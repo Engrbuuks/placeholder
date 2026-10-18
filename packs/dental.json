@@ -1,0 +1,37 @@
+{
+  "id": "dental",
+  "name": "Private dental practices",
+  "shortName": "Dental",
+  "description": "For dental practices offering private treatment.",
+  "markets": ["UK", "NG"],
+  "phase": 1,
+  "keywords": ["dental", "dentist", "teeth", "tooth", "implant", "orthodontic", "invisalign", "aligners", "whitening", "smile", "hygienist", "braces"],
+  "conversionAction": "Consultation booked",
+  "intake": [
+    { "key": "treatments", "label": "Private treatments and prices", "help": "One per line. For example: Implant consultation, £95", "type": "textarea" },
+    { "key": "finance", "label": "Finance options", "help": "Payment plans or finance partners you offer.", "type": "text" },
+    { "key": "nhs", "label": "NHS or private", "help": "Do you take NHS patients, private only, or both?", "type": "text" },
+    { "key": "clinicians", "label": "Clinicians", "help": "Name and role, one per line.", "type": "textarea" }
+  ],
+  "qualifiers": [
+    "Which treatment are you interested in?",
+    "Are you a new or existing patient?",
+    "What day and time suit you best?",
+    "Would you like to hear about spreading the cost?"
+  ],
+  "sequences": [
+    { "name": "Consultation", "steps": ["Confirm booking", "Reminder 72 hours before", "Reminder 24 hours before", "Reminder 2 hours before", "Rebook if missed"] },
+    { "name": "Recall", "steps": ["Six month checkup reminder", "Follow up after 7 days"] }
+  ],
+  "contentThemes": ["Treatment explainers", "Before and after, with consent", "Meet the team", "Patient questions answered"],
+  "adTemplates": [
+    { "objective": "Search", "audience": "People searching for implants, aligners or whitening nearby", "angle": "Free or low cost consultation" },
+    { "objective": "Leads", "audience": "Adults within 15 miles", "angle": "Straighter teeth with spread payments" }
+  ],
+  "compliance": [
+    "Follow General Dental Council advertising guidance.",
+    "No misleading claims about results.",
+    "Only message people who have agreed to hear from the practice."
+  ],
+  "kpis": ["Consultations booked", "Show rate", "Treatment value"]
+}

@@ -1,0 +1,18 @@
+{
+  "NG": {
+    "name": "Nigeria",
+    "currency": "NGN",
+    "currencySymbol": "₦",
+    "phonePrefix": "+234",
+    "paymentProvider": "Paystack",
+    "dataLaw": "Nigeria Data Protection Act"
+  },
+  "UK": {
+    "name": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "phonePrefix": "+44",
+    "paymentProvider": "Stripe",
+    "dataLaw": "UK GDPR"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "clinic",
+  "name": "Private clinics and diagnostic centres",
+  "shortName": "Clinic",
+  "description": "For private hospitals, clinics, laboratories and diagnostic centres.",
+  "markets": ["NG"],
+  "phase": 1,
+  "keywords": ["clinic", "hospital", "medical", "diagnostic", "laboratory", "lab", "scan", "ultrasound", "maternity", "doctor", "health", "physiotherapy", "fertility", "eye", "pharmacy"],
+  "conversionAction": "Appointment booked",
+  "intake": [
+    { "key": "consultationFee", "label": "Consultation fee", "help": "Your standard first visit fee.", "type": "text" },
+    { "key": "hmos", "label": "HMOs accepted", "help": "List the HMOs and insurers you work with.", "type": "textarea" },
+    { "key": "doctors", "label": "Doctors and specialists", "help": "Name and speciality, one per line.", "type": "textarea" },
+    { "key": "emergency", "label": "Emergency contact", "help": "What patients should do in an emergency. The assistant always passes emergencies to a person.", "type": "text" }
+  ],
+  "qualifiers": [
+    "What would you like to be seen for?",
+    "Is this urgent?",
+    "Which day and time suit you?",
+    "Will you pay yourself or through an HMO?"
+  ],
+  "sequences": [
+    { "name": "Appointment", "steps": ["Confirm booking", "Reminder the day before", "Reminder two hours before", "Check in after the visit", "Ask for a review"] }
+  ],
+  "contentThemes": ["Health tips", "Meet our doctors", "Service spotlights", "What to expect at your first visit"],
+  "adTemplates": [
+    { "objective": "Click to WhatsApp", "audience": "Adults within 10km of the clinic", "angle": "Book a same week appointment on WhatsApp" }
+  ],
+  "compliance": [
+    "Never claim cures or guaranteed outcomes.",
+    "The assistant never diagnoses or gives medical advice.",
+    "Any emergency or worrying symptom is passed to a person immediately."
+  ],
+  "kpis": ["Appointments booked", "Show rate", "Response time"]
+}

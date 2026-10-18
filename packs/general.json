@@ -1,0 +1,28 @@
+{
+  "id": "general",
+  "name": "Any other business",
+  "shortName": "General",
+  "description": "For any business not listed. We tailor the setup from your own website and answers.",
+  "markets": ["NG", "UK"],
+  "phase": 1,
+  "keywords": [],
+  "conversionAction": "Enquiry captured",
+  "intake": [
+    { "key": "idealCustomer", "label": "Who your best customers are", "help": "For example: busy parents in Ikeja, or small offices in Manchester.", "type": "text" },
+    { "key": "mainOffer", "label": "What you most want to sell more of", "help": "The product or service that matters most this quarter.", "type": "text" }
+  ],
+  "qualifiers": [
+    "What are you looking for?",
+    "When do you need it?",
+    "What is the best number to reach you on?"
+  ],
+  "sequences": [
+    { "name": "New enquiry", "steps": ["Reply instantly", "Follow up after 1 day", "Final follow up after 4 days"] }
+  ],
+  "contentThemes": ["Behind the scenes", "Customer questions answered", "Offers and news"],
+  "adTemplates": [
+    { "objective": "Click to WhatsApp", "audience": "People near your business", "angle": "Your main offer, answered instantly on WhatsApp" }
+  ],
+  "compliance": ["No claims the business has not confirmed."],
+  "kpis": ["Enquiries", "Response time", "Sales"]
+}

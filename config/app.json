@@ -1,0 +1,56 @@
+{
+  "name": "Placeholder",
+  "tagline": "Every enquiry answered, every lead followed up, every naira and pound traced to where it came from.",
+  "supportEmail": "support@example.com",
+  "sessionDays": 30,
+  "passwordMinLength": 10,
+  "rateLimit": {
+    "windowMinutes": 15,
+    "maxLoginAttempts": 10,
+    "maxSignupsPerIp": 5
+  },
+  "tones": [
+    {
+      "id": "warm",
+      "label": "Warm and friendly"
+    },
+    {
+      "id": "professional",
+      "label": "Professional and calm"
+    },
+    {
+      "id": "premium",
+      "label": "Premium and polished"
+    },
+    {
+      "id": "plain",
+      "label": "Plain and direct"
+    }
+  ],
+  "comingNext": [
+    {
+      "id": "whatsapp",
+      "label": "Connect WhatsApp",
+      "detail": "Your assistant answers customers on WhatsApp using the brand brain you confirmed."
+    },
+    {
+      "id": "webchat",
+      "label": "Add web chat to your site",
+      "detail": "A chat box for your website, answered instantly."
+    },
+    {
+      "id": "ads",
+      "label": "Plan your first ad",
+      "detail": "Ad copy, audience and budget drafted from your niche pack."
+    }
+  ],
+  "landing": {
+    "headline": "A customer messaged you at 9pm. Who answered?",
+    "intro": "Start with a free check of where your business is losing enquiries. It takes about a minute.",
+    "cta": "Check my business",
+    "audience": "For businesses in Nigeria and the United Kingdom.",
+    "sampleCaption": "What a check found for a typical small business website",
+    "packsHeading": "Set up for how your kind of business wins customers",
+    "packGoalPrefix": "Built to get more:"
+  }
+}
