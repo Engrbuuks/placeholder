@@ -9,6 +9,8 @@ const shared = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // A self contained build for the server image (deploy/README in the main README). Vercel ignores this.
+  output: "standalone",
   serverExternalPackages: ["@node-rs/argon2", "pg"],
   async headers() {
     return [

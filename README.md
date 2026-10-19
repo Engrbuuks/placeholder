@@ -14,6 +14,7 @@ AI marketing platform for owner run businesses in Nigeria and the UK. Build roun
 * **Audit page:** every leak with its fix.
 
 * **Automation pipeline (round 2):** see the next section.
+* **Free hosting (round 3):** one command install on Oracle Cloud's free server with the database, an every minute worker, HTTPS, daily backups, deploys from GitHub that keep the site up and roll back on their own, and a monthly AI spending cap per workspace. See **Deploy free on Oracle Cloud**.
 
 Calendar self booking and ads come in the next rounds, as set out in the product spec.
 
@@ -40,13 +41,12 @@ Every step is written to the activity log on the Automations page.
 * **Channels:** the web chat code to paste into the business website, a link to try it as a customer, and the WhatsApp connection with a checklist of what the server needs.
 * **Notifications bell** and a count of conversations that need the owner.
 
-### The scheduler on Vercel's free plan
+### The scheduler
 
-Replies to customers are instant on any plan. Timed steps (follow ups, reminders, weekly checks, alert emails) are run by `/api/cron/tick`, which needs `Authorization: Bearer <CRON_SECRET>`.
+Replies to customers are instant everywhere. Timed steps (follow ups, reminders, weekly checks, alert emails) are run by `/api/cron/tick`, which needs `Authorization: Bearer <CRON_SECRET>`.
 
-* **Built in:** `vercel.json` calls the tick once a day, which is all the free plan allows. That alone is a backstop, not enough for follow ups.
-* **Every minute, free:** create a free account at [cron-job.org](https://cron-job.org), add a job for `https://YOUR-APP/api/cron/tick`, run it every minute, and under Advanced add the header `Authorization` with the value `Bearer YOUR_CRON_SECRET`.
-* **Every five minutes, free:** the GitHub workflow in `.github/workflows/tick.yml` does the same once you add `APP_URL` and `CRON_SECRET` as repository secrets.
+* **On your own server (recommended, free on Oracle):** the `worker` service calls the tick every minute by itself. Nothing outside is needed.
+* **On Vercel:** `vercel.json` calls the tick once a day, which is all the free plan allows. Add a free every minute job at [cron-job.org](https://cron-job.org) for `https://YOUR-APP/api/cron/tick`, with the header `Authorization` set to `Bearer YOUR_CRON_SECRET`.
 * Due steps also run for a few seconds after every chat message, and owners can press **Run due steps now** on the Automations page.
 
 ### Connecting WhatsApp
@@ -79,7 +79,71 @@ You need Node 20 or newer and PostgreSQL 14 or newer.
 
 4. Start it with `npm run dev` and open http://localhost:3000.
 
-## Deploy to Vercel with Neon or Supabase
+## Deploy free on Oracle Cloud (recommended)
+
+Oracle's Always Free plan includes a server (2 ARM cores, 12 GB memory) that allows commercial use and costs nothing while you stay inside the free limits. One `docker compose` stack runs everything on it: Postgres, migrations, the app, the every minute worker, HTTPS through Caddy, and a daily database backup. Every part restarts by itself. The same steps work on any Ubuntu server (Hetzner, for example) when you outgrow it.
+
+### 1. Create the server (in the Oracle console)
+
+1. Sign up at [oracle.com/cloud/free](https://www.oracle.com/cloud/free/). A card is needed to verify you; you are not charged within the free limits. Pick a home region close to your customers; it cannot be changed later.
+2. Optional but wise: upgrade the account to **Pay As You Go**. The free allowance stays the same, and Oracle stops reclaiming free servers that look idle. Set a budget alert of 1 dollar so any charge emails you at once.
+3. **Compute, Instances, Create instance.** Image: **Ubuntu 24.04**. Shape: **Ampere, VM.Standard.A1.Flex**, 2 OCPUs and 12 GB memory. Keep the public IP. Download the SSH key it offers.
+4. Open the instance's **subnet, then its security list**, and add two ingress rules: source `0.0.0.0/0`, TCP, destination ports `80` and `443`.
+
+If the console says it is out of capacity for that shape, try another availability domain or try again later; this is common in busy regions.
+
+### 2. Install (on the server)
+
+Connect with `ssh -i your-key ubuntu@SERVER_IP`, then:
+
+```bash
+sudo apt-get update && sudo apt-get install -y git
+ssh-keygen -t ed25519 -N "" -f ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub
+```
+
+Add the printed key to GitHub as a read only deploy key (the repository's **Settings, Deploy keys**), then:
+
+```bash
+git clone git@github.com:OWNER/REPO.git placeholder
+cd placeholder
+sudo bash deploy/install.sh
+```
+
+The installer installs Docker, opens ports 80 and 443 inside the server, writes `.env` with fresh random secrets, builds, starts, and waits until the app is healthy. With no domain it gives you a free address made from your IP, such as `https://129-146-10-20.sslip.io`, with a real HTTPS certificate. When you buy a domain, point it at the server and run `sudo DOMAIN=app.yourdomain.com bash deploy/install.sh`; your secrets stay the same.
+
+Optional keys go in `.env` (`ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `WHATSAPP_APP_SECRET`), then run `docker compose up -d`.
+
+### 3. Deploy automatically from GitHub
+
+Every push to `main` runs `.github/workflows/deploy.yml`, which connects to the server and runs `deploy/update.sh`. Add three repository secrets: `SERVER_HOST` (the IP), `SERVER_USER` (`ubuntu`), and `SERVER_SSH_KEY` (a private key whose public half is in `~/.ssh/authorized_keys` on the server). Each deploy uses about one free GitHub minute.
+
+`deploy/update.sh` keeps the site up while it updates:
+
+1. It builds the new version while the current one keeps serving.
+2. It runs migrations. If one fails, it stops and the live site is untouched.
+3. It switches over and waits for the health check at `/api/health`.
+4. If the new version is not healthy within three minutes, it goes back to the previous version by itself.
+
+### Everyday commands (in the project folder)
+
+| Task | Command |
+| --- | --- |
+| See what is running | `docker compose ps` |
+| Read the app's log | `docker compose logs -f app` |
+| See the worker's ticks | `docker compose logs -f worker` |
+| Update by hand | `sh deploy/update.sh` |
+| Restore a backup | `sh deploy/restore.sh backups/placeholder-YYYYMMDD-HHMMSS.dump` |
+| Add the demo business | `docker compose run --rm migrate npm run seed:demo -- --force` |
+
+Backups are written to `backups/` straight away and then daily, and 7 days are kept. Copy them off the server now and then (for example with `scp`), since a backup on the same machine does not protect against losing the machine.
+
+### What still costs money
+
+* **AI answers:** Claude is billed per call on any host. The rules answer common questions first, replies use the cheaper model in `config/automation.json` (`ai.replyModel`), and each workspace is capped at `ai.monthlyCallsPerWorkspace` calls a month (2000 by default). At the cap, questions go to the owner and they are told once.
+* **WhatsApp:** replying to a customer who wrote first is free; template follow ups after the 24 hour window are charged by Meta.
+* **A domain:** optional, about 10 dollars a year.
+
+## Deploy to Vercel with Neon or Supabase (needs Vercel Pro for commercial use)
 
 1. Create a Postgres database on Neon or Supabase in a UK or EU region.
 2. In its SQL editor, create the app role as above (`placeholder_app`) with a strong password. Keep the default owner role for migrations.
@@ -102,10 +166,11 @@ You need Node 20 or newer and PostgreSQL 14 or newer.
    | `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN` | Needed for WhatsApp. See below. |
    | `RESEND_API_KEY`, `EMAIL_FROM` | Optional. Sends alert emails; without them alerts show in the app only. |
    | `ANTHROPIC_API_KEY` | Optional. Turns on AI answers, drafting and niche matching. |
-   | `AI_MODEL` | Optional. Defaults to `claude-sonnet-5-5`. |
+   | `AI_MODEL` | Optional. Model for drafting and niche matching. Defaults to `claude-sonnet-5-5`. |
+   | `AI_REPLY_MODEL` | Optional. Overrides `ai.replyModel` in `config/automation.json` for customer replies. |
 
 6. Deploy. Run `npm run migrate` again whenever a new file appears in `db/migrations`.
-7. Set up the minute trigger described under **The scheduler on Vercel's free plan**.
+7. Set up the cron-job.org minute trigger described under **The scheduler**.
 
 ## Demo business
 
@@ -182,4 +247,7 @@ src/lib/           database, auth, audit, AI, brand brain, queue
 src/lib/pipeline/  conversation engine, follow ups, delivery, jobs, worker
 src/lib/channels/  WhatsApp and email
 tests/             automated tests
+Dockerfile         one image for the app, worker and migrations
+docker-compose.yml the whole stack on one server
+deploy/            installer, safe updates, worker, backups, restore, HTTPS
 ```

@@ -1,0 +1,34 @@
+# Deploys to your server every time you push to main. Uses about one free GitHub minute per push.
+# Set three repository secrets (Settings, then Secrets and variables, then Actions):
+#   SERVER_HOST     your server's public IP
+#   SERVER_USER     the login on the server (ubuntu on Oracle's Ubuntu images)
+#   SERVER_SSH_KEY  a private key whose public half is in that user's ~/.ssh/authorized_keys
+# Until those are set, this workflow does nothing and passes.
+name: Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Update the server
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER_NAME: ${{ secrets.SERVER_USER }}
+          KEY: ${{ secrets.SERVER_SSH_KEY }}
+          APP_DIR: ${{ vars.SERVER_APP_DIR || 'placeholder' }}
+        run: |
+          if [ -z "$HOST" ] || [ -z "$KEY" ]; then
+            echo "Server secrets are not set yet, so there is nothing to deploy."
+            exit 0
+          fi
+          install -m 600 /dev/null key
+          printf '%s\n' "$KEY" > key
+          ssh -i key -o StrictHostKeyChecking=accept-new "${USER_NAME:-ubuntu}@$HOST" "cd $APP_DIR && sh deploy/update.sh"
+          rm -f key

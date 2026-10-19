@@ -1,6 +1,7 @@
 // Optional Claude calls. Every caller has a rules based fallback, so the app works without a key.
 // Text taken from websites or typed by users is passed as data and the reply is validated before use.
 import { z } from "zod";
+import { automationConfig } from "./config";
 
 const apiUrl = "https://api.anthropic.com/v1/messages";
 
@@ -8,7 +9,7 @@ export function aiEnabled(): boolean {
   return Boolean(process.env.ANTHROPIC_API_KEY);
 }
 
-export async function askForJson<T>(system: string, user: string, schema: z.ZodType<T>, maxTokens = 1500): Promise<T | null> {
+export async function askForJson<T>(system: string, user: string, schema: z.ZodType<T>, maxTokens = 1500, model?: string): Promise<T | null> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return null;
   try {
@@ -20,7 +21,7 @@ export async function askForJson<T>(system: string, user: string, schema: z.ZodT
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.AI_MODEL || "claude-sonnet-5-5",
+        model: model || process.env.AI_MODEL || "claude-sonnet-5-5",
         max_tokens: maxTokens,
         system,
         messages: [{ role: "user", content: user }],
@@ -127,6 +128,6 @@ export async function answerWithAi(input: {
     'Reply with one JSON object: {"answer": string or null}.',
   ].join(" ");
   const user = JSON.stringify({ facts: input.facts.slice(0, 8000), conversation: input.recent.slice(-8), question: input.question.slice(0, 1000) });
-  const result = await askForJson(system, user, answerSchema, 400);
+  const result = await askForJson(system, user, answerSchema, 400, process.env.AI_REPLY_MODEL || automationConfig.ai.replyModel);
   return result?.answer?.trim() || null;
 }

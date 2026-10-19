@@ -38,6 +38,10 @@
     "maxReplyLength": 700,
     "bookingRequestReply": "Thank you. I have passed your preferred time to the {businessName} team and they will confirm here shortly."
   },
+  "ai": {
+    "monthlyCallsPerWorkspace": 2000,
+    "replyModel": "claude-haiku-5-5"
+  },
   "whatsapp": {
     "windowHours": 24,
     "graphVersion": "v21.0"

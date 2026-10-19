@@ -179,6 +179,7 @@ const automationSchema = z.object({
     handoffKeywords: z.array(z.string()),
     maxReplyLength: z.number().int().positive(),
   }),
+  ai: z.object({ monthlyCallsPerWorkspace: z.number().int().min(0), replyModel: z.string().min(1) }),
   whatsapp: z.object({ windowHours: z.number().positive(), graphVersion: z.string().regex(/^v\d+\.\d+$/) }),
   weekly: z.object({ scoreDropAlert: z.number().int().min(1) }),
   webchat: z.object({

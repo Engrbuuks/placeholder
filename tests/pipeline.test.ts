@@ -360,3 +360,47 @@ describe("ordering", () => {
     assert.deepEqual(rows.map((x) => x.direction), ["in", "out", "in", "out", "in", "out", "in", "out"]);
   });
 });
+
+describe("AI spending cap", () => {
+  test("each workspace gets its monthly number of AI answers, then questions go to the owner", async () => {
+    const { automationConfig } = await import("../src/lib/config");
+    const saved = automationConfig.ai.monthlyCallsPerWorkspace;
+    automationConfig.ai.monthlyCallsPerWorkspace = 2;
+    process.env.ANTHROPIC_API_KEY = "test-key";
+    const models: string[] = [];
+    globalThis.fetch = (async (url: string, init: RequestInit) => {
+      if (String(url).includes("anthropic.com")) {
+        models.push(JSON.parse(String(init.body)).model);
+        return new Response(JSON.stringify({ content: [{ type: "text", text: '{"answer":"Yes, parking is free for visitors."}' }] }), { status: 200 });
+      }
+      return realFetch(url, init);
+    }) as typeof fetch;
+    try {
+      const ws = await business();
+      const other = await business();
+      const ask = (w: string, who: string) => say(w, "Is there parking for visitors?", who);
+
+      for (const who of ["a", "b"]) {
+        const r = await ask(ws, who);
+        assert.match((await outgoing(ws, r.leadId!)).map((m) => m.body).join(" "), /parking is free/);
+      }
+      const third = await ask(ws, "c");
+      const thirdOut = (await outgoing(ws, third.leadId!)).map((m) => m.body).join(" ");
+      assert.doesNotMatch(thirdOut, /parking is free/, "no AI answer once the cap is used");
+      assert.equal((await lead(ws, third.leadId!)).stage, "handoff", "the question goes to the owner instead");
+      assert.equal(models.length, 2, "Claude was only called twice");
+      assert.ok(models.every((m) => m === automationConfig.ai.replyModel), "replies use the cheaper reply model");
+
+      const capped = await q(ws, "select id from activity where kind = 'ai_cap'");
+      assert.equal(capped.length, 1, "the owner is told once");
+      const usage = await q<{ calls: number }>(ws, "select calls from ai_usage");
+      assert.equal(usage[0].calls, 2);
+
+      const r = await ask(other, "z");
+      assert.match((await outgoing(other, r.leadId!)).map((m) => m.body).join(" "), /parking is free/, "another workspace has its own allowance");
+    } finally {
+      automationConfig.ai.monthlyCallsPerWorkspace = saved;
+      delete process.env.ANTHROPIC_API_KEY;
+    }
+  });
+});

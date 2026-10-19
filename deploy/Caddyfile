@@ -1,0 +1,7 @@
+# HTTPS in front of the app. Caddy gets and renews a free certificate for SITE_ADDRESS by itself.
+# SITE_ADDRESS is your domain (app.example.com) or, before you have one, the free address
+# deploy/install.sh makes from your server's IP (for example 129-146-10-20.sslip.io).
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}

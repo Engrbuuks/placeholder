@@ -6,6 +6,7 @@
 // 4. Otherwise greet, answer any question from the brand brain, and work through the niche's qualifying questions.
 // 5. Queue the reply, schedule the no reply follow up, alert the owner when needed, then deliver.
 import { automationConfig } from "../config";
+import type { PoolClient } from "pg";
 import { withTenant } from "../db";
 import { aiEnabled, answerWithAi } from "../ai";
 import { logActivity, notify } from "../activity";
@@ -35,10 +36,44 @@ export type InboundResult = {
 
 const automatedStages = new Set(["new", "qualifying", "qualified"]);
 
-async function findAnswer(text: string, ctx: Awaited<ReturnType<typeof loadContext>> & object, recent: { from: "customer" | "business"; text: string }[]) {
+/**
+ * Reserves one Claude call against the workspace's monthly cap. Returns false once the cap is reached,
+ * so the question goes to the owner instead. The owner is told once, when the last allowed call is used.
+ */
+export async function reserveAiCall(c: PoolClient, workspaceId: string, leadId: string | null): Promise<boolean> {
+  const limit = automationConfig.ai.monthlyCallsPerWorkspace;
+  if (limit <= 0) return false;
+  const { rows } = await c.query<{ calls: number }>(
+    `insert into ai_usage (workspace_id, month, calls)
+     values ($1, date_trunc('month', now() at time zone 'utc')::date, 1)
+     on conflict (workspace_id, month) do update set calls = ai_usage.calls + 1
+     where ai_usage.calls < $2
+     returning calls`,
+    [workspaceId, limit],
+  );
+  if (rows.length === 0) return false;
+  if (rows[0].calls === limit) {
+    await logActivity(c, workspaceId, {
+      leadId,
+      kind: "ai_cap",
+      summary: `AI answers reached this month's limit of ${limit}. New questions the rules cannot answer will come to you until next month.`,
+    });
+  }
+  return true;
+}
+
+async function findAnswer(
+  c: PoolClient,
+  workspaceId: string,
+  leadId: string,
+  text: string,
+  ctx: Awaited<ReturnType<typeof loadContext>> & object,
+  recent: { from: "customer" | "business"; text: string }[],
+) {
   const ruled = answerFromBrain(text, ctx.brain, ctx.pack);
   if (ruled) return { answer: ruled, source: "rules" as const };
   if (!aiEnabled()) return { answer: null, source: "rules" as const };
+  if (!(await reserveAiCall(c, workspaceId, leadId))) return { answer: null, source: "cap" as const };
   const facts = factsText(ctx.brain, ctx.pack);
   const ai = await answerWithAi({
     question: text,
@@ -119,7 +154,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
     let index = lead.qualifier_index;
     const answers = [...lead.qualifier_answers];
     let handoffReason: string | null = null;
-    let answerSource: "rules" | "ai" | null = null;
+    let answerSource: "rules" | "ai" | "cap" | null = null;
 
     const handoffPhrase = detectHandoff(text, [...a.handoffKeywords, ...ctx.pack.handoffKeywords]);
     if (handoffPhrase) {
@@ -130,7 +165,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
       // After qualifying, the customer usually replies with a time that suits them.
       if (isQuestion(text)) {
         const recent = await recentMessages(c, leadId);
-        const found = await findAnswer(text, ctx, recent);
+        const found = await findAnswer(c, input.workspaceId, leadId, text, ctx, recent);
         answerSource = found.source;
         if (found.answer) parts.push(found.answer, ctx.pack.conversionPrompt);
         else {
@@ -149,7 +184,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
       const question = isQuestion(text);
       if (question) {
         const recent = await recentMessages(c, leadId);
-        const found = await findAnswer(text, ctx, recent);
+        const found = await findAnswer(c, input.workspaceId, leadId, text, ctx, recent);
         answerSource = found.source;
         if (found.answer) parts.push(found.answer);
         else {
