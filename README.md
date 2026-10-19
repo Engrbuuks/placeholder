@@ -79,13 +79,20 @@ Nothing a business owner reads is hardcoded in page code.
 
 | What | File |
 | --- | --- |
-| Product name, tagline, landing copy, tones, rate limits, session length | `config/app.json` |
+| Product name, tagline, landing page copy, sign in page copy, tones, rate limits, session length | `config/app.json` |
 | Markets, currencies, payment providers | `config/markets.json` |
 | Audit checks, weights, wording, fixes, thresholds | `config/audit.json` |
 | Niche packs | `packs/*.json`, listed in `packs/index.ts` |
 | Database changes | a new numbered file in `db/migrations` |
 
 All config files are validated when the app starts, so a mistake in one shows a clear error instead of a broken page.
+
+## Design
+
+* **Colours** live as tokens at the top of `src/app/globals.css`: warm off white paper, black ink, one orange accent. Change a token and every screen follows.
+* **Type** is Geist for text and Geist Mono for the small uppercase labels.
+* **Artwork** is drawn in code in `src/components/art.tsx`: the hero (grey blocks turning orange and flowing into a network), the dotted sphere, the dunes footer, and the small block scenes for each niche. There are no image files to manage.
+* **Audit colours:** black means working, orange means leaking.
 
 ## Security notes
 

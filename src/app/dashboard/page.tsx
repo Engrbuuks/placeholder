@@ -9,6 +9,7 @@ import { rerunAudit } from "@/app/actions/dashboard";
 import { AppHeader } from "@/components/AppHeader";
 import { LeakList, ScoreHeadline } from "@/components/AuditReport";
 import { SubmitButton } from "@/components/ui";
+import { Arrow } from "@/components/Wordmark";
 
 export const metadata: Metadata = { title: "Overview" };
 export const maxDuration = 60;
@@ -28,93 +29,112 @@ export default async function DashboardPage() {
   const missing = missingEssentials(brain.data);
   const firstName = session.fullName.split(" ")[0];
   const change = audit && previous ? audit.score - previous.score : null;
+  const confirmed = brain.status === "confirmed";
 
   return (
     <>
       <AppHeader businessName={workspace.name} active="dashboard" />
-      <main className="mx-auto grid max-w-6xl gap-10 px-5 py-10 lg:grid-cols-[1fr_340px]">
+      <main className="mx-auto grid max-w-[1200px] gap-8 px-4 pb-20 pt-12 sm:px-6 lg:grid-cols-[1fr_340px]">
         <section className="min-w-0">
-          <h1 className="text-4xl font-extrabold">
+          <p className="label">Overview</p>
+          <h1 className="mt-3 max-w-[20ch] text-[clamp(2.1rem,3.8vw,3rem)]">
             {audit ? `Here is where ${workspace.name} is losing enquiries, ${firstName}.` : `Welcome, ${firstName}.`}
           </h1>
 
           {audit ? (
-            <div className="mt-8 space-y-8">
-              <div className="rounded-3xl bg-surface p-6 sm:p-8">
+            <div className="mt-10 space-y-12">
+              <div className="rounded-3xl border border-line bg-surface p-6 sm:p-8">
+                <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="label">Latest check</p>
+                    <p className="mt-1 font-mono text-xs text-ink-soft">
+                      {dateFormat.format(audit.createdAt)}
+                      {audit.targetUrl ? ` / ${new URL(audit.targetUrl).hostname}` : ""}
+                      {change !== null && change !== 0 ? ` / ${change > 0 ? "up" : "down"} ${Math.abs(change)} since last check` : ""}
+                    </p>
+                  </div>
+                  <form action={rerunAudit}>
+                    <SubmitButton tone="quiet" pending="Checking again">
+                      Check again
+                    </SubmitButton>
+                  </form>
+                </div>
                 <ScoreHeadline score={audit.score} results={audit.results} siteRead={audit.facts.fetched} />
-                <p className="mt-4 text-sm text-ink-soft">
-                  Checked {dateFormat.format(audit.createdAt)}
-                  {audit.targetUrl ? ` on ${new URL(audit.targetUrl).hostname}` : ""}
-                  {change !== null && change !== 0 ? `. ${change > 0 ? "Up" : "Down"} ${Math.abs(change)} since the last check.` : "."}
-                </p>
-                {audit.facts.error && <p className="mt-2 font-bold text-leak">{audit.facts.error}</p>}
-                <form action={rerunAudit} className="mt-5">
-                  <SubmitButton tone="quiet" pending="Checking again">
-                    Check again
-                  </SubmitButton>
-                </form>
+                {audit.facts.error && (
+                  <p className="mt-6 flex gap-3 rounded-xl bg-accent-wash px-4 py-3 text-[0.9375rem]">
+                    <span aria-hidden className="mt-2 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                    {audit.facts.error}
+                  </p>
+                )}
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Fix these first</h2>
-                <p className="mt-1 text-ink-soft">Ordered by how many enquiries each one is likely to cost you.</p>
-                <div className="mt-5">
+                <p className="label">Fix these first</p>
+                <h2 className="mt-2 text-[1.75rem] tracking-[-0.03em]">Ordered by how many enquiries each one costs you.</h2>
+                <div className="mt-6">
                   <LeakList results={audit.results} siteRead={audit.facts.fetched} hasWebsite={Boolean(audit.targetUrl)} />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="mt-8 rounded-3xl bg-surface p-6">
+            <div className="mt-10 rounded-3xl border border-line bg-surface p-8">
               <p>No check has been run yet.</p>
-              <form action={rerunAudit} className="mt-4">
+              <form action={rerunAudit} className="mt-5">
                 <SubmitButton pending="Checking">Run my first check</SubmitButton>
               </form>
             </div>
           )}
         </section>
 
-        <aside className="space-y-6">
-          <div className="rounded-3xl bg-surface p-6">
-            <h2 className="text-xl font-bold">Brand brain</h2>
-            <p className="mt-2">
-              {brain.status === "confirmed"
-                ? "Confirmed. Your assistant will answer from these facts."
-                : "Not confirmed yet. Your assistant cannot go live until you confirm it."}
+        <aside className="space-y-4 lg:pt-[7.5rem]">
+          <div className="rounded-2xl bg-ink p-6 text-white">
+            <div className="flex items-start justify-between">
+              <p className="font-mono text-xs uppercase tracking-[0.06em] text-white/60">Brand brain</p>
+              <span aria-hidden className={`h-2 w-2 rounded-full ${confirmed ? "bg-white" : "bg-accent"}`} />
+            </div>
+            <p className="mt-6 text-[1.6rem] font-semibold leading-tight tracking-[-0.03em]">{confirmed ? "Confirmed" : "Not confirmed"}</p>
+            <p className="mt-2 text-[0.9375rem] text-white/70">
+              {confirmed ? "Your assistant will answer from these facts." : "Your assistant cannot go live until you confirm it."}
             </p>
-            {missing.length > 0 && <p className="mt-2 text-ink-soft">Still missing: {missing.join(", ")}.</p>}
-            <Link href="/brain" className="mt-4 inline-block font-bold underline underline-offset-4">
-              {brain.status === "confirmed" ? "Edit details" : "Finish your details"}
+            {missing.length > 0 && <p className="mt-2 text-[0.9375rem] text-white/70">Still missing: {missing.join(", ")}.</p>}
+            <Link
+              href="/brain"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-white/85"
+            >
+              {confirmed ? "Edit details" : "Finish your details"}
+              <Arrow />
             </Link>
           </div>
 
-          <div className="rounded-3xl bg-surface p-6">
-            <h2 className="text-xl font-bold">Your setup</h2>
-            <dl className="mt-3 space-y-2">
-              <div>
-                <dt className="text-sm text-ink-soft">Business type</dt>
-                <dd className="font-bold">{pack.name}</dd>
+          <div className="rounded-2xl border border-line bg-surface p-6">
+            <p className="label">Your setup</p>
+            <dl className="mt-4 divide-y divide-line">
+              <div className="pb-3">
+                <dt className="font-mono text-xs text-ink-soft">Business type</dt>
+                <dd className="mt-0.5 font-medium">{pack.name}</dd>
               </div>
               {market && (
-                <div>
-                  <dt className="text-sm text-ink-soft">Market</dt>
-                  <dd className="font-bold">
+                <div className="py-3">
+                  <dt className="font-mono text-xs text-ink-soft">Market</dt>
+                  <dd className="mt-0.5 font-medium">
                     {market.name}, prices in {market.currencySymbol}
                   </dd>
                 </div>
               )}
-              <div>
-                <dt className="text-sm text-ink-soft">Goal we optimise for</dt>
-                <dd className="font-bold">{pack.conversionAction}</dd>
+              <div className="pt-3">
+                <dt className="font-mono text-xs text-ink-soft">Goal we work towards</dt>
+                <dd className="mt-0.5 font-medium">{pack.conversionAction}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-3xl border-2 border-dashed border-line p-6">
-            <h2 className="text-xl font-bold">Coming next</h2>
-            <ul className="mt-3 space-y-3">
+          <div className="relative overflow-hidden rounded-2xl bg-accent p-6">
+            <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/25 blur-2xl" />
+            <p className="label relative text-ink/75">Coming next</p>
+            <ul className="relative mt-4 space-y-4">
               {appConfig.comingNext.map((item) => (
                 <li key={item.id}>
-                  <p className="font-bold">{item.label}</p>
-                  <p className="text-sm text-ink-soft">{item.detail}</p>
+                  <p className="font-medium">{item.label}</p>
+                  <p className="text-sm text-ink/75">{item.detail}</p>
                 </li>
               ))}
             </ul>

@@ -25,7 +25,7 @@ function BackLink({ to, label }: { to: string; label: string }) {
   return (
     <form action={goBack}>
       <input type="hidden" name="to" value={to} />
-      <button type="submit" className="font-bold underline underline-offset-4">
+      <button type="submit" className="text-[0.9375rem] font-medium underline decoration-ink/30 underline-offset-[6px] hover:decoration-ink">
         {label}
       </button>
     </form>
@@ -77,13 +77,18 @@ export default async function OnboardingPage() {
     body = (
       <div className="space-y-10">
         {audit && (
-          <div className="rounded-2xl bg-surface p-5">
-            <p className="font-bold">Your check scored {audit.score} out of 100.</p>
-            {audit.facts.error && <p className="text-ink-soft">{audit.facts.error}</p>}
-            <div className="mt-3">
+          <div className="rounded-3xl bg-ink p-6 text-white sm:p-8">
+            <div className="flex items-end gap-5">
+              <p className="text-[4rem] font-semibold leading-[0.8] tracking-[-0.06em]">{audit.score}</p>
+              <div>
+                <p className="font-mono text-[0.6875rem] uppercase tracking-[0.06em] text-white/60">Your check, out of 100</p>
+                <p className="mt-1 text-[0.9375rem] text-white/80">You will see every leak and its fix when you finish.</p>
+              </div>
+            </div>
+            {audit.facts.error && <p className="mt-4 text-[0.9375rem] text-white/80">{audit.facts.error}</p>}
+            <div className="mt-6 [&_.bg-ink]:bg-white">
               <LeakBar results={audit.results} label={`Score ${audit.score} out of 100`} />
             </div>
-            <p className="mt-3 text-sm text-ink-soft">You will see every leak and how to fix it once you finish this step.</p>
           </div>
         )}
         <BrainForm values={brainFormValues(brain.data)} intake={pack.intake} tones={appConfig.tones} confirmLabel="Confirm and finish" />
@@ -92,39 +97,41 @@ export default async function OnboardingPage() {
   }
 
   const previous = index > 0 ? steps[index - 1] : null;
+  const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <main className="mx-auto max-w-2xl px-5 py-10">
-      <Wordmark href="/onboarding" />
-      <ol className="mt-10 flex flex-wrap gap-x-6 gap-y-2" aria-label="Setup progress">
-        {steps.map((s, i) => (
-          <li
-            key={s.id}
-            aria-current={i === index ? "step" : undefined}
-            className={`flex items-center gap-2 ${i === index ? "font-bold text-ink" : i < index ? "text-ink" : "text-ink-soft"}`}
-          >
-            <span
-              aria-hidden
-              className={`grid h-7 w-7 place-items-center rounded-full text-sm font-bold ${
-                i < index ? "bg-signal text-paper" : i === index ? "bg-ink text-paper" : "border-2 border-line"
-              }`}
-            >
-              {i + 1}
-            </span>
-            {s.label}
-          </li>
-        ))}
-      </ol>
+    <div className="mx-auto max-w-[760px] px-4 pb-20 pt-4 sm:px-6">
+      <header className="flex items-center justify-between rounded-full border border-line bg-surface/80 py-2.5 pl-5 pr-5 backdrop-blur">
+        <Wordmark href="/onboarding" />
+        <p className="font-mono text-xs text-ink-soft">
+          <span className="text-ink">{pad(index + 1)}</span> / {pad(steps.length)}
+        </p>
+      </header>
 
-      <h1 className="mt-10 text-4xl font-extrabold">{heading}</h1>
-      <p className="mt-3 text-lg text-ink-soft">{intro}</p>
-      <div className="mt-8">{body}</div>
+      <main className="pt-12">
+        <ol className="grid grid-cols-4 gap-2" aria-label="Setup progress">
+          {steps.map((s, i) => (
+            <li key={s.id} aria-current={i === index ? "step" : undefined}>
+              <span aria-hidden className={`block h-1 rounded-full ${i < index ? "bg-ink" : i === index ? "bg-accent" : "bg-line"}`} />
+              <span className={`mt-2 block font-mono text-[0.6875rem] uppercase tracking-[0.06em] ${i === index ? "text-ink" : "text-ink-soft"}`}>
+                <span className="sr-only">{i < index ? "Done: " : i === index ? "Current: " : "Next: "}</span>
+                <span className="hidden sm:inline">{s.label}</span>
+                <span className="sm:hidden">{pad(i + 1)}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
 
-      {previous && (
-        <div className="mt-10">
-          <BackLink to={previous.id} label={`Back to ${previous.label.toLowerCase()}`} />
-        </div>
-      )}
-    </main>
+        <h1 className="mt-12 max-w-[18ch] text-[clamp(2.1rem,4.2vw,3.1rem)]">{heading}</h1>
+        <p className="mt-4 max-w-[56ch] text-ink-soft">{intro}</p>
+        <div className="mt-10">{body}</div>
+
+        {previous && (
+          <div className="mt-10">
+            <BackLink to={previous.id} label={`Back to ${previous.label.toLowerCase()}`} />
+          </div>
+        )}
+      </main>
+    </div>
   );
 }

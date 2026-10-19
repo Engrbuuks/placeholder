@@ -27,9 +27,9 @@ export function SignupForm({ minLength }: { minLength: number }) {
         help={`At least ${minLength} characters.`}
         required
       />
-      <div className="flex flex-wrap items-center gap-4 pt-2">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-4 pt-3">
         <SubmitButton pending="Creating your account">Create account</SubmitButton>
-        <Link href="/login" className="font-bold underline underline-offset-4">
+        <Link href="/login" className="text-[0.9375rem] font-medium underline decoration-ink/30 underline-offset-[6px] hover:decoration-ink">
           I already have an account
         </Link>
       </div>
@@ -44,9 +44,9 @@ export function LoginForm() {
       <FormError message={state.error} />
       <Field label="Email" name="email" type="email" autoComplete="email" required defaultValue={state.fields?.email} />
       <Field label="Password" name="password" type="password" autoComplete="current-password" required />
-      <div className="flex flex-wrap items-center gap-4 pt-2">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-4 pt-3">
         <SubmitButton pending="Logging in">Log in</SubmitButton>
-        <Link href="/signup" className="font-bold underline underline-offset-4">
+        <Link href="/signup" className="text-[0.9375rem] font-medium underline decoration-ink/30 underline-offset-[6px] hover:decoration-ink">
           Create an account
         </Link>
       </div>

@@ -2,6 +2,12 @@
 
 import { useFormStatus } from "react-dom";
 
+const arrow = (
+  <svg aria-hidden viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
+    <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export function SubmitButton({
   children,
   pending,
@@ -13,14 +19,15 @@ export function SubmitButton({
   pending?: string;
   name?: string;
   value?: string;
-  tone?: "primary" | "quiet";
+  tone?: "primary" | "dark" | "quiet";
 }) {
   const status = useFormStatus();
   const busy = status.pending;
-  const styles =
-    tone === "primary"
-      ? "bg-ink text-paper hover:bg-ink/90"
-      : "border-2 border-ink/80 text-ink hover:bg-ink/5";
+  const styles = {
+    primary: "bg-accent text-white hover:bg-accent-deep",
+    dark: "bg-ink text-white hover:bg-ink/85",
+    quiet: "border border-ink/20 bg-surface text-ink hover:border-ink/50",
+  }[tone];
   return (
     <button
       type="submit"
@@ -28,9 +35,10 @@ export function SubmitButton({
       value={value}
       disabled={busy}
       aria-busy={busy}
-      className={`rounded-full px-6 py-3 font-bold transition-colors disabled:cursor-wait disabled:opacity-60 ${styles}`}
+      className={`inline-flex items-center gap-2.5 rounded-full px-5 py-2.5 text-[0.9375rem] font-medium transition-colors disabled:cursor-wait disabled:opacity-60 ${styles}`}
     >
       {busy && pending ? pending : children}
+      {tone !== "quiet" && !busy && arrow}
     </button>
   );
 }
@@ -61,14 +69,14 @@ export function Field({
   const id = `field_${name}`;
   const helpId = help ? `${id}_help` : undefined;
   const base =
-    "mt-1.5 w-full rounded-xl border-2 border-line bg-surface px-4 py-3 text-ink placeholder:text-ink-soft/60 focus:border-ink focus:outline-none";
+    "mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-ink placeholder:text-ink-soft/50 transition-colors hover:border-ink/25 focus:border-ink focus:outline-none";
   return (
     <div>
-      <label htmlFor={id} className="font-bold">
+      <label htmlFor={id} className="block text-[0.9375rem] font-medium">
         {label}
       </label>
       {help && (
-        <p id={helpId} className="text-sm text-ink-soft">
+        <p id={helpId} className="mt-0.5 text-sm text-ink-soft">
           {help}
         </p>
       )}
@@ -103,8 +111,18 @@ export function Field({
 export function FormError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p role="alert" className="rounded-xl border-l-4 border-leak bg-leak-wash px-4 py-3 text-ink">
+    <p role="alert" className="flex gap-3 rounded-xl bg-accent-wash px-4 py-3 text-ink">
+      <span aria-hidden className="mt-2 h-2 w-2 shrink-0 rounded-full bg-accent" />
       {message}
+    </p>
+  );
+}
+
+export function Notice({ children }: { children: React.ReactNode }) {
+  return (
+    <p role="status" className="flex gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-ink">
+      <span aria-hidden className="mt-2 h-2 w-2 shrink-0 rounded-full bg-ink" />
+      {children}
     </p>
   );
 }

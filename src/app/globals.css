@@ -1,41 +1,53 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #f2f5f3;
+  --color-paper: #f4f2ef;
   --color-surface: #ffffff;
-  --color-ink: #10292b;
-  --color-ink-soft: #46605f;
-  --color-line: #cad6d1;
-  --color-signal: #177a52;
-  --color-signal-wash: #e3f1ea;
-  --color-leak: #a3214f;
-  --color-leak-wash: #f8e7ed;
-  --color-sun: #e9b949;
+  --color-mist: #ebe8e4;
+  --color-ink: #111111;
+  --color-ink-soft: #5f5b56;
+  --color-line: #e2ded9;
+  --color-accent: #ff5a14;
+  --color-accent-deep: #d9470a;
+  --color-accent-wash: #ffede3;
 
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
 }
 
 html {
   background: var(--color-paper);
   color: var(--color-ink);
-  font-family: var(--font-body);
-  font-size: 17px;
+  font-family: var(--font-sans);
+  font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--font-display);
-  line-height: 1.12;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+@layer components {
+  /* Small mono labels used for section markers and metadata. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-sun);
-  outline-offset: 2px;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 input,
@@ -44,20 +56,39 @@ select {
   font: inherit;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* The one orchestrated moment: the hero artwork settles in on first load. */
+.hero-art {
+  animation: settle 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
   }
 }
 
 .leak-bar {
   transform-origin: left;
-  animation: grow 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: grow 800ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 @keyframes grow {
   from {
     transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

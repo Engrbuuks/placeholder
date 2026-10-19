@@ -7,7 +7,18 @@ import { Field, FormError, SubmitButton } from "./ui";
 type MarketOption = { code: string; name: string; detail: string };
 
 const card =
-  "flex cursor-pointer gap-4 rounded-2xl border-2 border-line bg-surface p-5 has-[:checked]:border-ink has-[:checked]:bg-signal-wash has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-sun";
+  "group flex cursor-pointer items-start gap-4 rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-ink/30 has-[:checked]:border-ink has-[:checked]:shadow-[inset_0_0_0_1px_var(--color-ink)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent";
+
+function Dot() {
+  return (
+    <span
+      aria-hidden
+      className="mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full border-[1.5px] border-ink/30 group-has-[:checked]:border-accent"
+    >
+      <span className="h-2.5 w-2.5 scale-0 rounded-full bg-accent transition-transform group-has-[:checked]:scale-100" />
+    </span>
+  );
+}
 
 export function MarketStep({ options, current }: { options: MarketOption[]; current: string | null }) {
   const [state, action] = useActionState<StepState, FormData>(chooseMarket, {});
@@ -18,10 +29,11 @@ export function MarketStep({ options, current }: { options: MarketOption[]; curr
         <legend className="sr-only">Where your business trades</legend>
         {options.map((m) => (
           <label key={m.code} className={card}>
-            <input type="radio" name="country" value={m.code} defaultChecked={current === m.code} required className="mt-1.5 h-5 w-5 accent-ink" />
+            <input type="radio" name="country" value={m.code} defaultChecked={current === m.code} required className="sr-only" />
+            <Dot />
             <span>
-              <span className="block font-display text-xl font-bold">{m.name}</span>
-              <span className="text-ink-soft">{m.detail}</span>
+              <span className="block text-lg font-medium tracking-[-0.02em]">{m.name}</span>
+              <span className="text-[0.9375rem] text-ink-soft">{m.detail}</span>
             </span>
           </label>
         ))}
@@ -42,15 +54,16 @@ export function NicheStep({ options, current }: { options: PackOption[]; current
         <legend className="sr-only">What kind of business you run</legend>
         {options.map((p) => (
           <label key={p.id} className={card}>
-            <input type="radio" name="pack" value={p.id} defaultChecked={current === p.id} className="mt-1.5 h-5 w-5 accent-ink" />
+            <input type="radio" name="pack" value={p.id} defaultChecked={current === p.id} className="sr-only" />
+            <Dot />
             <span>
-              <span className="block font-display text-xl font-bold">{p.name}</span>
-              <span className="text-ink-soft">{p.description}</span>
+              <span className="block text-lg font-medium tracking-[-0.02em]">{p.name}</span>
+              <span className="text-[0.9375rem] text-ink-soft">{p.description}</span>
             </span>
           </label>
         ))}
       </fieldset>
-      <div className="rounded-2xl border-2 border-dashed border-line p-5">
+      <div className="rounded-2xl border border-dashed border-ink/25 p-5">
         <Field
           label="Not sure? Describe your business instead"
           name="description"

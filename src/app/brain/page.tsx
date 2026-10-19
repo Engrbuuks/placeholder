@@ -6,6 +6,7 @@ import { getBrandBrain, getWorkspace } from "@/lib/workspaces";
 import { brainFormValues } from "@/lib/brainView";
 import { AppHeader } from "@/components/AppHeader";
 import { BrainForm } from "@/components/BrainForm";
+import { Notice } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Brand brain" };
 
@@ -22,23 +23,24 @@ export default async function BrainPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <AppHeader businessName={workspace.name} active="brain" />
-      <main className="mx-auto max-w-2xl px-5 py-10">
-        <h1 className="text-4xl font-extrabold">Brand brain</h1>
-        <p className="mt-3 text-lg text-ink-soft">
+      <main className="mx-auto max-w-[760px] px-4 pb-20 pt-12 sm:px-6">
+        <p className="label">Brand brain</p>
+        <h1 className="mt-3 text-[clamp(2.1rem,3.8vw,3rem)]">What your assistant knows.</h1>
+        <p className="mt-4 max-w-[60ch] text-ink-soft">
           Everything your assistant is allowed to say about {workspace.name}. If it is not written here, the assistant hands the
           conversation to you.
         </p>
         {saved === "confirmed" && (
-          <p role="status" className="mt-6 rounded-xl border-l-4 border-signal bg-signal-wash px-4 py-3">
-            Saved and confirmed.
-          </p>
+          <div className="mt-6">
+            <Notice>Saved and confirmed.</Notice>
+          </div>
         )}
         {saved === "draft" && (
-          <p role="status" className="mt-6 rounded-xl border-l-4 border-sun bg-surface px-4 py-3">
-            Draft saved. Confirm it when everything is right, so your assistant can use these details.
-          </p>
+          <div className="mt-6">
+            <Notice>Draft saved. Confirm it when everything is right, so your assistant can use these details.</Notice>
+          </div>
         )}
-        <div className="mt-8">
+        <div className="mt-10">
           <BrainForm values={brainFormValues(brain.data)} intake={pack.intake} tones={appConfig.tones} confirmLabel="Save and confirm" />
         </div>
       </main>

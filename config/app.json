@@ -45,12 +45,138 @@
     }
   ],
   "landing": {
+    "nav": [
+      {
+        "label": "How it works",
+        "href": "#how"
+      },
+      {
+        "label": "Niches",
+        "href": "#niches"
+      },
+      {
+        "label": "Sample check",
+        "href": "#check"
+      }
+    ],
+    "navCta": "Check my business",
+    "navCtaShort": "Free check",
+    "eyebrow": [
+      "Real enquiries.",
+      "Instant answers.",
+      "Revenue you can trace."
+    ],
     "headline": "A customer messaged you at 9pm. Who answered?",
-    "intro": "Start with a free check of where your business is losing enquiries. It takes about a minute.",
+    "intro": "Find out where your business is losing enquiries, then let an assistant that knows your business answer every message, follow up and book.",
     "cta": "Check my business",
-    "audience": "For businesses in Nigeria and the United Kingdom.",
-    "sampleCaption": "What a check found for a typical small business website",
-    "packsHeading": "Set up for how your kind of business wins customers",
-    "packGoalPrefix": "Built to get more:"
+    "secondaryCta": {
+      "label": "See a sample check",
+      "href": "#check"
+    },
+    "heroArtTitle": "Scattered enquiries turning orange as they flow into a connected network of customers",
+    "heroLabels": [
+      "Found",
+      "Answered",
+      "Converted"
+    ],
+    "heroSideList": [
+      "Enquiries",
+      "Answers",
+      "Follow ups",
+      "Bookings",
+      "Revenue"
+    ],
+    "heroFooterLeft": "Nigeria / United Kingdom",
+    "heroFooterRight": [
+      "WhatsApp first",
+      "Naira and pounds",
+      "Owner approved"
+    ],
+    "niches": {
+      "kicker": "Niche packs",
+      "heading": "Built for how your business wins customers.",
+      "intro": "Each pack sets the questions your assistant asks, the follow ups it sends and the result it works towards.",
+      "statPacks": "niche packs",
+      "statChecks": "checks in every audit",
+      "goalPrefix": "Works towards"
+    },
+    "check": {
+      "kicker": "Sample check",
+      "heading": "See what is leaking.",
+      "intro": "This is what the free check found for a typical small business website. Yours takes about a minute.",
+      "caption": "A typical small business website"
+    },
+    "services": {
+      "kicker": "How it works",
+      "heading": "From missed messages to measured revenue.",
+      "intro": "Three steps, in order. Start with the free check today; the assistant and follow ups switch on as you connect your channels.",
+      "items": [
+        {
+          "title": "Find the leaks",
+          "body": "We check your website and profiles for every place an enquiry can slip away, and tell you how to fix each one.",
+          "tag": "Audit"
+        },
+        {
+          "title": "Answer every lead",
+          "body": "Your assistant replies on WhatsApp and your website in seconds, using only the facts you confirmed.",
+          "tag": "Answer"
+        },
+        {
+          "title": "Convert and report",
+          "body": "Follow ups, reminders and bookings run on their own, and you see what each lead was worth.",
+          "tag": "Convert"
+        }
+      ]
+    },
+    "band": {
+      "kicker": "Start today",
+      "heading": "Turn one missed message into your first booked customer.",
+      "body": "Run the free check, confirm your details, and see exactly where enquiries slip away.",
+      "cta": "Check my business",
+      "note": "Takes about a minute",
+      "side": [
+        "Fewer missed",
+        "More booked",
+        "Clearer numbers"
+      ]
+    },
+    "footer": {
+      "tagline": [
+        "Every enquiry",
+        "answered."
+      ],
+      "links": [
+        {
+          "label": "Log in",
+          "href": "/login"
+        },
+        {
+          "label": "Create account",
+          "href": "/signup"
+        },
+        {
+          "label": "Contact",
+          "href": "mailto:support@example.com"
+        }
+      ],
+      "location": "Lagos / London",
+      "side": [
+        "Found",
+        "Answered",
+        "Converted"
+      ]
+    }
+  },
+  "auth": {
+    "signupTitle": "Create your account",
+    "signupIntro": "Next we ask where you trade and what you do, then check your business for missed enquiries.",
+    "loginTitle": "Welcome back",
+    "loginIntro": "Log in to see your latest check and your brand brain.",
+    "panelHeading": "Every enquiry answered. Every lead followed up.",
+    "panelList": [
+      "Free check in about a minute",
+      "Built for your kind of business",
+      "Nothing goes live until you confirm it"
+    ]
   }
 }
