@@ -3,15 +3,85 @@
   "name": "Private dental practices",
   "shortName": "Dental",
   "description": "For dental practices offering private treatment.",
-  "markets": ["UK", "NG"],
+  "markets": [
+    "UK",
+    "NG"
+  ],
   "phase": 1,
-  "keywords": ["dental", "dentist", "teeth", "tooth", "implant", "orthodontic", "invisalign", "aligners", "whitening", "smile", "hygienist", "braces"],
+  "keywords": [
+    "dental",
+    "dentist",
+    "teeth",
+    "tooth",
+    "implant",
+    "orthodontic",
+    "invisalign",
+    "aligners",
+    "whitening",
+    "smile",
+    "hygienist",
+    "braces"
+  ],
   "conversionAction": "Consultation booked",
   "intake": [
-    { "key": "treatments", "label": "Private treatments and prices", "help": "One per line. For example: Implant consultation, £95", "type": "textarea" },
-    { "key": "finance", "label": "Finance options", "help": "Payment plans or finance partners you offer.", "type": "text" },
-    { "key": "nhs", "label": "NHS or private", "help": "Do you take NHS patients, private only, or both?", "type": "text" },
-    { "key": "clinicians", "label": "Clinicians", "help": "Name and role, one per line.", "type": "textarea" }
+    {
+      "key": "treatments",
+      "label": "Private treatments and prices",
+      "help": "One per line. For example: Implant consultation, £95",
+      "type": "textarea",
+      "keywords": [
+        "treatment",
+        "implant",
+        "aligner",
+        "invisalign",
+        "whitening",
+        "crown",
+        "veneer",
+        "braces",
+        "filling",
+        "extraction",
+        "scale",
+        "polish"
+      ]
+    },
+    {
+      "key": "finance",
+      "label": "Finance options",
+      "help": "Payment plans or finance partners you offer.",
+      "type": "text",
+      "keywords": [
+        "finance",
+        "spread the cost",
+        "monthly",
+        "instalment",
+        "installment",
+        "pay later",
+        "payment plan"
+      ]
+    },
+    {
+      "key": "nhs",
+      "label": "NHS or private",
+      "help": "Do you take NHS patients, private only, or both?",
+      "type": "text",
+      "keywords": [
+        "nhs",
+        "private"
+      ]
+    },
+    {
+      "key": "clinicians",
+      "label": "Clinicians",
+      "help": "Name and role, one per line.",
+      "type": "textarea",
+      "keywords": [
+        "dentist",
+        "clinician",
+        "hygienist",
+        "orthodontist",
+        "who will"
+      ]
+    }
   ],
   "qualifiers": [
     "Which treatment are you interested in?",
@@ -20,18 +90,92 @@
     "Would you like to hear about spreading the cost?"
   ],
   "sequences": [
-    { "name": "Consultation", "steps": ["Confirm booking", "Reminder 72 hours before", "Reminder 24 hours before", "Reminder 2 hours before", "Rebook if missed"] },
-    { "name": "Recall", "steps": ["Six month checkup reminder", "Follow up after 7 days"] }
+    {
+      "id": "no_reply",
+      "name": "No reply follow up",
+      "trigger": "no_reply",
+      "steps": [
+        {
+          "delayHours": 24,
+          "message": "Hi {firstName}, it is {businessName}. Would you still like to book a consultation? We have times available this week."
+        },
+        {
+          "delayHours": 96,
+          "message": "Hi {firstName}, a last check in from {businessName}. Reply any time to book."
+        }
+      ]
+    },
+    {
+      "id": "booked",
+      "name": "Consultation reminders",
+      "trigger": "booked",
+      "steps": [
+        {
+          "beforeHours": 72,
+          "message": "Hi {firstName}, a reminder of your consultation at {businessName} on {bookingTime}."
+        },
+        {
+          "beforeHours": 24,
+          "message": "Hi {firstName}, see you tomorrow at {bookingTime}. Reply here if you need to change it."
+        },
+        {
+          "beforeHours": 2,
+          "message": "Hi {firstName}, your consultation at {businessName} is at {bookingTime}."
+        }
+      ]
+    },
+    {
+      "id": "won",
+      "name": "After treatment",
+      "trigger": "won",
+      "steps": [
+        {
+          "delayHours": 24,
+          "message": "Hi {firstName}, thank you for visiting {businessName}. If you were happy, a short review would help other patients find us."
+        },
+        {
+          "delayHours": 4320,
+          "message": "Hi {firstName}, it has been six months since your visit to {businessName}. Would you like to book your check up?"
+        }
+      ]
+    }
   ],
-  "contentThemes": ["Treatment explainers", "Before and after, with consent", "Meet the team", "Patient questions answered"],
+  "contentThemes": [
+    "Treatment explainers",
+    "Before and after, with consent",
+    "Meet the team",
+    "Patient questions answered"
+  ],
   "adTemplates": [
-    { "objective": "Search", "audience": "People searching for implants, aligners or whitening nearby", "angle": "Free or low cost consultation" },
-    { "objective": "Leads", "audience": "Adults within 15 miles", "angle": "Straighter teeth with spread payments" }
+    {
+      "objective": "Search",
+      "audience": "People searching for implants, aligners or whitening nearby",
+      "angle": "Free or low cost consultation"
+    },
+    {
+      "objective": "Leads",
+      "audience": "Adults within 15 miles",
+      "angle": "Straighter teeth with spread payments"
+    }
   ],
   "compliance": [
     "Follow General Dental Council advertising guidance.",
     "No misleading claims about results.",
     "Only message people who have agreed to hear from the practice."
   ],
-  "kpis": ["Consultations booked", "Show rate", "Treatment value"]
+  "kpis": [
+    "Consultations booked",
+    "Show rate",
+    "Treatment value"
+  ],
+  "conversionPrompt": "Would you like to book a consultation? Tell me a day and time that suits you and the practice will confirm.",
+  "handoffKeywords": [
+    "emergency",
+    "swelling",
+    "bleeding",
+    "severe pain",
+    "broken tooth",
+    "knocked out",
+    "abscess"
+  ]
 }

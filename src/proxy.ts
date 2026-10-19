@@ -2,7 +2,7 @@
 // This is a convenience only: every page and action still checks the session against the database.
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedPrefixes = ["/dashboard", "/onboarding", "/brain", "/audit"];
+const protectedPrefixes = ["/dashboard", "/onboarding", "/brain", "/audit", "/inbox", "/automations", "/channels"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -15,5 +15,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/brain/:path*", "/audit/:path*"],
+  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/brain/:path*", "/audit/:path*", "/inbox/:path*", "/automations/:path*", "/channels/:path*"],
 };

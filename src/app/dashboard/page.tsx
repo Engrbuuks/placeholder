@@ -152,7 +152,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   if (!latest) {
     return (
-      <AppShell active="dashboard" title={copy.title} subtitle={copy.subtitle} {...shell}>
+      <AppShell workspaceId={session.workspaceId} active="dashboard" title={copy.title} subtitle={copy.subtitle} {...shell}>
         <Card className="max-w-xl">
           <p className="font-medium">No check has been run yet.</p>
           <p className="mt-1 text-ink-soft">Run one now to see where your business is losing enquiries.</p>
@@ -177,7 +177,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const pct = (n: number) => (now.total ? Math.round((n / now.total) * 100) : 0);
 
   return (
-    <AppShell active="dashboard" title={copy.title} subtitle={copy.subtitle} {...shell}>
+    <AppShell workspaceId={session.workspaceId} active="dashboard" title={copy.title} subtitle={copy.subtitle} {...shell}>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
         {/* Score over time */}
         <Card>

@@ -33,6 +33,24 @@ const paths: Record<string, React.ReactNode> = {
   chevron: <path d="M9 6l6 6-6 6" />,
   logout: <path d="M14 4H6v16h8M10 12h10M17 8.5l3.5 3.5-3.5 3.5" />,
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  flow: (
+    <>
+      <rect x="3.5" y="4" width="6" height="5" rx="1.2" />
+      <rect x="14.5" y="10" width="6" height="5" rx="1.2" />
+      <rect x="3.5" y="16" width="6" height="5" rx="1.2" />
+      <path d="M9.5 6.5h2.5a2 2 0 0 1 2 2v4M9.5 18.5h2.5a2 2 0 0 0 2-2v-4" />
+    </>
+  ),
+  bell: <path d="M6 16.5V11a6 6 0 1 1 12 0v5.5l1.5 2h-15L6 16.5zM10 20.5a2 2 0 0 0 4 0" />,
+  pause: <path d="M9 6v12M15 6v12" />,
+  play: <path d="M8 5.5v13l10-6.5-10-6.5z" />,
+  send: <path d="M5 12h13M13 6l6 6-6 6" />,
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </>
+  ),
 };
 
 export function Icon({ name, className = "h-5 w-5" }: { name: string; className?: string }) {

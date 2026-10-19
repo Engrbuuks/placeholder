@@ -3,16 +3,106 @@
   "name": "Real estate developers and agents",
   "shortName": "Real estate",
   "description": "For developers and agents selling homes and land, including to Nigerians living abroad.",
-  "markets": ["NG", "UK"],
+  "markets": [
+    "NG",
+    "UK"
+  ],
   "phase": 1,
-  "keywords": ["real estate", "property", "properties", "estate", "land", "plots", "apartments", "homes", "houses", "developer", "realtor", "off plan", "duplex", "terrace", "c of o", "realty"],
+  "keywords": [
+    "real estate",
+    "property",
+    "properties",
+    "estate",
+    "land",
+    "plots",
+    "apartments",
+    "homes",
+    "houses",
+    "developer",
+    "realtor",
+    "off plan",
+    "duplex",
+    "terrace",
+    "c of o",
+    "realty"
+  ],
   "conversionAction": "Inspection booked",
   "intake": [
-    { "key": "projects", "label": "Current projects or listings", "help": "One per line, with location. For example: Lekki Gardens Phase 2, Lekki", "type": "textarea" },
-    { "key": "unitTypes", "label": "Unit types and prices", "help": "Show naira and dollar prices if you sell to buyers abroad.", "type": "textarea" },
-    { "key": "titleDocuments", "label": "Title documents available", "help": "For example: C of O, Governor's Consent, Registered Survey.", "type": "text" },
-    { "key": "paymentPlans", "label": "Payment plans", "help": "Deposit and how long buyers have to pay.", "type": "textarea" },
-    { "key": "inspections", "label": "How inspections work", "help": "Physical days and times, and whether you offer virtual video inspections.", "type": "textarea" }
+    {
+      "key": "projects",
+      "label": "Current projects or listings",
+      "help": "One per line, with location. For example: Lekki Gardens Phase 2, Lekki",
+      "type": "textarea",
+      "keywords": [
+        "project",
+        "estate",
+        "listing",
+        "available",
+        "location"
+      ]
+    },
+    {
+      "key": "unitTypes",
+      "label": "Unit types and prices",
+      "help": "Show naira and dollar prices if you sell to buyers abroad.",
+      "type": "textarea",
+      "keywords": [
+        "bedroom",
+        "unit",
+        "plot",
+        "duplex",
+        "terrace",
+        "apartment",
+        "sqm",
+        "size"
+      ]
+    },
+    {
+      "key": "titleDocuments",
+      "label": "Title documents available",
+      "help": "For example: C of O, Governor's Consent, Registered Survey.",
+      "type": "text",
+      "keywords": [
+        "c of o",
+        "title",
+        "governor",
+        "consent",
+        "survey",
+        "document",
+        "deed"
+      ]
+    },
+    {
+      "key": "paymentPlans",
+      "label": "Payment plans",
+      "help": "Deposit and how long buyers have to pay.",
+      "type": "textarea",
+      "keywords": [
+        "payment plan",
+        "instalment",
+        "installment",
+        "deposit",
+        "spread",
+        "monthly",
+        "outright"
+      ]
+    },
+    {
+      "key": "inspections",
+      "label": "How inspections work",
+      "help": "Physical days and times, and whether you offer virtual video inspections.",
+      "type": "textarea",
+      "keywords": [
+        "inspection",
+        "inspect",
+        "visit",
+        "view",
+        "viewing",
+        "video",
+        "tour",
+        "see the"
+      ]
+    }
   ],
   "qualifiers": [
     "What budget are you working with?",
@@ -22,18 +112,86 @@
     "Would you pay outright or prefer a payment plan?"
   ],
   "sequences": [
-    { "name": "New enquiry", "steps": ["Send brochure and title proof", "Offer a virtual or physical inspection", "Follow up after 2 days", "Share a site progress update after 7 days"] },
-    { "name": "After inspection", "steps": ["Thank you and recap", "Send payment plan options", "Follow up after 5 days", "Final check in after 30 days"] }
+    {
+      "id": "no_reply",
+      "name": "No reply follow up",
+      "trigger": "no_reply",
+      "steps": [
+        {
+          "delayHours": 24,
+          "message": "Hi {firstName}, just checking in from {businessName}. Would you like the brochure and title documents for the project you asked about?"
+        },
+        {
+          "delayHours": 72,
+          "message": "Hi {firstName}, we still have units available on flexible payment plans. Would a quick video inspection this week help you decide?"
+        },
+        {
+          "delayHours": 168,
+          "message": "Hi {firstName}, this is a last check in from {businessName}. Reply any time and we will pick up where we left off."
+        }
+      ]
+    },
+    {
+      "id": "booked",
+      "name": "Inspection reminders",
+      "trigger": "booked",
+      "steps": [
+        {
+          "beforeHours": 24,
+          "message": "Hi {firstName}, a reminder of your inspection with {businessName} on {bookingTime}. Reply here if you need to change it."
+        },
+        {
+          "beforeHours": 2,
+          "message": "Hi {firstName}, your inspection with {businessName} is at {bookingTime}. See you soon."
+        }
+      ]
+    },
+    {
+      "id": "won",
+      "name": "After purchase",
+      "trigger": "won",
+      "steps": [
+        {
+          "delayHours": 48,
+          "message": "Hi {firstName}, thank you for choosing {businessName}. If you were happy with us, a short review would help other buyers trust us."
+        }
+      ]
+    }
   ],
-  "contentThemes": ["Site progress updates", "How to verify a title", "Buyer stories", "Payment plan explainers", "Neighbourhood guides"],
+  "contentThemes": [
+    "Site progress updates",
+    "How to verify a title",
+    "Buyer stories",
+    "Payment plan explainers",
+    "Neighbourhood guides"
+  ],
   "adTemplates": [
-    { "objective": "Click to WhatsApp", "audience": "Nigerians living in the UK, US and Canada interested in property in Nigeria", "angle": "Verified title and virtual inspection before you fly in" },
-    { "objective": "Click to WhatsApp", "audience": "Professionals within 20km of the site", "angle": "Flexible payment plan with a fixed price" }
+    {
+      "objective": "Click to WhatsApp",
+      "audience": "Nigerians living in the UK, US and Canada interested in property in Nigeria",
+      "angle": "Verified title and virtual inspection before you fly in"
+    },
+    {
+      "objective": "Click to WhatsApp",
+      "audience": "Professionals within 20km of the site",
+      "angle": "Flexible payment plan with a fixed price"
+    }
   ],
   "compliance": [
     "Never promise guaranteed returns or fixed resale profits.",
     "Only state title documents the business has confirmed.",
     "Meta treats housing ads as a special category with limited targeting."
   ],
-  "kpis": ["Inspections booked", "Cost per qualified lead", "Sales value"]
+  "kpis": [
+    "Inspections booked",
+    "Cost per qualified lead",
+    "Sales value"
+  ],
+  "conversionPrompt": "Would you like to book an inspection? We can do a video call or a visit to the site. Tell me a day and time that suits you.",
+  "handoffKeywords": [
+    "fraud",
+    "court",
+    "lawyer",
+    "dispute"
+  ]
 }

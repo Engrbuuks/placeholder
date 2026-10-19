@@ -1,0 +1,87 @@
+{
+  "quietHours": {
+    "start": 21,
+    "end": 8
+  },
+  "retry": {
+    "maxAttempts": 5,
+    "baseMinutes": 2
+  },
+  "worker": {
+    "batchSize": 20,
+    "budgetMs": 25000,
+    "inlineBudgetMs": 4000
+  },
+  "assistant": {
+    "greeting": "Hi {firstName}, thanks for messaging {businessName}.",
+    "handoffReply": "Thank you. I have passed this to the {businessName} team and someone will reply here shortly.",
+    "unknownReply": "Good question. I would rather not guess, so I have asked the team to answer you here.",
+    "qualifiedReply": "Thank you, that is everything I need. {conversionPrompt}",
+    "afterHandoffReply": "Thanks, the team has your message and will reply here.",
+    "handoffKeywords": [
+      "speak to a person",
+      "speak to someone",
+      "talk to a person",
+      "talk to someone",
+      "real person",
+      "human",
+      "agent",
+      "manager",
+      "complaint",
+      "complain",
+      "refund",
+      "scam",
+      "not happy",
+      "disappointed",
+      "call me"
+    ],
+    "maxReplyLength": 700,
+    "bookingRequestReply": "Thank you. I have passed your preferred time to the {businessName} team and they will confirm here shortly."
+  },
+  "whatsapp": {
+    "windowHours": 24,
+    "graphVersion": "v21.0"
+  },
+  "weekly": {
+    "scoreDropAlert": 5
+  },
+  "webchat": {
+    "maxMessageLength": 1000,
+    "maxMessagesPerMinute": 12,
+    "title": "Chat with us",
+    "subtitle": "We usually reply in seconds",
+    "placeholder": "Type your message",
+    "launcherLabel": "Chat with us",
+    "pollSeconds": 5
+  },
+  "stages": [
+    {
+      "id": "new",
+      "label": "New"
+    },
+    {
+      "id": "qualifying",
+      "label": "Qualifying"
+    },
+    {
+      "id": "qualified",
+      "label": "Qualified"
+    },
+    {
+      "id": "handoff",
+      "label": "Needs you"
+    },
+    {
+      "id": "booked",
+      "label": "Booked"
+    },
+    {
+      "id": "won",
+      "label": "Won"
+    },
+    {
+      "id": "lost",
+      "label": "Lost"
+    }
+  ]
+}

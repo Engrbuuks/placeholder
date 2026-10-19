@@ -3,15 +3,82 @@
   "name": "Private clinics and diagnostic centres",
   "shortName": "Clinic",
   "description": "For private hospitals, clinics, laboratories and diagnostic centres.",
-  "markets": ["NG"],
+  "markets": [
+    "NG"
+  ],
   "phase": 1,
-  "keywords": ["clinic", "hospital", "medical", "diagnostic", "laboratory", "lab", "scan", "ultrasound", "maternity", "doctor", "health", "physiotherapy", "fertility", "eye", "pharmacy"],
+  "keywords": [
+    "clinic",
+    "hospital",
+    "medical",
+    "diagnostic",
+    "laboratory",
+    "lab",
+    "scan",
+    "ultrasound",
+    "maternity",
+    "doctor",
+    "health",
+    "physiotherapy",
+    "fertility",
+    "eye",
+    "pharmacy"
+  ],
   "conversionAction": "Appointment booked",
   "intake": [
-    { "key": "consultationFee", "label": "Consultation fee", "help": "Your standard first visit fee.", "type": "text" },
-    { "key": "hmos", "label": "HMOs accepted", "help": "List the HMOs and insurers you work with.", "type": "textarea" },
-    { "key": "doctors", "label": "Doctors and specialists", "help": "Name and speciality, one per line.", "type": "textarea" },
-    { "key": "emergency", "label": "Emergency contact", "help": "What patients should do in an emergency. The assistant always passes emergencies to a person.", "type": "text" }
+    {
+      "key": "consultationFee",
+      "label": "Consultation fee",
+      "help": "Your standard first visit fee.",
+      "type": "text",
+      "keywords": [
+        "consultation",
+        "fee",
+        "charge"
+      ]
+    },
+    {
+      "key": "hmos",
+      "label": "HMOs accepted",
+      "help": "List the HMOs and insurers you work with.",
+      "type": "textarea",
+      "keywords": [
+        "hmo",
+        "insurance",
+        "insurer",
+        "nhis",
+        "hygeia",
+        "axa",
+        "reliance"
+      ]
+    },
+    {
+      "key": "doctors",
+      "label": "Doctors and specialists",
+      "help": "Name and speciality, one per line.",
+      "type": "textarea",
+      "keywords": [
+        "doctor",
+        "specialist",
+        "gynae",
+        "paediatric",
+        "pediatric",
+        "surgeon",
+        "physician"
+      ]
+    },
+    {
+      "key": "emergency",
+      "label": "Emergency contact",
+      "help": "What patients should do in an emergency. The assistant always passes emergencies to a person.",
+      "type": "text",
+      "keywords": [
+        "after hours",
+        "night",
+        "24 hours",
+        "weekend emergency"
+      ]
+    }
   ],
   "qualifiers": [
     "What would you like to be seen for?",
@@ -20,16 +87,83 @@
     "Will you pay yourself or through an HMO?"
   ],
   "sequences": [
-    { "name": "Appointment", "steps": ["Confirm booking", "Reminder the day before", "Reminder two hours before", "Check in after the visit", "Ask for a review"] }
+    {
+      "id": "no_reply",
+      "name": "No reply follow up",
+      "trigger": "no_reply",
+      "steps": [
+        {
+          "delayHours": 20,
+          "message": "Hi {firstName}, it is {businessName}. Would you still like an appointment? Reply with a day and time that suits you."
+        },
+        {
+          "delayHours": 72,
+          "message": "Hi {firstName}, just a last check in from {businessName}. We are here whenever you are ready."
+        }
+      ]
+    },
+    {
+      "id": "booked",
+      "name": "Appointment reminders",
+      "trigger": "booked",
+      "steps": [
+        {
+          "beforeHours": 24,
+          "message": "Hi {firstName}, a reminder of your appointment at {businessName} on {bookingTime}. Reply here if you need to change it."
+        },
+        {
+          "beforeHours": 2,
+          "message": "Hi {firstName}, your appointment at {businessName} is at {bookingTime}."
+        }
+      ]
+    },
+    {
+      "id": "won",
+      "name": "After the visit",
+      "trigger": "won",
+      "steps": [
+        {
+          "delayHours": 24,
+          "message": "Hi {firstName}, thank you for visiting {businessName}. How are you feeling? If you were happy with your care, a short review would mean a lot."
+        }
+      ]
+    }
   ],
-  "contentThemes": ["Health tips", "Meet our doctors", "Service spotlights", "What to expect at your first visit"],
+  "contentThemes": [
+    "Health tips",
+    "Meet our doctors",
+    "Service spotlights",
+    "What to expect at your first visit"
+  ],
   "adTemplates": [
-    { "objective": "Click to WhatsApp", "audience": "Adults within 10km of the clinic", "angle": "Book a same week appointment on WhatsApp" }
+    {
+      "objective": "Click to WhatsApp",
+      "audience": "Adults within 10km of the clinic",
+      "angle": "Book a same week appointment on WhatsApp"
+    }
   ],
   "compliance": [
     "Never claim cures or guaranteed outcomes.",
     "The assistant never diagnoses or gives medical advice.",
     "Any emergency or worrying symptom is passed to a person immediately."
   ],
-  "kpis": ["Appointments booked", "Show rate", "Response time"]
+  "kpis": [
+    "Appointments booked",
+    "Show rate",
+    "Response time"
+  ],
+  "conversionPrompt": "Would you like me to book you in? Tell me a day and time that suits you and the team will confirm.",
+  "handoffKeywords": [
+    "emergency",
+    "bleeding",
+    "chest pain",
+    "can't breathe",
+    "cannot breathe",
+    "unconscious",
+    "fainted",
+    "seizure",
+    "pregnant and bleeding",
+    "severe pain",
+    "overdose"
+  ]
 }

@@ -153,3 +153,24 @@ export function RefreshButton({ label }: { label: string }) {
     </button>
   );
 }
+
+export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={async (e) => {
+        const button = e.currentTarget;
+        try {
+          await navigator.clipboard.writeText(text);
+          button.textContent = "Copied";
+        } catch {
+          button.textContent = "Select and copy";
+        }
+        setTimeout(() => (button.textContent = label), 1800);
+      }}
+      className="rounded-full border border-line bg-surface px-3.5 py-1.5 text-sm hover:border-ink/40"
+    >
+      {label}
+    </button>
+  );
+}

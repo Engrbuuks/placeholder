@@ -41,8 +41,7 @@ export async function clientIp(): Promise<string> {
 }
 
 /** Records an attempt and reports whether the key is over its limit for the current window. */
-export async function overLimit(key: string, max: number): Promise<boolean> {
-  const minutes = appConfig.rateLimit.windowMinutes;
+export async function overLimit(key: string, max: number, minutes = appConfig.rateLimit.windowMinutes): Promise<boolean> {
   await globalQuery("insert into login_attempts (attempt_key) values ($1)", [key]);
   const { rows } = await globalQuery<{ n: string }>(
     "select count(*) as n from login_attempts where attempt_key = $1 and attempted_at > now() - make_interval(mins => $2)",

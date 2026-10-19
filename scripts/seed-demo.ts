@@ -96,6 +96,32 @@ async function main() {
     }
   });
 
+  // Real conversations, run through the real engine, so the inbox and automations pages have something to show.
+  const { ensureWebchat } = await import("../src/lib/webchat");
+  const { handleInbound } = await import("../src/lib/pipeline/engine");
+  const { setStage } = await import("../src/lib/pipeline/owner");
+  await ensureWebchat(account.workspaceId);
+  const { randomUUID } = await import("node:crypto");
+  const chat = async (visitor: string, lines: string[]) => {
+    let leadId = "";
+    for (const text of lines) leadId = (await handleInbound({ workspaceId: account.workspaceId, channel: "webchat", externalId: visitor, text })).leadId ?? leadId;
+    return leadId;
+  };
+  const amaka = await chat(randomUUID(), [
+    "Hi, my name is Amaka. How much is the 3 bedroom terrace?",
+    "Around 90 million",
+    "United Kingdom",
+    "To live in when I move back",
+    "Within six months",
+    "Payment plan",
+  ]);
+  const booked = new Date(Date.now() + 3 * 24 * 3600_000);
+  booked.setUTCHours(10, 0, 0, 0);
+  await setStage(account.workspaceId, amaka, "booked", booked);
+  await chat(randomUUID(), ["Hello, do you offer virtual inspections?", "I'm Tunde. About 25 million", "Nigeria, Lagos"]);
+  await chat(randomUUID(), ["I paid a deposit last month and nobody has called me. I want to speak to a person."]);
+  await chat(randomUUID(), ["Is the road to the estate tarred?"]);
+
   console.log(`Demo business created. Log in as ${email} with "${password}".`);
   await getPool().end();
 }

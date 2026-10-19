@@ -3,6 +3,7 @@ import { z } from "zod";
 import appJson from "@config/app.json";
 import marketsJson from "@config/markets.json";
 import auditJson from "@config/audit.json";
+import automationJson from "@config/automation.json";
 import { packFiles, fallbackPackId } from "@packs/index";
 
 const appSchema = z.object({
@@ -140,7 +141,61 @@ const intakeSchema = z.object({
   label: z.string(),
   help: z.string().default(""),
   type: z.enum(["text", "textarea"]),
+  keywords: z.array(z.string()).default([]),
 });
+
+const stepSchema = z
+  .object({
+    delayHours: z.number().positive().optional(),
+    beforeHours: z.number().positive().optional(),
+    message: z.string().min(1).max(1000),
+  })
+  .refine((s) => (s.delayHours === undefined) !== (s.beforeHours === undefined), {
+    message: "Each step needs exactly one of delayHours or beforeHours.",
+  });
+
+const sequenceSchema = z
+  .object({
+    id: z.string().regex(/^[a-z_]+$/),
+    name: z.string(),
+    trigger: z.enum(["no_reply", "booked", "won"]),
+    steps: z.array(stepSchema).min(1),
+  })
+  .refine((s) => s.steps.every((st) => (s.trigger === "booked" ? st.beforeHours !== undefined : st.delayHours !== undefined)), {
+    message: "Booked sequences use beforeHours; other sequences use delayHours.",
+  });
+
+const automationSchema = z.object({
+  quietHours: z.object({ start: z.number().int().min(0).max(23), end: z.number().int().min(0).max(23) }),
+  retry: z.object({ maxAttempts: z.number().int().min(1).max(20), baseMinutes: z.number().positive() }),
+  worker: z.object({ batchSize: z.number().int().min(1).max(100), budgetMs: z.number().int().positive(), inlineBudgetMs: z.number().int().positive() }),
+  assistant: z.object({
+    greeting: z.string(),
+    handoffReply: z.string(),
+    unknownReply: z.string(),
+    qualifiedReply: z.string(),
+    afterHandoffReply: z.string(),
+    bookingRequestReply: z.string(),
+    handoffKeywords: z.array(z.string()),
+    maxReplyLength: z.number().int().positive(),
+  }),
+  whatsapp: z.object({ windowHours: z.number().positive(), graphVersion: z.string().regex(/^v\d+\.\d+$/) }),
+  weekly: z.object({ scoreDropAlert: z.number().int().min(1) }),
+  webchat: z.object({
+    maxMessageLength: z.number().int().positive(),
+    maxMessagesPerMinute: z.number().int().positive(),
+    title: z.string(),
+    subtitle: z.string(),
+    placeholder: z.string(),
+    launcherLabel: z.string(),
+    pollSeconds: z.number().int().min(2),
+  }),
+  stages: z.array(z.object({ id: z.string(), label: z.string() })).min(1),
+});
+
+export type AutomationConfig = z.infer<typeof automationSchema>;
+export const automationConfig: AutomationConfig = automationSchema.parse(automationJson);
+export type Sequence = z.infer<typeof sequenceSchema>;
 
 const packSchema = z.object({
   id: z.string().regex(/^[a-z_]+$/),
@@ -153,7 +208,9 @@ const packSchema = z.object({
   conversionAction: z.string(),
   intake: z.array(intakeSchema),
   qualifiers: z.array(z.string()),
-  sequences: z.array(z.object({ name: z.string(), steps: z.array(z.string()) })),
+  sequences: z.array(sequenceSchema).min(1),
+  conversionPrompt: z.string().min(1),
+  handoffKeywords: z.array(z.string()),
   contentThemes: z.array(z.string()),
   adTemplates: z.array(z.object({ objective: z.string(), audience: z.string(), angle: z.string() })),
   compliance: z.array(z.string()),

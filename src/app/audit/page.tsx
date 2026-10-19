@@ -23,6 +23,7 @@ export default async function AuditPage() {
 
   return (
     <AppShell
+      workspaceId={session.workspaceId}
       active="audit"
       title="Audit"
       subtitle="Every place an enquiry can slip away, with the fix for each"

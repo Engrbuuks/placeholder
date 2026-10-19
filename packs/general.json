@@ -3,13 +3,36 @@
   "name": "Any other business",
   "shortName": "General",
   "description": "For any business not listed. We tailor the setup from your own website and answers.",
-  "markets": ["NG", "UK"],
+  "markets": [
+    "NG",
+    "UK"
+  ],
   "phase": 1,
   "keywords": [],
   "conversionAction": "Enquiry captured",
   "intake": [
-    { "key": "idealCustomer", "label": "Who your best customers are", "help": "For example: busy parents in Ikeja, or small offices in Manchester.", "type": "text" },
-    { "key": "mainOffer", "label": "What you most want to sell more of", "help": "The product or service that matters most this quarter.", "type": "text" }
+    {
+      "key": "idealCustomer",
+      "label": "Who your best customers are",
+      "help": "For example: busy parents in Ikeja, or small offices in Manchester.",
+      "type": "text",
+      "keywords": [
+        "who do you",
+        "customers"
+      ]
+    },
+    {
+      "key": "mainOffer",
+      "label": "What you most want to sell more of",
+      "help": "The product or service that matters most this quarter.",
+      "type": "text",
+      "keywords": [
+        "offer",
+        "sell",
+        "product",
+        "service"
+      ]
+    }
   ],
   "qualifiers": [
     "What are you looking for?",
@@ -17,12 +40,64 @@
     "What is the best number to reach you on?"
   ],
   "sequences": [
-    { "name": "New enquiry", "steps": ["Reply instantly", "Follow up after 1 day", "Final follow up after 4 days"] }
+    {
+      "id": "no_reply",
+      "name": "No reply follow up",
+      "trigger": "no_reply",
+      "steps": [
+        {
+          "delayHours": 24,
+          "message": "Hi {firstName}, just checking in from {businessName}. Can we help with anything else?"
+        },
+        {
+          "delayHours": 96,
+          "message": "Hi {firstName}, a last check in from {businessName}. Reply any time."
+        }
+      ]
+    },
+    {
+      "id": "booked",
+      "name": "Booking reminders",
+      "trigger": "booked",
+      "steps": [
+        {
+          "beforeHours": 24,
+          "message": "Hi {firstName}, a reminder of your booking with {businessName} on {bookingTime}."
+        }
+      ]
+    },
+    {
+      "id": "won",
+      "name": "After the sale",
+      "trigger": "won",
+      "steps": [
+        {
+          "delayHours": 48,
+          "message": "Hi {firstName}, thank you for choosing {businessName}. A short review would help us a lot."
+        }
+      ]
+    }
   ],
-  "contentThemes": ["Behind the scenes", "Customer questions answered", "Offers and news"],
+  "contentThemes": [
+    "Behind the scenes",
+    "Customer questions answered",
+    "Offers and news"
+  ],
   "adTemplates": [
-    { "objective": "Click to WhatsApp", "audience": "People near your business", "angle": "Your main offer, answered instantly on WhatsApp" }
+    {
+      "objective": "Click to WhatsApp",
+      "audience": "People near your business",
+      "angle": "Your main offer, answered instantly on WhatsApp"
+    }
   ],
-  "compliance": ["No claims the business has not confirmed."],
-  "kpis": ["Enquiries", "Response time", "Sales"]
+  "compliance": [
+    "No claims the business has not confirmed."
+  ],
+  "kpis": [
+    "Enquiries",
+    "Response time",
+    "Sales"
+  ],
+  "conversionPrompt": "What is the best next step for you? Tell me a day and time that suits you and the team will confirm.",
+  "handoffKeywords": []
 }

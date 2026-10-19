@@ -19,6 +19,7 @@ import {
 } from "@/lib/workspaces";
 import { brandBrainFromForm } from "@/lib/brandBrainForm";
 import { aiEnabled } from "@/lib/ai";
+import { ensureWebchat } from "@/lib/webchat";
 
 export type StepState = { error?: string; notice?: string; fields?: Record<string, string> };
 
@@ -114,6 +115,7 @@ export async function saveBrain(_prev: StepState, formData: FormData): Promise<S
 
   if (workspace.onboardingStep !== "done" && intent === "confirm") {
     await updateWorkspace(workspaceId, { onboardingStep: "done" });
+    await ensureWebchat(workspaceId);
     redirect("/dashboard");
   }
   if (workspace.onboardingStep === "done") redirect(`/brain?saved=${intent === "confirm" ? "confirmed" : "draft"}`);

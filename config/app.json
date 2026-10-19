@@ -29,19 +29,14 @@
   ],
   "comingNext": [
     {
-      "id": "whatsapp",
-      "label": "Connect WhatsApp",
-      "detail": "Your assistant answers customers on WhatsApp using the brand brain you confirmed."
-    },
-    {
-      "id": "webchat",
-      "label": "Add web chat to your site",
-      "detail": "A chat box for your website, answered instantly."
-    },
-    {
       "id": "ads",
       "label": "Plan your first ad",
-      "detail": "Ad copy, audience and budget drafted from your niche pack."
+      "detail": "Ad copy, audience and budget drafted from your niche pack, with leads flowing straight into your inbox."
+    },
+    {
+      "id": "calendar",
+      "label": "Calendar booking",
+      "detail": "Customers pick a slot themselves and reminders follow automatically."
     }
   ],
   "landing": {
@@ -233,6 +228,24 @@
         "icon": "home"
       },
       {
+        "id": "inbox",
+        "label": "Inbox",
+        "href": "/inbox",
+        "icon": "inbox"
+      },
+      {
+        "id": "automations",
+        "label": "Automations",
+        "href": "/automations",
+        "icon": "flow"
+      },
+      {
+        "id": "channels",
+        "label": "Channels",
+        "href": "/channels",
+        "icon": "chat"
+      },
+      {
         "id": "audit",
         "label": "Audit",
         "href": "/audit",
@@ -246,14 +259,6 @@
       }
     ],
     "soon": [
-      {
-        "label": "Inbox",
-        "icon": "inbox"
-      },
-      {
-        "label": "Assistant",
-        "icon": "chat"
-      },
       {
         "label": "Ads",
         "icon": "megaphone"

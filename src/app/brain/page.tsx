@@ -22,6 +22,7 @@ export default async function BrainPage({ searchParams }: { searchParams: Promis
 
   return (
     <AppShell
+      workspaceId={session.workspaceId}
       active="brain"
       title="Brand brain"
       subtitle="Everything your assistant is allowed to say"
