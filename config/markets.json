@@ -5,7 +5,8 @@
     "currencySymbol": "₦",
     "phonePrefix": "+234",
     "paymentProvider": "Paystack",
-    "dataLaw": "Nigeria Data Protection Act"
+    "dataLaw": "Nigeria Data Protection Act",
+    "timeZone": "Africa/Lagos"
   },
   "UK": {
     "name": "United Kingdom",
@@ -13,6 +14,7 @@
     "currencySymbol": "£",
     "phonePrefix": "+44",
     "paymentProvider": "Stripe",
-    "dataLaw": "UK GDPR"
+    "dataLaw": "UK GDPR",
+    "timeZone": "Europe/London"
   }
 }

@@ -10,7 +10,8 @@ AI marketing platform for owner run businesses in Nigeria and the UK. This is bu
 * **Niche packs:** real estate, clinics, dental, and a general pack. Each pack sets the intake questions, qualifiers, follow up sequences, content themes, ad templates, compliance rules and KPIs.
 * **Website audit:** reads the business website safely and scores 19 checks, from WhatsApp link and tap to call through to page speed and structured data. Every leak comes with a plain language fix.
 * **Brand brain:** the facts the assistant is allowed to say. Drafted from the website, then corrected and confirmed by the owner. It cannot be confirmed until the essentials are filled in.
-* **Overview page:** score, leaks ordered by impact, brand brain status, setup summary and what comes next.
+* **Dashboard:** a black sidebar with the app sections, a readiness score chart over time (1 week to all time, with hover details), four headline numbers with trends, a gauge with a score per area (Reach, Response, Trust, Technical), a breakdown of working, leaking and waiting checks, the next three fixes, and a table of every check with its history.
+* **Audit page:** every leak with its fix.
 
 The assistant itself, WhatsApp, booking and ads come in the next rounds, as set out in the product spec.
 
@@ -58,18 +59,29 @@ You need Node 20 or newer and PostgreSQL 14 or newer.
 
 6. Deploy. Run `npm run migrate` again whenever a new file appears in `db/migrations`.
 
+## Demo business
+
+To preview the dashboard with six weeks of history, run:
+
+```bash
+npm run seed:demo
+```
+
+It creates **Lekki Gardens Homes**, a made up real estate business. Log in as `demo@placeholder.test` with the password `demo password 2026`. Its scores come from the real scoring code applied to a made up website that improves over time. The script refuses to run in production unless you pass `--force`.
+
 ## Tests
 
 ```bash
 npm test
 ```
 
-22 tests run against the real database and the real audit code:
+30 tests run against the real database and the real audit code:
 
 * **Tenant isolation:** the app role cannot bypass row level security; a workspace sees only its own rows, cannot write into another workspace, cannot update or delete another workspace; nothing is visible outside a tenant transaction; the tenant setting never leaks between pooled connections; a taken email creates nothing.
 * **Audit:** every configured check has a rule; a well built page scores 100; a bare page leaks; drafts read structured data and never overwrite what the owner typed.
 * **Address guard:** private, loopback, link local, cloud metadata and IPv4 mapped addresses are refused, both by address and when a hostname resolves to one.
 * **Owner input:** website, Instagram and Google links are tidied; niche matching; the brand brain form.
+* **Dashboard numbers:** every check belongs to an area; bands and impact follow config; website checks wait rather than leak when the site cannot be read; fixes since the last check are detected; brand brain completeness.
 
 The isolation tests were checked by switching off a policy on purpose: they fail, then pass again once it is restored.
 
@@ -79,9 +91,9 @@ Nothing a business owner reads is hardcoded in page code.
 
 | What | File |
 | --- | --- |
-| Product name, tagline, landing page copy, sign in page copy, tones, rate limits, session length | `config/app.json` |
-| Markets, currencies, payment providers | `config/markets.json` |
-| Audit checks, weights, wording, fixes, thresholds | `config/audit.json` |
+| Product name, tagline, landing page copy, sign in page copy, dashboard copy, score bands, sidebar items, tones, rate limits, session length | `config/app.json` |
+| Markets, currencies, payment providers, time zones | `config/markets.json` |
+| Audit checks, weights, areas, impact levels, wording, fixes, thresholds | `config/audit.json` |
 | Niche packs | `packs/*.json`, listed in `packs/index.ts` |
 | Database changes | a new numbered file in `db/migrations` |
 

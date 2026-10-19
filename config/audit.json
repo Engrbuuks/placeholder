@@ -14,11 +14,51 @@
     "descriptionMax": 170
   },
   "keywords": {
-    "booking": ["book", "appointment", "schedule", "reserve", "consultation", "inspection", "enquire", "enquiry", "get a quote", "request a quote"],
-    "reviews": ["review", "testimonial", "what our clients say", "what our patients say", "rated", "stars"],
-    "social": ["instagram.com", "facebook.com", "tiktok.com", "linkedin.com", "x.com", "twitter.com", "youtube.com"],
-    "maps": ["google.com/maps", "maps.google", "goo.gl/maps", "maps.app.goo.gl", "g.page"],
-    "analytics": ["googletagmanager.com", "gtag(", "google-analytics.com", "fbq(", "connect.facebook.net", "plausible.io", "analytics.tiktok.com"]
+    "booking": [
+      "book",
+      "appointment",
+      "schedule",
+      "reserve",
+      "consultation",
+      "inspection",
+      "enquire",
+      "enquiry",
+      "get a quote",
+      "request a quote"
+    ],
+    "reviews": [
+      "review",
+      "testimonial",
+      "what our clients say",
+      "what our patients say",
+      "rated",
+      "stars"
+    ],
+    "social": [
+      "instagram.com",
+      "facebook.com",
+      "tiktok.com",
+      "linkedin.com",
+      "x.com",
+      "twitter.com",
+      "youtube.com"
+    ],
+    "maps": [
+      "google.com/maps",
+      "maps.google",
+      "goo.gl/maps",
+      "maps.app.goo.gl",
+      "g.page"
+    ],
+    "analytics": [
+      "googletagmanager.com",
+      "gtag(",
+      "google-analytics.com",
+      "fbq(",
+      "connect.facebook.net",
+      "plausible.io",
+      "analytics.tiktok.com"
+    ]
   },
   "checks": [
     {
@@ -29,7 +69,8 @@
       "pass": "You have a website customers can find.",
       "fail": "No website was given, so customers searching for you find competitors first.",
       "unreachable": "Your website did not load when we tried it, so visitors may see an error too.",
-      "fix": "Add your website address, or ask us to build a simple page from your brand brain."
+      "fix": "Add your website address, or ask us to build a simple page from your brand brain.",
+      "area": "Reach"
     },
     {
       "id": "instagram",
@@ -38,7 +79,8 @@
       "label": "Instagram profile",
       "pass": "Your Instagram profile is linked.",
       "fail": "No Instagram profile was given.",
-      "fix": "Add your Instagram handle so we can include it in your audit and content plan."
+      "fix": "Add your Instagram handle so we can include it in your audit and content plan.",
+      "area": "Reach"
     },
     {
       "id": "google_profile",
@@ -47,7 +89,8 @@
       "label": "Google Business Profile",
       "pass": "Your Google Business Profile is linked.",
       "fail": "No Google Business Profile was given. Local searches and map results lean heavily on it.",
-      "fix": "Create or claim your free profile on Google, then add its link here."
+      "fix": "Create or claim your free profile on Google, then add its link here.",
+      "area": "Reach"
     },
     {
       "id": "https",
@@ -56,7 +99,8 @@
       "label": "Secure connection",
       "pass": "Your site loads securely over HTTPS.",
       "fail": "Your site does not load over HTTPS, so browsers warn visitors it is not secure.",
-      "fix": "Turn on a free SSL certificate with your web host."
+      "fix": "Turn on a free SSL certificate with your web host.",
+      "area": "Technical"
     },
     {
       "id": "whatsapp",
@@ -65,7 +109,8 @@
       "label": "WhatsApp link",
       "pass": "Visitors can message you on WhatsApp in one tap.",
       "fail": "There is no WhatsApp link, so visitors have to copy your number and message you themselves.",
-      "fix": "Add a WhatsApp button that opens a chat with your business number."
+      "fix": "Add a WhatsApp button that opens a chat with your business number.",
+      "area": "Response"
     },
     {
       "id": "phone",
@@ -74,7 +119,8 @@
       "label": "Tap to call",
       "pass": "Your phone number can be tapped to call.",
       "fail": "Your phone number cannot be tapped to call on a mobile phone.",
-      "fix": "Make your phone number a tap to call link."
+      "fix": "Make your phone number a tap to call link.",
+      "area": "Response"
     },
     {
       "id": "booking",
@@ -83,7 +129,8 @@
       "label": "Clear next step",
       "pass": "Your site invites visitors to book, enquire or request a quote.",
       "fail": "Your site does not clearly invite visitors to book, enquire or request a quote.",
-      "fix": "Add one obvious button near the top, such as Book a consultation or Request an inspection."
+      "fix": "Add one obvious button near the top, such as Book a consultation or Request an inspection.",
+      "area": "Response"
     },
     {
       "id": "viewport",
@@ -92,7 +139,8 @@
       "label": "Mobile friendly",
       "pass": "Your site is set up for mobile screens.",
       "fail": "Your site is not set up for mobile screens, so it looks tiny on phones.",
-      "fix": "Ask your web developer to add a mobile viewport setting and test the site on a phone."
+      "fix": "Ask your web developer to add a mobile viewport setting and test the site on a phone.",
+      "area": "Technical"
     },
     {
       "id": "speed",
@@ -101,7 +149,8 @@
       "label": "Response speed",
       "pass": "Your site responded quickly.",
       "fail": "Your site was slow to respond. Many visitors leave before a slow page loads.",
-      "fix": "Check your hosting plan and remove heavy plugins or scripts."
+      "fix": "Check your hosting plan and remove heavy plugins or scripts.",
+      "area": "Technical"
     },
     {
       "id": "title",
@@ -110,7 +159,8 @@
       "label": "Page title",
       "pass": "Your page title is a good length for search results.",
       "fail": "Your page title is missing or a poor length for search results.",
-      "fix": "Write a title that names your business, what you do and where, in about 50 to 60 characters."
+      "fix": "Write a title that names your business, what you do and where, in about 50 to 60 characters.",
+      "area": "Trust"
     },
     {
       "id": "description",
@@ -119,7 +169,8 @@
       "label": "Search description",
       "pass": "Your page has a search description.",
       "fail": "Your page has no useful search description, so Google picks random text to show.",
-      "fix": "Write a one or two sentence description of what you offer and who for."
+      "fix": "Write a one or two sentence description of what you offer and who for.",
+      "area": "Trust"
     },
     {
       "id": "contact_form",
@@ -128,7 +179,8 @@
       "label": "Enquiry form",
       "pass": "Visitors can send an enquiry through a form.",
       "fail": "There is no enquiry form on this page.",
-      "fix": "Add a short form asking for name, phone and what the visitor needs."
+      "fix": "Add a short form asking for name, phone and what the visitor needs.",
+      "area": "Response"
     },
     {
       "id": "schema",
@@ -137,7 +189,8 @@
       "label": "Business details for search engines",
       "pass": "Your site tells search engines your business details in a structured way.",
       "fail": "Your site does not give search engines your business details in a structured way.",
-      "fix": "Add LocalBusiness structured data with your name, address, phone and opening hours."
+      "fix": "Add LocalBusiness structured data with your name, address, phone and opening hours.",
+      "area": "Trust"
     },
     {
       "id": "social",
@@ -146,7 +199,8 @@
       "label": "Social links",
       "pass": "Your site links to your social profiles.",
       "fail": "Your site does not link to any social profiles.",
-      "fix": "Link your Instagram and Facebook pages from the footer."
+      "fix": "Link your Instagram and Facebook pages from the footer.",
+      "area": "Reach"
     },
     {
       "id": "maps",
@@ -155,7 +209,8 @@
       "label": "Map or directions",
       "pass": "Visitors can find directions to you.",
       "fail": "There is no map or directions link.",
-      "fix": "Link to your Google Maps listing so visitors can get directions."
+      "fix": "Link to your Google Maps listing so visitors can get directions.",
+      "area": "Reach"
     },
     {
       "id": "reviews",
@@ -164,7 +219,8 @@
       "label": "Reviews on the page",
       "pass": "Your page shows reviews or testimonials.",
       "fail": "Your page shows no reviews or testimonials, which new customers look for before trusting you.",
-      "fix": "Show three recent reviews with the customer's first name."
+      "fix": "Show three recent reviews with the customer's first name.",
+      "area": "Trust"
     },
     {
       "id": "analytics",
@@ -173,7 +229,8 @@
       "label": "Visitor tracking",
       "pass": "Your site measures visitors.",
       "fail": "Your site does not measure visitors, so you cannot tell which ads or posts bring customers.",
-      "fix": "Add Google Analytics and the Meta pixel. We will connect them in a later step."
+      "fix": "Add Google Analytics and the Meta pixel. We will connect them in a later step.",
+      "area": "Technical"
     },
     {
       "id": "og_image",
@@ -182,7 +239,8 @@
       "label": "Share preview image",
       "pass": "Your link shows a preview image when shared on WhatsApp and social media.",
       "fail": "Your link shows no preview image when shared on WhatsApp and social media.",
-      "fix": "Set a share image, ideally your logo or a photo of your work."
+      "fix": "Set a share image, ideally your logo or a photo of your work.",
+      "area": "Trust"
     },
     {
       "id": "page_weight",
@@ -191,7 +249,44 @@
       "label": "Page size",
       "pass": "Your page is a reasonable size for mobile data.",
       "fail": "Your page is heavy, which costs visitors mobile data and time.",
-      "fix": "Compress large images before uploading them."
+      "fix": "Compress large images before uploading them.",
+      "area": "Technical"
+    }
+  ],
+  "areas": [
+    {
+      "id": "Reach",
+      "label": "Reach",
+      "detail": "Can customers find you"
+    },
+    {
+      "id": "Response",
+      "label": "Response",
+      "detail": "Can they reach you in one tap"
+    },
+    {
+      "id": "Trust",
+      "label": "Trust",
+      "detail": "Do you look credible"
+    },
+    {
+      "id": "Technical",
+      "label": "Technical",
+      "detail": "Does the site work well"
+    }
+  ],
+  "impact": [
+    {
+      "min": 8,
+      "label": "High"
+    },
+    {
+      "min": 5,
+      "label": "Medium"
+    },
+    {
+      "min": 0,
+      "label": "Low"
     }
   ]
 }

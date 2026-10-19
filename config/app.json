@@ -178,5 +178,92 @@
       "Built for your kind of business",
       "Nothing goes live until you confirm it"
     ]
+  },
+  "dashboard": {
+    "title": "Business health",
+    "subtitle": "Where enquiries are being lost, and what to fix next",
+    "chartTitle": "Readiness score",
+    "chartLabel": "Overall readiness",
+    "ranges": [
+      {
+        "id": "7d",
+        "label": "1W",
+        "days": 7
+      },
+      {
+        "id": "30d",
+        "label": "1M",
+        "days": 30
+      },
+      {
+        "id": "90d",
+        "label": "3M",
+        "days": 90
+      },
+      {
+        "id": "all",
+        "label": "All",
+        "days": 0
+      }
+    ],
+    "defaultRange": "30d",
+    "bands": [
+      {
+        "min": 80,
+        "label": "Strong"
+      },
+      {
+        "min": 60,
+        "label": "Fair"
+      },
+      {
+        "min": 40,
+        "label": "Weak"
+      },
+      {
+        "min": 0,
+        "label": "Leaking"
+      }
+    ],
+    "nav": [
+      {
+        "id": "dashboard",
+        "label": "Overview",
+        "href": "/dashboard",
+        "icon": "home"
+      },
+      {
+        "id": "audit",
+        "label": "Audit",
+        "href": "/audit",
+        "icon": "pulse"
+      },
+      {
+        "id": "brain",
+        "label": "Brand brain",
+        "href": "/brain",
+        "icon": "brain"
+      }
+    ],
+    "soon": [
+      {
+        "label": "Inbox",
+        "icon": "inbox"
+      },
+      {
+        "label": "Assistant",
+        "icon": "chat"
+      },
+      {
+        "label": "Ads",
+        "icon": "megaphone"
+      },
+      {
+        "label": "Reports",
+        "icon": "file"
+      }
+    ],
+    "soonLabel": "Soon",
+    "historyLength": 8
   }
 }

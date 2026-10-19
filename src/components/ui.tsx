@@ -126,3 +126,30 @@ export function Notice({ children }: { children: React.ReactNode }) {
     </p>
   );
 }
+
+/** A round icon button that submits its form and spins while the server works. */
+export function RefreshButton({ label }: { label: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-label={label}
+      title={label}
+      className="grid h-10 w-10 place-items-center rounded-full border border-line bg-surface text-ink transition-colors hover:border-ink/40 disabled:cursor-wait"
+    >
+      <svg
+        aria-hidden
+        viewBox="0 0 24 24"
+        className={`h-[18px] w-[18px] ${pending ? "animate-spin" : ""}`}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M19 8a7.5 7.5 0 1 0 1 6M19 3.5V8h-4.5" />
+      </svg>
+    </button>
+  );
+}

@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { appConfig } from "@/lib/config";
 
-export function Wordmark({ href = "/" }: { href?: string }) {
+export function Wordmark({ href = "/", tone = "dark" }: { href?: string; tone?: "dark" | "light" }) {
   return (
-    <Link href={href} className="inline-flex items-center gap-2 text-[1.05rem] font-bold uppercase tracking-[0.02em] text-ink">
+    <Link
+      href={href}
+      className={`inline-flex items-center gap-2 text-[1.05rem] font-bold uppercase tracking-[0.02em] ${tone === "light" ? "text-white" : "text-ink"}`}
+    >
       <svg aria-hidden viewBox="0 0 20 20" className="h-5 w-5">
         <rect x="1" y="1" width="8" height="8" rx="1.5" fill="currentColor" />
         <rect x="11" y="11" width="8" height="8" rx="1.5" fill="var(--color-accent)" />

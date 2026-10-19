@@ -17,4 +17,5 @@ export async function rerunAudit() {
   const { outcome } = await runAudit(presence);
   await saveAudit(workspaceId, outcome, workspace.websiteUrl);
   revalidatePath("/dashboard");
+  revalidatePath("/audit");
 }

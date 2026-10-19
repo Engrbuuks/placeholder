@@ -18,6 +18,19 @@ const appSchema = z.object({
   }),
   tones: z.array(z.object({ id: z.string(), label: z.string() })).min(1),
   comingNext: z.array(z.object({ id: z.string(), label: z.string(), detail: z.string() })),
+  dashboard: z.object({
+    title: z.string(),
+    subtitle: z.string(),
+    chartTitle: z.string(),
+    chartLabel: z.string(),
+    ranges: z.array(z.object({ id: z.string(), label: z.string(), days: z.number().int().min(0) })).min(1),
+    defaultRange: z.string(),
+    bands: z.array(z.object({ min: z.number(), label: z.string() })).min(1),
+    nav: z.array(z.object({ id: z.string(), label: z.string(), href: z.string(), icon: z.string() })),
+    soon: z.array(z.object({ label: z.string(), icon: z.string() })),
+    soonLabel: z.string(),
+    historyLength: z.number().int().min(2),
+  }),
   auth: z.object({
     signupTitle: z.string(),
     signupIntro: z.string(),
@@ -79,12 +92,14 @@ const marketSchema = z.object({
   phonePrefix: z.string(),
   paymentProvider: z.string(),
   dataLaw: z.string(),
+  timeZone: z.string(),
 });
 const marketsSchema = z.record(z.enum(["NG", "UK"]), marketSchema);
 
 const checkSchema = z.object({
   id: z.string(),
   group: z.enum(["presence", "site"]),
+  area: z.string(),
   weight: z.number().int().positive(),
   label: z.string(),
   pass: z.string(),
@@ -116,6 +131,8 @@ const auditSchema = z.object({
     analytics: z.array(z.string()),
   }),
   checks: z.array(checkSchema).min(1),
+  areas: z.array(z.object({ id: z.string(), label: z.string(), detail: z.string() })).min(1),
+  impact: z.array(z.object({ min: z.number(), label: z.string() })).min(1),
 });
 
 const intakeSchema = z.object({
@@ -154,6 +171,11 @@ export type IntakeField = z.infer<typeof intakeSchema>;
 export const appConfig: AppConfig = appSchema.parse(appJson);
 export const markets = marketsSchema.parse(marketsJson) as Record<MarketCode, Market>;
 export const auditConfig: AuditConfig = auditSchema.parse(auditJson);
+
+const areaIds = new Set(auditConfig.areas.map((a) => a.id));
+for (const check of auditConfig.checks) {
+  if (!areaIds.has(check.area)) throw new Error(`Audit check "${check.id}" names an unknown area "${check.area}".`);
+}
 
 export const packs: NichePack[] = packFiles.map((p) => packSchema.parse(p));
 

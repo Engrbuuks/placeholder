@@ -234,3 +234,32 @@ export async function recordUsage(workspaceId: string, kind: string, units: numb
     c.query("insert into usage_ledger (workspace_id, kind, units) values ($1, $2, $3)", [workspaceId, kind, units]),
   );
 }
+
+/** Checks in time order, oldest first. days = 0 means all of them. */
+export async function auditHistory(workspaceId: string, days: number, limit = 200): Promise<StoredAudit[]> {
+  return withTenant(workspaceId, async (c) => {
+    const { rows } = await c.query<{
+      id: string;
+      target_url: string | null;
+      score: number;
+      results: AuditOutcome["results"];
+      facts: AuditOutcome["facts"];
+      created_at: Date;
+    }>(
+      `select id, target_url, score, results, facts, created_at from (
+         select * from audit_reports
+         where $1::int = 0 or created_at > now() - make_interval(days => $1::int)
+         order by created_at desc limit $2
+       ) recent order by created_at asc`,
+      [days, limit],
+    );
+    return rows.map((r) => ({
+      id: r.id,
+      targetUrl: r.target_url,
+      score: r.score,
+      results: r.results,
+      facts: r.facts,
+      createdAt: r.created_at,
+    }));
+  });
+}
