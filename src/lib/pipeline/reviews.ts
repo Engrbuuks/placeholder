@@ -47,7 +47,13 @@ export async function scheduleReviewRequest(c: PoolClient, ctx: WorkspaceContext
 export async function writeReviewRequest(c: PoolClient, ctx: WorkspaceContext, lead: Lead): Promise<{ messageId: string } | { skip: string }> {
   const blocker = reviewBlocker(ctx, lead) ?? (lead.stage !== "won" ? "The sale is no longer marked as won" : null);
   if (blocker) return { skip: blocker };
-  const body = render(ctx.locale.assistant.reviewAsk, { firstName: firstName(lead.name, ""), businessName: ctx.businessName });
+  const token = randomBytes(12).toString("base64url");
+  const byEmail = lead.channel === "email";
+  const body = render(byEmail ? ctx.locale.assistant.reviewAskEmail : ctx.locale.assistant.reviewAsk, {
+    firstName: firstName(lead.name, ""),
+    businessName: ctx.businessName,
+    link: reviewUrl(lead.review_token ?? token),
+  });
   const { rows } = await c.query<{ id: string }>(
     `insert into messages (workspace_id, lead_id, direction, author, body, status, channel, sequence_id)
      values ($1, $2, 'out', 'automation', $3, 'queued', $4, 'review') returning id`,
@@ -55,9 +61,9 @@ export async function writeReviewRequest(c: PoolClient, ctx: WorkspaceContext, l
   );
   await c.query(
     "update leads set review_status = 'requested', review_requested_at = now(), review_token = coalesce(review_token, $2), updated_at = now() where id = $1",
-    [lead.id, randomBytes(12).toString("base64url")],
+    [lead.id, token],
   );
-  await logActivity(c, ctx.workspaceId, { leadId: lead.id, kind: "review_requested", summary: "Asked for a rating from 1 to 5" });
+  await logActivity(c, ctx.workspaceId, { leadId: lead.id, kind: "review_requested", summary: byEmail ? "Emailed your review link" : "Asked for a rating from 1 to 5" });
   return { messageId: rows[0].id };
 }
 

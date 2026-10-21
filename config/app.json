@@ -32,11 +32,6 @@
       "id": "ads",
       "label": "Plan your first ad",
       "detail": "Ad copy, audience and budget drafted from your niche pack, with leads flowing straight into your inbox."
-    },
-    {
-      "id": "calendar",
-      "label": "Calendar booking",
-      "detail": "Customers pick a slot themselves and reminders follow automatically."
     }
   ],
   "landing": {
@@ -238,6 +233,12 @@
         "label": "Inbox",
         "href": "/inbox",
         "icon": "inbox"
+      },
+      {
+        "id": "bookings",
+        "label": "Bookings",
+        "href": "/bookings",
+        "icon": "clock"
       },
       {
         "id": "automations",

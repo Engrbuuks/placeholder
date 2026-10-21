@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { chooseMarket, chooseNiche, savePresence, type StepState } from "@/app/actions/onboarding";
 import type { MarketOption } from "@/lib/marketOptions";
-import { Field, FormError, SelectField, SubmitButton } from "./ui";
+import { Field, FormError, SelectField, SubmitButton, useActionForm } from "./ui";
 
 const card =
   "group flex cursor-pointer items-start gap-4 rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-ink/30 has-[:checked]:border-ink has-[:checked]:shadow-[inset_0_0_0_1px_var(--color-ink)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent";
@@ -26,11 +26,11 @@ export function MarketStep({
   options: MarketOption[];
   current: { country: string | null; timeZone: string | null; language: string };
 }) {
-  const [state, action] = useActionState<StepState, FormData>(chooseMarket, {});
+  const [state, action, pending] = useActionForm<StepState>(chooseMarket, {});
   const [code, setCode] = useState(current.country ?? "");
   const market = options.find((m) => m.code === code);
   return (
-    <form action={action} className="space-y-6">
+    <form onSubmit={action} className="space-y-6">
       <FormError message={state.error} />
       <SelectField
         label="Country"
@@ -70,7 +70,7 @@ export function MarketStep({
           </div>
         </>
       )}
-      <SubmitButton pending="Saving">Continue</SubmitButton>
+      <SubmitButton busy={pending} pending="Saving">Continue</SubmitButton>
     </form>
   );
 }
@@ -78,9 +78,9 @@ export function MarketStep({
 type PackOption = { id: string; name: string; description: string };
 
 export function NicheStep({ options, current }: { options: PackOption[]; current: string | null }) {
-  const [state, action] = useActionState<StepState, FormData>(chooseNiche, {});
+  const [state, action, pending] = useActionForm<StepState>(chooseNiche, {});
   return (
-    <form action={action} className="space-y-6">
+    <form onSubmit={action} className="space-y-6">
       <FormError message={state.error} />
       <fieldset className="grid gap-4">
         <legend className="sr-only">What kind of business you run</legend>
@@ -103,7 +103,7 @@ export function NicheStep({ options, current }: { options: PackOption[]; current
           defaultValue={state.fields?.description}
         />
       </div>
-      <SubmitButton pending="Finding your match">Continue</SubmitButton>
+      <SubmitButton busy={pending} pending="Finding your match">Continue</SubmitButton>
     </form>
   );
 }
@@ -117,9 +117,9 @@ export function PresenceStep({
   instagram: string | null;
   google: string | null;
 }) {
-  const [state, action] = useActionState<StepState, FormData>(savePresence, {});
+  const [state, action, pending] = useActionForm<StepState>(savePresence, {});
   return (
-    <form action={action} className="space-y-6">
+    <form onSubmit={action} className="space-y-6">
       <FormError message={state.error} />
       <Field
         label="Website"
@@ -141,7 +141,7 @@ export function PresenceStep({
         help="Open your listing on Google Maps, tap Share, and paste the link."
         defaultValue={state.fields?.googleProfileUrl ?? google ?? ""}
       />
-      <SubmitButton pending="Checking your business. This can take up to a minute.">Check my business</SubmitButton>
+      <SubmitButton busy={pending} pending="Checking your business. This can take up to a minute.">Check my business</SubmitButton>
     </form>
   );
 }

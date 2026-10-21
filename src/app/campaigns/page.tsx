@@ -26,7 +26,7 @@ export default async function CampaignsPage() {
         <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
           <h2 className="text-[1.0625rem] font-semibold tracking-[-0.02em]">New campaign</h2>
           <p className="mt-1 text-[0.9375rem] text-ink-soft">
-            One short message to a group of people who already know you. It goes out by WhatsApp or text on the channel they used.
+            One short message to a group of people who already know you. It goes out by WhatsApp, text or email, on the channel they used.
           </p>
           <div className="mt-5">
             <CampaignForm segments={segments} ideas={localeFor(workspace.language).campaignIdeas} />

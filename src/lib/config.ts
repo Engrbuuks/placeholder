@@ -135,6 +135,8 @@ const localeSchema = z.object({
     optOutReply: z.string(),
     optInReply: z.string(),
     reviewAsk: z.string(),
+    /** By email the customer's reply goes to the owner, so the link is offered at once and a complaint arrives privately. */
+    reviewAskEmail: z.string(),
     reviewHappy: z.string(),
     reviewUnhappy: z.string(),
     missedCallText: z.string(),
@@ -142,6 +144,13 @@ const localeSchema = z.object({
     formThanks: z.string(),
     formConsent: z.string(),
     formIntro: z.string(),
+    bookingInvite: z.string(),
+    bookingConfirmed: z.string(),
+    bookingRescheduled: z.string(),
+    bookingCancelledCustomer: z.string(),
+    emailSubject: z.string(),
+    emailFooter: z.string(),
+    unsubscribed: z.string(),
   }),
   /** Starting messages for each campaign group, which the owner edits before sending. */
   campaignIdeas: z.object({ quiet: z.string(), lost: z.string(), customers: z.string(), booked_no_show: z.string() }),

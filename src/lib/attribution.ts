@@ -47,7 +47,7 @@ export function attributionFromPage(page: string | null | undefined, referrer: s
 
 /** The label a person reads for a lead's source, for example "Google (cpc)" or "Web chat". */
 export function sourceLabel(row: { source: string | null; utm_source: string | null; utm_medium: string | null }): string {
-  const base = { webchat: "Web chat", whatsapp: "WhatsApp", sms: "SMS", form: "Lead form", missed_call: "Missed call" }[row.source ?? ""] ?? "Other";
+  const base = { webchat: "Web chat", whatsapp: "WhatsApp", sms: "SMS", form: "Lead form", missed_call: "Missed call", booking: "Booking page", email: "Email" }[row.source ?? ""] ?? "Other";
   if (!row.utm_source) return base;
   const name = row.utm_source.charAt(0).toUpperCase() + row.utm_source.slice(1);
   return row.utm_medium ? `${name} (${row.utm_medium})` : name;

@@ -14,6 +14,7 @@ AI marketing platform for owner run businesses in Nigeria and the UK. Build roun
 * **Audit page:** every leak with its fix.
 
 * **Automation pipeline (round 2):** see the next section.
+* **Booking and email (round 6):** customers book their own appointments from real free times, with no double booking, confirmations, reminders, rescheduling, cancelling and an add to calendar file; the assistant offers the booking page when a customer is ready; email is a channel for customers who leave no phone, sent as the business with replies to the owner and an unsubscribe link. Every form keeps what was typed when there is an error.
 * **Results engine (round 5):** every lead's source and campaign, deal values, a Results page (funnel, speed to lead, after hours leads, revenue by source), a weekly results email, the review engine, reactivation campaigns, missed call text back and a lead form with consent. See **Automations that bring results**.
 * **Global (round 4):** 14 countries in config, a time zone and language per business, money in any currency (including lakh and crore) in the price guard, English, French, Spanish and Portuguese, SMS through Twilio, STOP and START on every channel, follow up rules per market, and customer data export and deletion. See **Going global**.
 * **Free hosting (round 3):** one command install on Oracle Cloud's free server with the database, an every minute worker, HTTPS, daily backups, deploys from GitHub that keep the site up and roll back on their own, and a monthly AI spending cap per workspace. See **Deploy free on Oracle Cloud**.
@@ -80,6 +81,21 @@ The platform uses one Meta app; each business connects its own number.
 **Missed call text back.** With SMS connected, set your Twilio number's Voice webhook ("A call comes in") to `https://YOUR-APP/api/webhooks/voice` and, under Channels, give the phone that should ring. Calls ring that phone for 20 seconds. If nobody answers, the caller hears a short message, gets a text at once, and the conversation starts in your inbox; their reply is not greeted a second time. Both voice webhooks check Twilio's signature like the SMS one.
 
 **Lead form.** Every business gets a form at `https://YOUR-APP/f/<key>` (the same key as the web chat), to link from Instagram, Google or a QR code, or embed with the iframe code on Channels. Local phone numbers are turned into international form with the business's country code. With SMS connected, the person gets a text from the assistant within seconds; without it, you are alerted to call them. The consent box records agreement to marketing texts, which allows follow ups even where the law needs consent.
+
+### Self booking
+
+Under **Bookings**, set what customers book, how long it takes, any gap after each appointment, how many customers fit in one time, the notice you need, how far ahead people can book, opening hours for each day, and closed dates. Turn it on and share the link (`/b/<key>`), or embed it with the code on that page.
+
+* Customers see only real free times in your time zone, pick one, and leave a name and a phone or email. Bookings for one business are made one at a time under a database lock, so two people can never take the last place in the same time.
+* The booking moves the conversation to booked, schedules the reminders from your niche pack, alerts you, and sends the customer a confirmation with a link to change or cancel and an add to calendar file.
+* When a chat, WhatsApp or text customer answers the last qualifying question, the assistant sends their own booking link instead of asking for a time, so the booking lands on their conversation.
+* Bookings you make from the inbox appear on the same calendar. After an appointment, mark it **Came** or **No show**; people who did not come are the "Booked, then nothing" campaign group.
+
+### Email
+
+Customers who leave an email and no phone are answered by email: one helpful reply that answers their question and offers the booking page, after which the conversation is yours, because their replies go straight to your own inbox (your alert email, or your login email). Booking confirmations, review requests (with the review link straight away, since replies come to you) and campaigns also go by email. Every email is sent with the business's name, carries an unsubscribe link and the headers mail apps use for their one click unsubscribe button, and unsubscribing works like STOP on every channel.
+
+Email needs `RESEND_API_KEY` and `EMAIL_FROM` on a domain you have verified with Resend. Without them, emails are not sent and each one is marked as skipped with the reason. Marketing emails follow the same consent rule per market as texts, except that past customers may be emailed.
 
 ## Going global
 
@@ -265,6 +281,7 @@ Nothing a business owner reads is hardcoded in page code.
 | Audit checks, weights, areas, impact levels, wording, fixes, thresholds | `config/audit.json` |
 | Niche packs, including qualifying questions, handoff words, the booking prompt and follow up sequences | `packs/*.json`, listed in `packs/index.ts` |
 | Quiet hours, retries, AI cap and reply model, reply length, web chat limits, weekly alert threshold, campaign limits (frequency cap, batch size, audience size, days a sale counts towards a campaign) | `config/automation.json` |
+| Booking hours, length, capacity and closed dates | the Bookings page (stored per business) |
 | Database changes | a new numbered file in `db/migrations` |
 
 All config files are validated when the app starts, so a mistake in one shows a clear error instead of a broken page.

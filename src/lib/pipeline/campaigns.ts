@@ -10,6 +10,7 @@ import { enqueue, type ClaimedJob } from "../queue";
 import { render, firstName } from "../templates";
 import { inQuietHours, nextAllowedTime } from "../time";
 import { withinWindow } from "../channels/whatsapp";
+import { emailConfigured } from "../channels/email";
 import { loadContext, type Lead, type WorkspaceContext } from "./context";
 import { deliverMessage } from "./delivery";
 import { smsFollowUpsAllowed } from "./sequences";
@@ -30,8 +31,21 @@ const segmentWhere: Record<Segment, string> = {
   booked_no_show: "l.stage = 'booked' and l.booked_for < now() - interval '1 day'",
 };
 
-type Connections = { sms: boolean; whatsapp: boolean; whatsappTemplate: boolean };
-export type Reach = { ok: true; via: "text" | "template" } | { ok: false; reason: string };
+type Connections = { sms: boolean; whatsapp: boolean; whatsappTemplate: boolean; email?: boolean };
+export type Reach = { ok: true; via: "text" | "template" | "email" } | { ok: false; reason: string };
+
+/**
+ * Marketing email follows the same consent rule as marketing texts in each market, with one addition: past
+ * customers may be emailed (the "soft opt in" for existing customers), always with an unsubscribe link.
+ */
+function emailReach(ctx: WorkspaceContext, lead: Lead, conn: Connections): Reach {
+  if (!conn.email) return { ok: false, reason: "Email sending is not set up on the server" };
+  const permissive = ctx.country ? (markets[ctx.country]?.smsFollowUps ?? false) : false;
+  if (!permissive && !lead.marketing_consent_at && lead.stage !== "won") {
+    return { ok: false, reason: `Marketing emails need their consent in ${ctx.country ? markets[ctx.country]?.name : "this market"}` };
+  }
+  return { ok: true, via: "email" };
+}
 
 /** Whether one person may be messaged first by this business, and how. */
 export function reach(ctx: WorkspaceContext, lead: Lead, conn: Connections, lastCampaignAt: Date | null, now = new Date()): Reach {
@@ -40,8 +54,10 @@ export function reach(ctx: WorkspaceContext, lead: Lead, conn: Connections, last
   if (cap > 0 && lastCampaignAt && now.getTime() - lastCampaignAt.getTime() < cap * 86_400_000) {
     return { ok: false, reason: `Already sent a campaign in the last ${cap} days` };
   }
-  if (lead.channel === "webchat") return { ok: false, reason: "Web chat visitors cannot be messaged first" };
-  if (lead.channel === "form") return { ok: false, reason: "Came from the lead form with no text channel" };
+  if (lead.channel === "email") return emailReach(ctx, lead, conn);
+  // Web chat and form customers can be reached only when they left an email address.
+  if (lead.channel === "webchat") return lead.email ? emailReach(ctx, lead, conn) : { ok: false, reason: "Web chat visitors without an email address cannot be messaged first" };
+  if (lead.channel === "form") return lead.email ? emailReach(ctx, lead, conn) : { ok: false, reason: "Came from the lead form with no way to message them" };
   if (lead.channel === "sms") {
     if (!conn.sms) return { ok: false, reason: "SMS is not connected" };
     if (!smsFollowUpsAllowed(ctx, lead)) {
@@ -61,13 +77,19 @@ async function connections(c: PoolClient): Promise<Connections> {
     "select channel, secret_enc is not null as ok, settings->>'templateName' as template from channel_connections",
   );
   const wa = rows.find((r) => r.channel === "whatsapp");
-  return { sms: Boolean(rows.find((r) => r.channel === "sms")?.ok), whatsapp: Boolean(wa?.ok), whatsappTemplate: Boolean(wa?.ok && wa.template) };
+  return {
+    sms: Boolean(rows.find((r) => r.channel === "sms")?.ok),
+    whatsapp: Boolean(wa?.ok),
+    whatsappTemplate: Boolean(wa?.ok && wa.template),
+    email: emailConfigured(),
+  };
 }
 
 export type Preview = {
   total: number;
   reachable: number;
   viaTemplate: number;
+  viaEmail: number;
   skipped: { reason: string; count: number }[];
   sample: string;
 };
@@ -80,12 +102,14 @@ export async function previewCampaign(workspaceId: string, input: { segment: Seg
     const skipped = new Map<string, number>();
     let reachable = 0;
     let viaTemplate = 0;
+    let viaEmail = 0;
     let sampleName: string | null = null;
     for (const p of people) {
       const r = reach(ctx, p, conn, p.last_campaign_at);
       if (r.ok) {
         reachable++;
         if (r.via === "template") viaTemplate++;
+        if (r.via === "email") viaEmail++;
         sampleName ??= p.name;
       } else skipped.set(r.reason, (skipped.get(r.reason) ?? 0) + 1);
     }
@@ -93,6 +117,7 @@ export async function previewCampaign(workspaceId: string, input: { segment: Seg
       total: people.length,
       reachable,
       viaTemplate,
+      viaEmail,
       skipped: [...skipped].map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count),
       sample: render(input.message, { firstName: firstName(sampleName ?? "Ada", ""), businessName: ctx.businessName }),
     };
@@ -129,7 +154,7 @@ export async function startCampaign(
       const r = reach(ctx, p, conn, p.last_campaign_at);
       await c.query(
         "insert into campaign_recipients (campaign_id, workspace_id, lead_id, status, reason) values ($1, $2, $3, $4, $5)",
-        [campaignId, workspaceId, p.id, r.ok ? "queued" : "skipped", r.ok ? (r.via === "template" ? "Will use your approved WhatsApp template" : null) : r.reason],
+        [campaignId, workspaceId, p.id, r.ok ? "queued" : "skipped", r.ok ? (r.via === "template" ? "Will use your approved WhatsApp template" : r.via === "email" ? "By email" : null) : r.reason],
       );
       if (r.ok) queued++;
     }
@@ -181,7 +206,7 @@ export async function campaignSend(job: ClaimedJob) {
       const m = await c.query<{ id: string }>(
         `insert into messages (workspace_id, lead_id, direction, author, body, status, channel, sequence_id)
          values ($1, $2, 'out', 'automation', $3, 'queued', $4, $5) returning id`,
-        [job.workspace_id, lead.id, body, lead.channel, `campaign:${campaignId}`],
+        [job.workspace_id, lead.id, body, r.via === "email" ? "email" : lead.channel, `campaign:${campaignId}`],
       );
       await c.query("update campaign_recipients set message_id = $3 where campaign_id = $1 and lead_id = $2", [campaignId, lead.id, m.rows[0].id]);
       toSend.push({ leadId: lead.id, messageId: m.rows[0].id });

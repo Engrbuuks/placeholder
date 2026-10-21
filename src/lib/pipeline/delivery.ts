@@ -6,16 +6,21 @@ import { logActivity, notify } from "../activity";
 import { firstName } from "../templates";
 import { sendTemplate, sendText, withinWindow, WhatsAppError } from "../channels/whatsapp";
 import { sendSms, SmsError } from "../channels/sms";
+import { EmailError, sendCustomerEmail } from "../channels/email";
+import { render } from "../templates";
+import { publicTokenFor } from "../leadToken";
+import { loadContext } from "./context";
 
 type Row = {
   id: string;
   lead_id: string;
   body: string;
   status: string;
-  channel: "webchat" | "whatsapp" | "sms" | "form";
+  channel: "webchat" | "whatsapp" | "sms" | "form" | "email";
   author: string;
   external_id: string;
   opted_out_at: Date | null;
+  email: string | null;
   name: string | null;
   last_inbound_at: Date | null;
   account: string | null;
@@ -28,7 +33,7 @@ export type DeliveryOutcome = "sent" | "skipped" | "failed" | "not_queued";
 export async function deliverMessage(workspaceId: string, messageId: string, fetchImpl?: typeof fetch): Promise<DeliveryOutcome> {
   const row = await withTenant(workspaceId, async (c) => {
     const { rows } = await c.query<Row>(
-      `select m.id, m.lead_id, m.body, m.status, m.channel, m.author, l.external_id, l.name, l.last_inbound_at, l.opted_out_at,
+      `select m.id, m.lead_id, m.body, m.status, m.channel, m.author, l.external_id, l.name, l.last_inbound_at, l.opted_out_at, l.email,
               cc.external_account_id as account, cc.secret_enc, cc.settings
        from messages m
        join leads l on l.id = m.lead_id
@@ -65,8 +70,12 @@ export async function deliverMessage(workspaceId: string, messageId: string, fet
     return "skipped";
   }
 
+  if (row.channel === "email" || (row.channel === "form" && row.email)) {
+    return deliverEmail(workspaceId, row, finish, fetchImpl);
+  }
+
   if (row.channel === "form") {
-    await finish("skipped", "This customer came from the lead form and has no text channel. Call or email them.");
+    await finish("skipped", "This customer came from the lead form with no phone or email we can use. Call them.");
     return "skipped";
   }
 
@@ -145,3 +154,52 @@ export async function deliverMessage(workspaceId: string, messageId: string, fet
   }
 }
 
+
+async function deliverEmail(
+  workspaceId: string,
+  row: Row,
+  finish: (status: "sent" | "skipped" | "failed", detail: string | null, externalId?: string | null) => Promise<void>,
+  fetchImpl?: typeof fetch,
+): Promise<DeliveryOutcome> {
+  if (!row.email) {
+    await finish("failed", "This customer has no email address.");
+    return "failed";
+  }
+  const prep = await withTenant(workspaceId, async (c) => {
+    const ctx = (await loadContext(c, workspaceId))!;
+    const token = await publicTokenFor(c, row.lead_id);
+    const owner = (
+      await c.query<{ email: string }>(
+        "select u.email from memberships m join users u on u.id = m.user_id where m.workspace_id = $1 and m.role = 'owner' limit 1",
+        [workspaceId],
+      )
+    ).rows[0]?.email;
+    return { ctx, token, replyTo: ctx.settings.alertEmail ?? owner ?? null };
+  });
+  const base = (process.env.APP_URL ?? "").replace(/\/$/, "");
+  const unsubscribeUrl = `${base}/u/${prep.token}`;
+  const t = prep.ctx.locale.assistant;
+  const text = `${row.body}\n\n${render(t.emailFooter, { businessName: prep.ctx.businessName, link: unsubscribeUrl })}`;
+  try {
+    const id = await sendCustomerEmail(
+      {
+        businessName: prep.ctx.businessName,
+        to: row.email,
+        replyTo: prep.replyTo,
+        subject: render(t.emailSubject, { businessName: prep.ctx.businessName }),
+        text,
+        unsubscribeUrl,
+        oneClickUrl: `${base}/api/unsubscribe/${prep.token}`,
+      },
+      fetchImpl,
+    );
+    await finish("sent", null, id);
+    return "sent";
+  } catch (error) {
+    if (error instanceof EmailError && !error.retryable) {
+      await finish(/not set up/.test(error.message) ? "skipped" : "failed", error.message);
+      return /not set up/.test(error.message) ? "skipped" : "failed";
+    }
+    throw error instanceof Error ? error : new Error(String(error));
+  }
+}

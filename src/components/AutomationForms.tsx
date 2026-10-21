@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+
 import { saveAutomationSettings, saveMissedCalls, saveReviewSettings, saveSms, saveWhatsApp, type ActionState } from "@/app/actions/pipeline";
-import { Field, FormError, Notice, SelectField, SubmitButton } from "./ui";
+import { Field, FormError, Notice, SelectField, SubmitButton, useActionForm } from "./ui";
 
 type Settings = { enabled: boolean; approvalMode: "auto" | "approve"; alertEmail: string | null; weeklyCheck: boolean };
 
@@ -33,9 +33,9 @@ export function AutomationSettingsForm({
   ownerEmail: string;
   local: { timeZone: string; timeZones: Choice[]; language: string; languages: Choice[] };
 }) {
-  const [state, action] = useActionState<ActionState, FormData>(saveAutomationSettings, {});
+  const [state, action, pending] = useActionForm<ActionState>(saveAutomationSettings, {});
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={action} className="space-y-4">
       <FormError message={state.error} />
       {state.notice && <Notice>{state.notice}</Notice>}
       <div className="divide-y divide-line">
@@ -91,7 +91,7 @@ export function AutomationSettingsForm({
         help={`Leave empty to use your login email, ${ownerEmail}.`}
         defaultValue={settings.alertEmail ?? ""}
       />
-      <SubmitButton pending="Saving">Save settings</SubmitButton>
+      <SubmitButton busy={pending} pending="Saving">Save settings</SubmitButton>
     </form>
   );
 }
@@ -107,9 +107,9 @@ export function WhatsAppForm({
   templateName: string;
   templateLanguage: string;
 }) {
-  const [state, action] = useActionState<ActionState, FormData>(saveWhatsApp, {});
+  const [state, action, pending] = useActionForm<ActionState>(saveWhatsApp, {});
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={action} className="space-y-4">
       <FormError message={state.error} />
       {state.notice && <Notice>{state.notice}</Notice>}
       <Field label="Phone number ID" name="phoneNumberId" help="From Meta: WhatsApp, then API setup." defaultValue={phoneNumberId} required />
@@ -130,15 +130,15 @@ export function WhatsAppForm({
         />
         <Field label="Language" name="templateLanguage" defaultValue={templateLanguage || "en"} />
       </div>
-      <SubmitButton pending="Saving">Save WhatsApp</SubmitButton>
+      <SubmitButton busy={pending} pending="Saving">Save WhatsApp</SubmitButton>
     </form>
   );
 }
 
 export function SmsForm({ accountSid, phoneNumber, hasToken }: { accountSid: string; phoneNumber: string; hasToken: boolean }) {
-  const [state, action] = useActionState<ActionState, FormData>(saveSms, {});
+  const [state, action, pending] = useActionForm<ActionState>(saveSms, {});
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={action} className="space-y-4">
       <FormError message={state.error} />
       {state.notice && <Notice>{state.notice}</Notice>}
       <Field label="Twilio number" name="phoneNumber" help="The number customers text, with the country code, for example +14155550123." defaultValue={phoneNumber} required />
@@ -151,15 +151,15 @@ export function SmsForm({ accountSid, phoneNumber, hasToken }: { accountSid: str
         help={hasToken ? "A token is saved and stays hidden. Paste a new one only to replace it." : "Under Account Info in your Twilio console. Stored encrypted, and used to check that texts really come from Twilio."}
         required={!hasToken}
       />
-      <SubmitButton pending="Saving">Save SMS</SubmitButton>
+      <SubmitButton busy={pending} pending="Saving">Save SMS</SubmitButton>
     </form>
   );
 }
 
 export function ReviewSettingsForm({ enabled, link, delayHours }: { enabled: boolean; link: string; delayHours: number }) {
-  const [state, action] = useActionState<ActionState, FormData>(saveReviewSettings, {});
+  const [state, action, pending] = useActionForm<ActionState>(saveReviewSettings, {});
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={action} className="space-y-4">
       <FormError message={state.error} />
       {state.notice && <Notice>{state.notice}</Notice>}
       <Toggle
@@ -179,15 +179,15 @@ export function ReviewSettingsForm({ enabled, link, delayHours }: { enabled: boo
       <div className="max-w-[12rem]">
         <Field label="Ask after (hours)" name="reviewDelayHours" type="number" defaultValue={String(delayHours)} />
       </div>
-      <SubmitButton pending="Saving">Save reviews</SubmitButton>
+      <SubmitButton busy={pending} pending="Saving">Save reviews</SubmitButton>
     </form>
   );
 }
 
 export function MissedCallForm({ enabled, forwardTo, smsReady }: { enabled: boolean; forwardTo: string; smsReady: boolean }) {
-  const [state, action] = useActionState<ActionState, FormData>(saveMissedCalls, {});
+  const [state, action, pending] = useActionForm<ActionState>(saveMissedCalls, {});
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={action} className="space-y-4">
       <FormError message={state.error} />
       {state.notice && <Notice>{state.notice}</Notice>}
       {!smsReady && <p className="rounded-xl bg-accent-wash px-4 py-3 text-sm">Connect SMS above first: the text back goes out from your Twilio number.</p>}
@@ -198,7 +198,7 @@ export function MissedCallForm({ enabled, forwardTo, smsReady }: { enabled: bool
         defaultChecked={enabled}
       />
       <Field label="Phone to ring" name="forwardTo" help="Your business mobile or landline, with the country code." defaultValue={forwardTo} placeholder="+13125550100" />
-      <SubmitButton pending="Saving">Save missed calls</SubmitButton>
+      <SubmitButton busy={pending} pending="Saving">Save missed calls</SubmitButton>
     </form>
   );
 }

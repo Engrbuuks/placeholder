@@ -97,7 +97,7 @@ export async function loadContext(c: PoolClient, workspaceId: string): Promise<W
 export type Lead = {
   id: string;
   workspace_id: string;
-  channel: "webchat" | "whatsapp" | "sms" | "form";
+  channel: "webchat" | "whatsapp" | "sms" | "form" | "email";
   external_id: string;
   opted_out_at: Date | null;
   source: string | null;

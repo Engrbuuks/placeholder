@@ -31,8 +31,8 @@ export function previousAllowedTime(date: Date, timeZone: string, quiet: { start
   return new Date(t);
 }
 
-export function formatBookingTime(date: Date, timeZone: string): string {
-  return new Intl.DateTimeFormat("en-GB", {
+export function formatBookingTime(date: Date, timeZone: string, language = "en"): string {
+  return new Intl.DateTimeFormat(language === "en" ? "en-GB" : language, {
     timeZone,
     weekday: "long",
     day: "numeric",

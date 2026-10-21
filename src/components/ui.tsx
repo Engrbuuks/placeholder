@@ -1,5 +1,6 @@
 "use client";
 
+import { useActionState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 
 const arrow = (
@@ -14,15 +15,18 @@ export function SubmitButton({
   name,
   value,
   tone = "primary",
+  busy: busyProp,
 }: {
   children: React.ReactNode;
   pending?: string;
   name?: string;
   value?: string;
   tone?: "primary" | "dark" | "quiet";
+  /** Set by forms that submit through useActionForm, where the browser's form status is not used. */
+  busy?: boolean;
 }) {
   const status = useFormStatus();
-  const busy = status.pending;
+  const busy = busyProp ?? status.pending;
   const styles = {
     primary: "bg-accent text-white hover:bg-accent-deep",
     dark: "bg-ink text-white hover:bg-ink/85",
@@ -221,4 +225,19 @@ export function SelectField({
       </select>
     </div>
   );
+}
+
+/**
+ * Like useActionState, but returns a submit handler instead of a form action. React clears every field of a
+ * form after its action runs; this keeps what the person typed, so an error never wipes their work.
+ */
+export function useActionForm<S>(fn: (state: Awaited<S>, data: FormData) => S | Promise<S>, initial: Awaited<S>) {
+  const [state, dispatch] = useActionState<S, FormData>(fn, initial);
+  const [pending, startTransition] = useTransition();
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget, (e.nativeEvent as SubmitEvent).submitter);
+    startTransition(() => dispatch(data));
+  };
+  return [state, onSubmit, pending] as const;
 }

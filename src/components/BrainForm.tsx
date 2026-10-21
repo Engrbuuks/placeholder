@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+
 import { saveBrain, type StepState } from "@/app/actions/onboarding";
-import { Field, FormError, Notice, SubmitButton } from "./ui";
+import { Field, FormError, Notice, SubmitButton, useActionForm } from "./ui";
 
 export type BrainFormValues = {
   businessName: string;
@@ -34,9 +34,9 @@ export function BrainForm({
   /** A sample price in the business's own currency, for example ₹1,500 or $45. */
   examplePrice?: string;
 }) {
-  const [state, action] = useActionState<StepState, FormData>(saveBrain, {});
+  const [state, action, pending] = useActionForm<StepState>(saveBrain, {});
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={action} className="space-y-4">
       <FormError message={state.error} />
       {state.notice && <Notice>{state.notice}</Notice>}
 
@@ -114,10 +114,10 @@ export function BrainForm({
       </section>
 
       <div className="flex flex-wrap gap-3 pt-2">
-        <SubmitButton name="intent" value="confirm" pending="Saving">
+        <SubmitButton busy={pending} name="intent" value="confirm" pending="Saving">
           {confirmLabel}
         </SubmitButton>
-        <SubmitButton name="intent" value="save" tone="quiet" pending="Saving">
+        <SubmitButton busy={pending} name="intent" value="save" tone="quiet" pending="Saving">
           Save draft
         </SubmitButton>
       </div>

@@ -1,5 +1,6 @@
 // What the business owner can do with a conversation: reply, approve or discard a follow up,
 // move the lead to a stage (booked, won, lost), pause or hand back to the assistant.
+import { randomBytes } from "node:crypto";
 import { withTenant } from "../db";
 import { logActivity } from "../activity";
 import { cancelLeadJobs, enqueue } from "../queue";
@@ -92,6 +93,13 @@ export async function setStage(workspaceId: string, leadId: string, stage: Lead[
 
     let summary = `Moved to ${stage}`;
     if (stage === "booked" && bookedFor) {
+      // The calendar shows every booking, whether the customer made it or the owner did.
+      const slot = (await c.query<{ slot_minutes: number }>("select slot_minutes from booking_settings where workspace_id = $1", [workspaceId])).rows[0]?.slot_minutes ?? 30;
+      await c.query("update bookings set status = 'cancelled', cancelled_at = now() where lead_id = $1 and status = 'confirmed'", [leadId]);
+      await c.query(
+        "insert into bookings (workspace_id, lead_id, starts_at, ends_at, source, manage_token) values ($1, $2, $3, $4, 'owner', $5)",
+        [workspaceId, leadId, bookedFor, new Date(bookedFor.getTime() + slot * 60_000), randomBytes(15).toString("base64url")],
+      );
       const reminders = await scheduleBookingReminders(c, ctx, lead, bookedFor);
       summary = `Booked for ${formatBookingTime(bookedFor, ctx.timeZone)}; ${reminders.length} reminder${reminders.length === 1 ? "" : "s"} scheduled`;
     } else if (stage === "won") {
@@ -103,6 +111,7 @@ export async function setStage(workspaceId: string, leadId: string, stage: Lead[
         .filter(Boolean)
         .join("; ");
     } else if (stage === "lost") {
+      await c.query("update bookings set status = 'cancelled', cancelled_at = now() where lead_id = $1 and status = 'confirmed' and starts_at > now()", [leadId]);
       await cancelLeadJobs(c, leadId);
       summary = "Marked as lost; all follow ups stopped";
     }

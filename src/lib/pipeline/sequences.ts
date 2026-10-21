@@ -29,6 +29,8 @@ export async function scheduleChainedStep(
   base: Date,
 ): Promise<Date | null> {
   if (!smsFollowUpsAllowed(ctx, lead)) return null;
+  // Email replies go to the owner's inbox, so the assistant cannot tell whether an email customer answered.
+  if (lead.channel === "email" && trigger === "no_reply") return null;
   const seq = sequenceFor(ctx, trigger);
   const step = seq?.steps[stepIndex];
   if (!seq || !step?.delayHours) return null;

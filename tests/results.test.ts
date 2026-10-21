@@ -235,7 +235,7 @@ describe("campaigns", () => {
     assert.equal(preview.viaTemplate, 1, "the old WhatsApp contact gets the approved template");
     const reasons = preview.skipped.map((s) => s.reason).join(" | ");
     assert.match(reasons, /consent in United States/);
-    assert.match(reasons, /Web chat visitors cannot be messaged first/);
+    assert.match(reasons, /Web chat visitors without an email address cannot be messaged first/);
     assert.match(reasons, /Opted out/);
     assert.match(preview.sample, /^Hi Person, it's Bright Smile Dental\./);
 
@@ -282,11 +282,12 @@ describe("campaigns", () => {
       const [job] = await q<{ run_at: Date }>(ws, "select run_at from jobs where kind = 'campaign_send' and status = 'queued'");
       assert.ok(job.run_at.getTime() > Date.now() + 30 * 60_000, "scheduled after quiet hours end");
       await runDueJobs({ budgetMs: 3000 });
-      assert.equal(sent.length, before, "nothing sent at night");
+      const toThem = () => sent.slice(before).filter((m) => m.to === "+2348036666666").length;
+      assert.equal(toThem(), 0, "nothing sent at night");
       // A later batch that comes due while it is night, for example a long campaign, also waits.
       await makeDue(ws, "campaign_send");
       await runDueJobs({ budgetMs: 3000 });
-      assert.equal(sent.length, before, "a due batch still sends nothing at night");
+      assert.equal(toThem(), 0, "a due batch still sends nothing at night");
       const [rescheduled] = await q<{ run_at: Date }>(ws, "select run_at from jobs where kind = 'campaign_send' and status = 'queued'");
       assert.ok(rescheduled && rescheduled.run_at.getTime() > Date.now(), "it moves itself to the morning");
     }));
@@ -330,10 +331,22 @@ describe("lead form", () => {
     assert.equal(lead.utm_source, "instagram");
   });
 
-  test("without SMS the owner is alerted to call, and nothing is sent", async () => {
-    const sent = mockChannels();
+  test("without SMS but with an email, the reply goes by email and the owner takes over", async () => {
+    mockChannels();
     const { ws } = await business();
     const { channel, result } = await submitLeadForm(ws, { name: "Bola", phone: "08031234567", email: "bola@example.com", message: "Price?", consent: false, website: "" }, {});
+    assert.equal(channel, "email");
+    assert.equal(result.replied, true);
+    const [lead] = await q<{ stage: string; handoff_reason: string }>(ws, "select stage, handoff_reason from leads where id = $1", [result.leadId]);
+    assert.equal(lead.stage, "handoff");
+    assert.match(lead.handoff_reason, /replies come straight to your email/);
+    assert.equal((await q(ws, "select 1 from notifications where kind = 'handoff'")).length, 1);
+  });
+
+  test("with neither SMS nor an email, the owner is alerted to call, and nothing is sent", async () => {
+    const sent = mockChannels();
+    const { ws } = await business();
+    const { channel, result } = await submitLeadForm(ws, { name: "Bola", phone: "08031234567", email: "", message: "Price?", consent: false, website: "" }, {});
     assert.equal(channel, "form");
     assert.equal(result.replied, false);
     assert.equal(sent.length, 0);

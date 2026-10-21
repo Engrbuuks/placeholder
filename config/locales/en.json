@@ -17,7 +17,15 @@
     "missedCallVoice": "Sorry, we could not take your call. We have just sent you a text message.",
     "formThanks": "Thank you. We have your message and will reply shortly.",
     "formConsent": "I agree to receive texts from {businessName} about my enquiry and offers. Reply STOP to opt out at any time.",
-    "formIntro": "Leave your details and we will get back to you in minutes."
+    "formIntro": "Leave your details and we will get back to you in minutes.",
+    "bookingInvite": "Choose a time that suits you here: {link}",
+    "bookingConfirmed": "You are booked with {businessName} for {bookingTime}. To change or cancel: {link}",
+    "bookingRescheduled": "Your booking with {businessName} is moved to {bookingTime}. To change or cancel: {link}",
+    "bookingCancelledCustomer": "Your booking with {businessName} for {bookingTime} is cancelled. To book again: {link}",
+    "emailSubject": "A message from {businessName}",
+    "emailFooter": "You are receiving this because you contacted {businessName}. To stop these emails: {link}",
+    "unsubscribed": "You will not get any more messages from {businessName}.",
+    "reviewAskEmail": "Thank you for choosing {businessName}, {firstName}. If you were happy with us, would you leave a quick review? {link} If anything was not right, just reply to this email and we will put it right."
   },
   "handoffKeywords": [
     "speak to a person",

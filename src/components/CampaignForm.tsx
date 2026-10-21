@@ -102,6 +102,7 @@ export function CampaignForm({ segments, ideas }: { segments: SegmentOption[]; i
           <p className="text-[0.9375rem]">
             <span className="text-2xl font-semibold tabular-nums">{p.reachable}</span> of {p.total} {p.total === 1 ? "person" : "people"} in this group can be messaged.
             {p.viaTemplate > 0 && ` ${p.viaTemplate} last wrote more than 24 hours ago on WhatsApp, so they get your approved template instead of this text.`}
+            {p.viaEmail > 0 && ` ${p.viaEmail} will get it by email, with an unsubscribe link.`}
           </p>
           {p.skipped.length > 0 && (
             <ul className="space-y-1 text-sm text-ink-soft">

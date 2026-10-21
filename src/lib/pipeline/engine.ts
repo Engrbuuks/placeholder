@@ -18,10 +18,11 @@ import { loadContext, leadLabel, type Lead } from "./context";
 import { deliverMessage } from "./delivery";
 import { scheduleChainedStep } from "./sequences";
 import { handleRatingReply } from "./reviews";
+import { bookingInvite } from "../booking";
 
 export type InboundInput = {
   workspaceId: string;
-  channel: "webchat" | "whatsapp" | "sms" | "form";
+  channel: "webchat" | "whatsapp" | "sms" | "form" | "email";
   externalId: string;
   text: string;
   externalMessageId?: string | null;
@@ -224,10 +225,12 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
     }
 
     const a = ctx.locale.assistant;
+    // Once a customer is close to booking, the assistant offers the booking page instead of asking for a time.
+    const invite = ["qualifying", "qualified"].includes(lead.stage) ? await bookingInvite(c, ctx, leadId) : null;
     const vars = {
       firstName: firstName(lead.name),
       businessName: ctx.businessName,
-      conversionPrompt: ctx.pack.conversionPrompt,
+      conversionPrompt: invite ?? ctx.pack.conversionPrompt,
     };
     const parts: string[] = [];
     let stage = lead.stage;
@@ -237,7 +240,20 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
     let answerSource: "rules" | "ai" | "cap" | null = null;
 
     const handoffPhrase = detectHandoff(text, [...everyLanguage("handoffKeywords"), ...ctx.pack.handoffKeywords]);
-    if (handoffPhrase) {
+    if (input.channel === "email" && !handoffPhrase) {
+      // By email the customer's replies go to the owner's own inbox, so the assistant answers once,
+      // offers the booking page, and hands the conversation over.
+      parts.push(render(firstName(lead.name, "") ? a.greeting : a.greetingNoName, vars));
+      if (isQuestion(text)) {
+        const found = await findAnswer(c, input.workspaceId, leadId, text, ctx, []);
+        answerSource = found.source;
+        if (found.answer) parts.push(found.answer);
+      }
+      const offer = invite ?? (await bookingInvite(c, ctx, leadId));
+      parts.push(offer ?? ctx.pack.conversionPrompt);
+      stage = "handoff";
+      handoffReason = "Came in by email form. Their replies come straight to your email";
+    } else if (handoffPhrase) {
       parts.push(render(a.handoffReply, vars));
       stage = "handoff";
       handoffReason = `Customer wrote "${handoffPhrase}"`;
@@ -247,7 +263,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
         const recent = await recentMessages(c, leadId);
         const found = await findAnswer(c, input.workspaceId, leadId, text, ctx, recent);
         answerSource = found.source;
-        if (found.answer) parts.push(found.answer, ctx.pack.conversionPrompt);
+        if (found.answer) parts.push(found.answer, vars.conversionPrompt);
         else {
           parts.push(render(a.unknownReply, vars));
           stage = "handoff";

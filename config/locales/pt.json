@@ -17,7 +17,15 @@
     "missedCallVoice": "Desculpe, não conseguimos atender a sua ligação. Acabamos de enviar uma mensagem de texto.",
     "formThanks": "Obrigado. Recebemos a sua mensagem e vamos responder em breve.",
     "formConsent": "Aceito receber mensagens de texto de {businessName} sobre o meu pedido e ofertas. Responda STOP para cancelar.",
-    "formIntro": "Deixe os seus dados e respondemos em minutos."
+    "formIntro": "Deixe os seus dados e respondemos em minutos.",
+    "bookingInvite": "Escolha o horário que preferir aqui: {link}",
+    "bookingConfirmed": "O seu horário com {businessName} está marcado para {bookingTime}. Para alterar ou cancelar: {link}",
+    "bookingRescheduled": "O seu horário com {businessName} foi movido para {bookingTime}. Para alterar ou cancelar: {link}",
+    "bookingCancelledCustomer": "O seu horário com {businessName} de {bookingTime} foi cancelado. Para marcar de novo: {link}",
+    "emailSubject": "Uma mensagem de {businessName}",
+    "emailFooter": "Você recebe esta mensagem porque entrou em contato com {businessName}. Para não receber mais estes emails: {link}",
+    "unsubscribed": "Você não vai receber mais mensagens de {businessName}.",
+    "reviewAskEmail": "Obrigado por escolher {businessName}, {firstName}. Se ficou satisfeito, poderia deixar uma avaliação rápida? {link} Se algo não correu bem, responda a este email e vamos resolver."
   },
   "handoffKeywords": [
     "falar com uma pessoa",

@@ -17,7 +17,15 @@
     "missedCallVoice": "Désolé, nous n'avons pas pu prendre votre appel. Nous venons de vous envoyer un SMS.",
     "formThanks": "Merci. Nous avons bien reçu votre message et vous répondrons très vite.",
     "formConsent": "J'accepte de recevoir des SMS de {businessName} au sujet de ma demande et de ses offres. Répondez STOP pour vous désinscrire.",
-    "formIntro": "Laissez vos coordonnées, nous vous répondons en quelques minutes."
+    "formIntro": "Laissez vos coordonnées, nous vous répondons en quelques minutes.",
+    "bookingInvite": "Choisissez l'horaire qui vous convient ici : {link}",
+    "bookingConfirmed": "Votre rendez vous chez {businessName} est confirmé pour {bookingTime}. Pour modifier ou annuler : {link}",
+    "bookingRescheduled": "Votre rendez vous chez {businessName} est déplacé au {bookingTime}. Pour modifier ou annuler : {link}",
+    "bookingCancelledCustomer": "Votre rendez vous chez {businessName} du {bookingTime} est annulé. Pour reprendre rendez vous : {link}",
+    "emailSubject": "Un message de {businessName}",
+    "emailFooter": "Vous recevez ce message car vous avez contacté {businessName}. Pour ne plus recevoir ces emails : {link}",
+    "unsubscribed": "Vous ne recevrez plus de messages de {businessName}.",
+    "reviewAskEmail": "Merci d'avoir choisi {businessName}, {firstName}. Si vous êtes satisfait, pourriez vous laisser un court avis ? {link} Si quelque chose n'allait pas, répondez simplement à cet email et nous corrigerons cela."
   },
   "handoffKeywords": [
     "parler à une personne",
