@@ -1,0 +1,78 @@
+{
+  "name": "Español",
+  "assistant": {
+    "greeting": "Hola {firstName}, gracias por escribir a {businessName}.",
+    "greetingNoName": "Hola, gracias por escribir a {businessName}.",
+    "handoffReply": "Gracias. He pasado tu mensaje al equipo de {businessName} y alguien te responderá aquí en breve.",
+    "unknownReply": "Buena pregunta. Prefiero no adivinar, así que he pedido al equipo que te responda aquí.",
+    "qualifiedReply": "Gracias, ya tengo todo lo que necesito. {conversionPrompt}",
+    "afterHandoffReply": "Gracias, el equipo tiene tu mensaje y te responderá aquí.",
+    "bookingRequestReply": "Gracias. He pasado el horario que prefieres al equipo de {businessName} y te lo confirmarán aquí en breve.",
+    "optOutReply": "No recibirás más mensajes automáticos de {businessName}. Responde START si cambias de opinión.",
+    "optInReply": "Bienvenido de nuevo. Volverás a recibir respuestas de {businessName}."
+  },
+  "handoffKeywords": [
+    "hablar con una persona",
+    "hablar con alguien",
+    "un humano",
+    "una persona real",
+    "agente",
+    "gerente",
+    "queja",
+    "reclamo",
+    "reembolso",
+    "estafa",
+    "no estoy contento",
+    "decepcionado",
+    "llámame",
+    "llamame"
+  ],
+  "optOutKeywords": [
+    "stop",
+    "parar",
+    "baja",
+    "cancelar suscripción",
+    "darme de baja"
+  ],
+  "optInKeywords": [
+    "start",
+    "alta"
+  ],
+  "priceWords": [
+    "cuánto",
+    "cuanto",
+    "precio",
+    "precios",
+    "costo",
+    "coste",
+    "tarifa",
+    "tarifas"
+  ],
+  "questionStarts": [
+    "qué",
+    "que",
+    "cómo",
+    "como",
+    "cuándo",
+    "cuando",
+    "dónde",
+    "donde",
+    "cuál",
+    "cual",
+    "quién",
+    "quien",
+    "por qué",
+    "tienen",
+    "hay",
+    "puedo",
+    "pueden",
+    "es",
+    "son"
+  ],
+  "webchat": {
+    "title": "Chatea con nosotros",
+    "subtitle": "Solemos responder en segundos",
+    "placeholder": "Escribe tu mensaje",
+    "launcherLabel": "Chatea con nosotros"
+  }
+}

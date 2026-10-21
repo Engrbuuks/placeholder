@@ -4,6 +4,7 @@ import { loadAppPage } from "@/lib/shell";
 import { automationConfig, getPack, markets } from "@/lib/config";
 import { relativeTime } from "@/lib/health";
 import { render } from "@/lib/templates";
+import { marketOptions } from "@/lib/marketOptions";
 import { automationOverview } from "@/lib/inbox";
 import { runNowAction } from "@/app/actions/pipeline";
 import { AppShell } from "@/components/AppShell";
@@ -35,14 +36,15 @@ export default async function AutomationsPage({ searchParams }: { searchParams: 
   const { session, workspace, shell } = await loadAppPage();
   const { ran } = await searchParams;
   const o = await automationOverview(session.workspaceId);
-  const pack = getPack(workspace.nichePack);
-  const timeZone = workspace.country ? markets[workspace.country].timeZone : "UTC";
+  const pack = getPack(workspace.nichePack, workspace.country);
+  const timeZone = workspace.timeZone;
   const when = new Intl.DateTimeFormat("en-GB", { timeZone, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
   const q = automationConfig.quietHours;
+  const localChoices = marketOptions().find((m) => m.code === workspace.country);
   const stale = o.stats.due > 0 && (!o.lastTick || Date.now() - o.lastTick.getTime() > 15 * 60_000);
 
   const flow = [
-    { icon: "chat", title: "Message arrives", body: "Web chat or WhatsApp" },
+    { icon: "chat", title: "Message arrives", body: "Web chat, WhatsApp or SMS" },
     { icon: "send", title: "Instant reply", body: "Answers only from your brand brain" },
     { icon: "check", title: `${pack.qualifiers.length} qualifying questions`, body: "Saved to the lead as they answer" },
     { icon: "bell", title: "You are alerted", body: `When they are ready: ${pack.conversionAction.toLowerCase()}` },
@@ -103,7 +105,16 @@ export default async function AutomationsPage({ searchParams }: { searchParams: 
 
         <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <Card title="Settings">
-            <AutomationSettingsForm settings={o.settings} ownerEmail={session.email} />
+            <AutomationSettingsForm
+              settings={o.settings}
+              ownerEmail={session.email}
+              local={{
+                timeZone: workspace.timeZone,
+                timeZones: localChoices?.timeZones ?? [],
+                language: workspace.language,
+                languages: localChoices?.languages ?? [],
+              }}
+            />
             <p className="mt-4 font-mono text-xs text-ink-soft">
               {o.emailReady ? "Alert emails are sent through Resend." : "Email sending is not set up on the server yet, so alerts appear here and in the bell only."}
             </p>

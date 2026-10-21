@@ -1,7 +1,7 @@
 // Loads what the pipeline needs about a workspace, inside a tenant transaction.
 import type { PoolClient } from "pg";
 import { parseStoredBrandBrain, type BrandBrain } from "../brandBrain";
-import { getPack, markets, type MarketCode, type NichePack } from "../config";
+import { getPack, localeFor, workspaceTimeZone, type Locale, type MarketCode, type NichePack } from "../config";
 
 export type Settings = {
   enabled: boolean;
@@ -17,6 +17,9 @@ export type WorkspaceContext = {
   businessName: string;
   country: MarketCode | null;
   timeZone: string;
+  language: string;
+  /** Fixed texts in the business's language. */
+  locale: Locale;
   pack: NichePack;
   brain: BrandBrain;
   brainConfirmed: boolean;
@@ -24,8 +27,8 @@ export type WorkspaceContext = {
 };
 
 export async function loadContext(c: PoolClient, workspaceId: string): Promise<WorkspaceContext | null> {
-  const ws = await c.query<{ name: string; country: MarketCode | null; niche_pack: string | null }>(
-    "select name, country, niche_pack from workspaces where id = $1",
+  const ws = await c.query<{ name: string; country: MarketCode | null; niche_pack: string | null; time_zone: string | null; language: string }>(
+    "select name, country, niche_pack, time_zone, language from workspaces where id = $1",
     [workspaceId],
   );
   if (!ws.rows[0]) return null;
@@ -43,8 +46,10 @@ export async function loadContext(c: PoolClient, workspaceId: string): Promise<W
     workspaceId,
     businessName: data.businessName || ws.rows[0].name,
     country,
-    timeZone: country ? markets[country].timeZone : "UTC",
-    pack: getPack(ws.rows[0].niche_pack),
+    timeZone: workspaceTimeZone(country, ws.rows[0].time_zone),
+    language: ws.rows[0].language,
+    locale: localeFor(ws.rows[0].language),
+    pack: getPack(ws.rows[0].niche_pack, country),
     brain: data,
     brainConfirmed: brain.rows[0]?.status === "confirmed",
     settings: s
@@ -56,8 +61,9 @@ export async function loadContext(c: PoolClient, workspaceId: string): Promise<W
 export type Lead = {
   id: string;
   workspace_id: string;
-  channel: "webchat" | "whatsapp";
+  channel: "webchat" | "whatsapp" | "sms";
   external_id: string;
+  opted_out_at: Date | null;
   name: string | null;
   phone: string | null;
   email: string | null;

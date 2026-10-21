@@ -2,10 +2,9 @@
   "id": "real_estate",
   "name": "Real estate developers and agents",
   "shortName": "Real estate",
-  "description": "For developers and agents selling homes and land, including to Nigerians living abroad.",
+  "description": "For developers and agents selling homes and land, including to buyers living abroad.",
   "markets": [
-    "NG",
-    "UK"
+    "*"
   ],
   "phase": 1,
   "keywords": [
@@ -31,7 +30,7 @@
     {
       "key": "projects",
       "label": "Current projects or listings",
-      "help": "One per line, with location. For example: Lekki Gardens Phase 2, Lekki",
+      "help": "One per line, with location. For example: Palm Grove Phase 2, east side",
       "type": "textarea",
       "keywords": [
         "project",
@@ -44,7 +43,7 @@
     {
       "key": "unitTypes",
       "label": "Unit types and prices",
-      "help": "Show naira and dollar prices if you sell to buyers abroad.",
+      "help": "Prices in {currency}. Add a second currency if you sell to buyers abroad.",
       "type": "textarea",
       "keywords": [
         "bedroom",
@@ -60,7 +59,7 @@
     {
       "key": "titleDocuments",
       "label": "Title documents available",
-      "help": "For example: C of O, Governor's Consent, Registered Survey.",
+      "help": "For example, in Nigeria: C of O, Governor's Consent, Registered Survey. Elsewhere: freehold, leasehold, title deed.",
       "type": "text",
       "keywords": [
         "c of o",
@@ -169,7 +168,10 @@
     {
       "objective": "Click to WhatsApp",
       "audience": "Nigerians living in the UK, US and Canada interested in property in Nigeria",
-      "angle": "Verified title and virtual inspection before you fly in"
+      "angle": "Verified title and virtual inspection before you fly in",
+      "markets": [
+        "NG"
+      ]
     },
     {
       "objective": "Click to WhatsApp",

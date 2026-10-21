@@ -140,8 +140,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const recent = [...recentDesc].reverse();
   const latest = recent[recent.length - 1];
   const previous = recent.length > 1 ? recent[recent.length - 2] : null;
-  const pack = getPack(workspace.nichePack);
-  const timeZone = workspace.country ? markets[workspace.country].timeZone : "UTC";
+  const pack = getPack(workspace.nichePack, workspace.country);
+  const timeZone = workspace.timeZone;
   const shell = {
     businessName: workspace.name,
     country: workspace.country,

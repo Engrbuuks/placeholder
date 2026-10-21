@@ -174,3 +174,51 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
     </button>
   );
 }
+
+export function SelectField({
+  label,
+  name,
+  help,
+  options,
+  value,
+  defaultValue,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  help?: string;
+  options: { value: string; label: string }[];
+  value?: string;
+  defaultValue?: string;
+  onChange?: (value: string) => void;
+}) {
+  const id = `field_${name}`;
+  const helpId = help ? `${id}_help` : undefined;
+  return (
+    <div>
+      <label htmlFor={id} className="block text-[0.9375rem] font-medium">
+        {label}
+      </label>
+      {help && (
+        <p id={helpId} className="mt-0.5 text-sm text-ink-soft">
+          {help}
+        </p>
+      )}
+      <select
+        id={id}
+        name={name}
+        value={value}
+        defaultValue={value === undefined ? defaultValue : undefined}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        aria-describedby={helpId}
+        className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-ink transition-colors hover:border-ink/25 focus:border-ink focus:outline-none"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}

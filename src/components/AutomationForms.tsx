@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { saveAutomationSettings, saveWhatsApp, type ActionState } from "@/app/actions/pipeline";
-import { Field, FormError, Notice, SubmitButton } from "./ui";
+import { saveAutomationSettings, saveSms, saveWhatsApp, type ActionState } from "@/app/actions/pipeline";
+import { Field, FormError, Notice, SelectField, SubmitButton } from "./ui";
 
 type Settings = { enabled: boolean; approvalMode: "auto" | "approve"; alertEmail: string | null; weeklyCheck: boolean };
 
@@ -22,7 +22,17 @@ function Toggle({ name, label, help, defaultChecked }: { name: string; label: st
   );
 }
 
-export function AutomationSettingsForm({ settings, ownerEmail }: { settings: Settings; ownerEmail: string }) {
+type Choice = { value: string; label: string };
+
+export function AutomationSettingsForm({
+  settings,
+  ownerEmail,
+  local,
+}: {
+  settings: Settings;
+  ownerEmail: string;
+  local: { timeZone: string; timeZones: Choice[]; language: string; languages: Choice[] };
+}) {
   const [state, action] = useActionState<ActionState, FormData>(saveAutomationSettings, {});
   return (
     <form action={action} className="space-y-4">
@@ -56,6 +66,24 @@ export function AutomationSettingsForm({ settings, ownerEmail }: { settings: Set
           ))}
         </div>
       </fieldset>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {local.timeZones.length > 1 ? (
+          <SelectField label="Time zone" name="timeZone" help="Quiet hours and reminder times follow this." options={local.timeZones} defaultValue={local.timeZone} />
+        ) : (
+          <div>
+            <p className="text-[0.9375rem] font-medium">Time zone</p>
+            <p className="mt-2 text-[0.9375rem] text-ink-soft">{local.timeZones[0]?.label ?? "Set your country first"}</p>
+          </div>
+        )}
+        {local.languages.length > 1 ? (
+          <SelectField label="Assistant language" name="language" help="For greetings, handovers and the chat window." options={local.languages} defaultValue={local.language} />
+        ) : (
+          <div>
+            <p className="text-[0.9375rem] font-medium">Assistant language</p>
+            <p className="mt-2 text-[0.9375rem] text-ink-soft">{local.languages[0]?.label ?? "English"}</p>
+          </div>
+        )}
+      </div>
       <Field
         label="Send alerts to"
         name="alertEmail"
@@ -103,6 +131,27 @@ export function WhatsAppForm({
         <Field label="Language" name="templateLanguage" defaultValue={templateLanguage || "en"} />
       </div>
       <SubmitButton pending="Saving">Save WhatsApp</SubmitButton>
+    </form>
+  );
+}
+
+export function SmsForm({ accountSid, phoneNumber, hasToken }: { accountSid: string; phoneNumber: string; hasToken: boolean }) {
+  const [state, action] = useActionState<ActionState, FormData>(saveSms, {});
+  return (
+    <form action={action} className="space-y-4">
+      <FormError message={state.error} />
+      {state.notice && <Notice>{state.notice}</Notice>}
+      <Field label="Twilio number" name="phoneNumber" help="The number customers text, with the country code, for example +14155550123." defaultValue={phoneNumber} required />
+      <Field label="Account SID" name="accountSid" help="On your Twilio console home page. Starts with AC." defaultValue={accountSid} required />
+      <Field
+        label="Auth token"
+        name="smsToken"
+        type="password"
+        autoComplete="off"
+        help={hasToken ? "A token is saved and stays hidden. Paste a new one only to replace it." : "Under Account Info in your Twilio console. Stored encrypted, and used to check that texts really come from Twilio."}
+        required={!hasToken}
+      />
+      <SubmitButton pending="Saving">Save SMS</SubmitButton>
     </form>
   );
 }

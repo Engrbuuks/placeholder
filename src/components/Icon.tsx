@@ -10,6 +10,14 @@ const paths: Record<string, React.ReactNode> = {
     </>
   ),
   inbox: <path d="M4 13l2.5-8h11L20 13v6H4v-6zM4 13h4.5l1 2.5h5l1-2.5H20" />,
+  phone: (
+    <>
+      <rect x="7" y="3" width="10" height="18" rx="2.5" />
+      <path d="M11 17.5h2" />
+    </>
+  ),
+  download: <path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14" />,
+  trash: <path d="M5 7h14M10 7V5h4v2m-6 0 1 12h6l1-12" />,
   chat: <path d="M5 5h14v10H10l-4 4v-4H5V5z" />,
   megaphone: <path d="M4 10v4h3l8 4V6L7 10H4zM18 9.5a3 3 0 0 1 0 5" />,
   file: <path d="M7 3h7l4 4v14H7V3zM14 3v4h4M9.5 12h6M9.5 15.5h6" />,

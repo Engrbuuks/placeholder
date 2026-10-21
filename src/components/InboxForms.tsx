@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { replyAction, stageAction, type ActionState } from "@/app/actions/pipeline";
+import { deleteCustomerAction, replyAction, stageAction, type ActionState } from "@/app/actions/pipeline";
 import { FormError, Notice, SubmitButton } from "./ui";
 
 export function ReplyBox({ leadId, channelLabel }: { leadId: string; channelLabel: string }) {
@@ -87,4 +87,21 @@ export function ScrollToEnd({ targetId, signal }: { targetId: string; signal: nu
     if (el) el.scrollTop = el.scrollHeight;
   }, [targetId, signal]);
   return null;
+}
+
+export function DeleteCustomerForm({ leadId }: { leadId: string }) {
+  const [state, action] = useActionState<ActionState, FormData>(deleteCustomerAction, {});
+  return (
+    <form action={action} className="space-y-3">
+      <FormError message={state.error} />
+      <input type="hidden" name="leadId" value={leadId} />
+      <label className="flex cursor-pointer items-start gap-2 text-[0.8125rem] text-ink-soft">
+        <input type="checkbox" name="confirm" value="yes" className="mt-0.5 accent-[var(--color-accent)]" />
+        Permanently delete this customer, their messages and anything scheduled for them. This cannot be undone.
+      </label>
+      <SubmitButton tone="quiet" pending="Deleting">
+        Delete customer data
+      </SubmitButton>
+    </form>
+  );
 }

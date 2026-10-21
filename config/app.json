@@ -81,7 +81,7 @@
       "Bookings",
       "Revenue"
     ],
-    "heroFooterLeft": "Nigeria / United Kingdom",
+    "heroFooterLeft": "{countries} countries / {languages} languages",
     "heroFooterRight": [
       "WhatsApp first",
       "Naira and pounds",

@@ -25,11 +25,14 @@ export function BrainForm({
   intake,
   tones,
   confirmLabel,
+  examplePrice = "45",
 }: {
   values: BrainFormValues;
   intake: Intake[];
   tones: { id: string; label: string }[];
   confirmLabel: string;
+  /** A sample price in the business's own currency, for example ₹1,500 or $45. */
+  examplePrice?: string;
 }) {
   const [state, action] = useActionState<StepState, FormData>(saveBrain, {});
   return (
@@ -64,7 +67,7 @@ export function BrainForm({
           name="services"
           multiline
           rows={6}
-          help="One per line. Put a bar between the service and its price, for example: Consultation | ₦15,000. The assistant only quotes prices written here."
+          help={`One per line. Put a bar between the service and its price, for example: Consultation | ${examplePrice}. The assistant only quotes prices written here.`}
           defaultValue={values.services}
         />
         <Field

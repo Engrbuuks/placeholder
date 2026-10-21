@@ -1,6 +1,6 @@
 // Schedules timed messages from a niche pack's sequences.
 import type { PoolClient } from "pg";
-import { automationConfig, type Sequence } from "../config";
+import { automationConfig, markets, type Sequence } from "../config";
 import { enqueue, cancelLeadJobs } from "../queue";
 import { nextAllowedTime, previousAllowedTime } from "../time";
 import type { Lead, WorkspaceContext } from "./context";
@@ -9,15 +9,25 @@ export function sequenceFor(ctx: WorkspaceContext, trigger: Sequence["trigger"])
   return ctx.pack.sequences.find((s) => s.trigger === trigger);
 }
 
+/**
+ * Whether marketing style follow ups (no reply, won) may go to this customer by SMS in this market.
+ * Booking reminders are service messages and always allowed. Other channels are not affected.
+ */
+export function smsFollowUpsAllowed(ctx: Pick<WorkspaceContext, "country">, lead: Pick<Lead, "channel">): boolean {
+  if (lead.channel !== "sms") return true;
+  return ctx.country ? (markets[ctx.country]?.smsFollowUps ?? false) : false;
+}
+
 /** Schedules one step of a chained sequence (no reply, won), measured from a base time. */
 export async function scheduleChainedStep(
   c: PoolClient,
   ctx: WorkspaceContext,
-  lead: Pick<Lead, "id">,
+  lead: Pick<Lead, "id" | "channel">,
   trigger: "no_reply" | "won",
   stepIndex: number,
   base: Date,
 ): Promise<Date | null> {
+  if (!smsFollowUpsAllowed(ctx, lead)) return null;
   const seq = sequenceFor(ctx, trigger);
   const step = seq?.steps[stepIndex];
   if (!seq || !step?.delayHours) return null;

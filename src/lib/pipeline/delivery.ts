@@ -5,20 +5,22 @@ import { decryptSecret } from "../crypto";
 import { logActivity, notify } from "../activity";
 import { firstName } from "../templates";
 import { sendTemplate, sendText, withinWindow, WhatsAppError } from "../channels/whatsapp";
+import { sendSms, SmsError } from "../channels/sms";
 
 type Row = {
   id: string;
   lead_id: string;
   body: string;
   status: string;
-  channel: "webchat" | "whatsapp";
+  channel: "webchat" | "whatsapp" | "sms";
   author: string;
   external_id: string;
+  opted_out_at: Date | null;
   name: string | null;
   last_inbound_at: Date | null;
   account: string | null;
   secret_enc: string | null;
-  settings: { templateName?: string; templateLanguage?: string } | null;
+  settings: { templateName?: string; templateLanguage?: string; accountSid?: string } | null;
 };
 
 export type DeliveryOutcome = "sent" | "skipped" | "failed" | "not_queued";
@@ -26,7 +28,7 @@ export type DeliveryOutcome = "sent" | "skipped" | "failed" | "not_queued";
 export async function deliverMessage(workspaceId: string, messageId: string, fetchImpl?: typeof fetch): Promise<DeliveryOutcome> {
   const row = await withTenant(workspaceId, async (c) => {
     const { rows } = await c.query<Row>(
-      `select m.id, m.lead_id, m.body, m.status, m.channel, m.author, l.external_id, l.name, l.last_inbound_at,
+      `select m.id, m.lead_id, m.body, m.status, m.channel, m.author, l.external_id, l.name, l.last_inbound_at, l.opted_out_at,
               cc.external_account_id as account, cc.secret_enc, cc.settings
        from messages m
        join leads l on l.id = m.lead_id
@@ -57,9 +59,40 @@ export async function deliverMessage(workspaceId: string, messageId: string, fet
       }
     });
 
+  // Follow ups never go to a customer who opted out, whatever the channel.
+  if (row.opted_out_at && row.author === "automation") {
+    await finish("skipped", "Not sent: the customer opted out of messages.");
+    return "skipped";
+  }
+
   if (row.channel === "webchat") {
     await finish("sent", null);
     return "sent";
+  }
+
+  if (row.channel === "sms") {
+    if (!row.account || !row.secret_enc || !row.settings?.accountSid) {
+      await finish("failed", "SMS is not connected. Connect Twilio in Channels.");
+      return "failed";
+    }
+    let authToken: string;
+    try {
+      authToken = decryptSecret(row.secret_enc);
+    } catch {
+      await finish("failed", "The saved Twilio auth token could not be read. Reconnect SMS in Channels.");
+      return "failed";
+    }
+    try {
+      const sid = await sendSms({ accountSid: row.settings.accountSid, authToken, from: row.account, to: row.external_id, body: row.body, fetchImpl });
+      await finish("sent", null, sid);
+      return "sent";
+    } catch (error) {
+      if (error instanceof SmsError && !error.retryable) {
+        await finish("failed", `Twilio refused the text: ${error.message}`);
+        return "failed";
+      }
+      throw error instanceof Error ? error : new Error(String(error));
+    }
   }
 
   // WhatsApp

@@ -19,7 +19,7 @@ export default async function AuditPage() {
   if (workspace.onboardingStep !== "done") redirect("/onboarding");
 
   const [audit] = await latestAudits(session.workspaceId, 1);
-  const timeZone = workspace.country ? markets[workspace.country].timeZone : "UTC";
+  const timeZone = workspace.timeZone;
 
   return (
     <AppShell

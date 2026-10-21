@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth";
 import { appConfig, getPack } from "@/lib/config";
+import { exampleConsultationPrice } from "@/lib/marketOptions";
 import { getBrandBrain, getWorkspace, latestAudits } from "@/lib/workspaces";
 import { brainFormValues } from "@/lib/brainView";
 import { AppShell } from "@/components/AppShell";
@@ -18,7 +19,7 @@ export default async function BrainPage({ searchParams }: { searchParams: Promis
 
   const { saved } = await searchParams;
   const [brain, [audit]] = await Promise.all([getBrandBrain(session.workspaceId), latestAudits(session.workspaceId, 1)]);
-  const pack = getPack(workspace.nichePack);
+  const pack = getPack(workspace.nichePack, workspace.country);
 
   return (
     <AppShell
@@ -47,7 +48,7 @@ export default async function BrainPage({ searchParams }: { searchParams: Promis
           </div>
         )}
         <div className="mt-8">
-          <BrainForm values={brainFormValues(brain.data)} intake={pack.intake} tones={appConfig.tones} confirmLabel="Save and confirm" />
+          <BrainForm values={brainFormValues(brain.data)} intake={pack.intake} tones={appConfig.tones} confirmLabel="Save and confirm" examplePrice={exampleConsultationPrice(workspace.country)} />
         </div>
       </div>
     </AppShell>

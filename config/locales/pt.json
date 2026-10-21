@@ -1,0 +1,72 @@
+{
+  "name": "Português",
+  "assistant": {
+    "greeting": "Olá {firstName}, obrigado por falar com {businessName}.",
+    "greetingNoName": "Olá, obrigado por falar com {businessName}.",
+    "handoffReply": "Obrigado. Passei a sua mensagem para a equipe de {businessName} e alguém vai responder aqui em breve.",
+    "unknownReply": "Boa pergunta. Prefiro não adivinhar, então pedi à equipe para responder aqui.",
+    "qualifiedReply": "Obrigado, já tenho tudo o que preciso. {conversionPrompt}",
+    "afterHandoffReply": "Obrigado, a equipe recebeu a sua mensagem e vai responder aqui.",
+    "bookingRequestReply": "Obrigado. Passei o horário que você prefere para a equipe de {businessName}, que vai confirmar aqui em breve.",
+    "optOutReply": "Você não vai receber mais mensagens automáticas de {businessName}. Responda START se mudar de ideia.",
+    "optInReply": "Bem vindo de volta. Você voltará a receber respostas de {businessName}."
+  },
+  "handoffKeywords": [
+    "falar com uma pessoa",
+    "falar com alguém",
+    "um humano",
+    "uma pessoa real",
+    "atendente",
+    "gerente",
+    "reclamação",
+    "reembolso",
+    "golpe",
+    "não estou satisfeito",
+    "decepcionado",
+    "me liga"
+  ],
+  "optOutKeywords": [
+    "stop",
+    "parar",
+    "sair",
+    "cancelar"
+  ],
+  "optInKeywords": [
+    "start",
+    "voltar"
+  ],
+  "priceWords": [
+    "quanto",
+    "quanto custa",
+    "preço",
+    "preco",
+    "preços",
+    "valor",
+    "custo",
+    "taxa"
+  ],
+  "questionStarts": [
+    "que",
+    "qual",
+    "quais",
+    "como",
+    "quando",
+    "onde",
+    "quem",
+    "por que",
+    "porque",
+    "vocês",
+    "voces",
+    "tem",
+    "posso",
+    "pode",
+    "é",
+    "são"
+  ],
+  "webchat": {
+    "title": "Fale conosco",
+    "subtitle": "Respondemos em segundos",
+    "placeholder": "Escreva a sua mensagem",
+    "launcherLabel": "Fale conosco"
+  }
+}

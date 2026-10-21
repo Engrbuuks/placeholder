@@ -1,7 +1,7 @@
 // How the assistant reads a customer message and finds an answer.
 // Pure functions, so every rule can be tested without a database or a network.
 import type { BrandBrain } from "../brandBrain";
-import type { NichePack } from "../config";
+import { everyLanguage, markets, type NichePack } from "../config";
 
 const stopwords = new Set(
   "a an the and or but if to of in on at for with by from about as is are was were be been am do does did can could would should will shall may might i you we they he she it me my your our their this that these those there here what which who whom how when where why please hi hello hey thanks thank ok okay yes no not just so also any some much many more most get got have has had".split(
@@ -9,9 +9,21 @@ const stopwords = new Set(
   ),
 );
 
+/** Lower case, accents folded (où and ou match), hyphens read as spaces, spacing tidied. */
 export function normalise(text: string): string {
-  return text.toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, " ").trim();
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[’']/g, "'")
+    .replace(/[-‐‑]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const phraseAlternation = (phrases: string[]) =>
+  [...new Set(phrases.map(normalise))].sort((a, b) => b.length - a.length).map(escapeRe).join("|");
 
 /** Light stemming so "inspections" matches "inspection" and "prices" matches "price". */
 function stem(word: string): string {
@@ -34,17 +46,28 @@ function hasPhrase(text: string, phrase: string): boolean {
   return new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}($|[^\\p{L}\\p{N}])`, "u").test(normalise(text));
 }
 
+/** True when the whole message is one of the keywords, such as "STOP" or "Stop." but not "don't stop". */
+export function isKeywordMessage(text: string, keywords: string[]): boolean {
+  const t = normalise(text).replace(/[^\p{L}\p{N} ]/gu, "").trim();
+  return t.length > 0 && keywords.some((k) => normalise(k) === t);
+}
+
 /** Returns the first handoff phrase found in the message, or null. */
 export function detectHandoff(text: string, phrases: string[]): string | null {
   return phrases.find((p) => p.trim() && hasPhrase(text, p)) ?? null;
 }
 
-const questionStarts =
-  /^(what|whats|what's|how|when|where|which|who|why|do|does|did|can|could|is|are|will|would|should|have|has|any|price|cost|how much)\b/;
+// Built from every language file, so "how much", "combien", "cuánto" and "quanto" all count.
+const priceWords = new RegExp(`(^|[^\\p{L}\\p{N}])(${phraseAlternation(everyLanguage("priceWords"))})($|[^\\p{L}\\p{N}])`, "u");
+const questionStarts = new RegExp(`^(${phraseAlternation(everyLanguage("questionStarts"))})($|[^\\p{L}\\p{N}])`, "u");
 
 export function isQuestion(text: string): boolean {
   const t = normalise(text);
-  return t.includes("?") || questionStarts.test(t) || /\b(how much|price|prices|cost|costs|fee|fees)\b/.test(t);
+  return t.includes("?") || t.includes("¿") || questionStarts.test(t) || priceWords.test(t);
+}
+
+export function asksPrice(text: string): boolean {
+  return priceWords.test(normalise(text));
 }
 
 export function extractContact(text: string): { email?: string; phone?: string; name?: string } {
@@ -75,23 +98,55 @@ export function factsText(brain: BrandBrain, pack: NichePack): string {
   return lines.filter(Boolean).join("\n");
 }
 
-const moneyPattern =
-  /(?:₦|£|\$|€|\bngn\s?|\bgbp\s?|\busd\s?|\bn(?=\d))\s?\d[\d,]*(?:\.\d+)?\s?(?:k|m|bn|million|thousand|billion)?\b|\d[\d,]*(?:\.\d+)?\s?(?:k|m|bn|million|thousand|billion)?\s?(?:naira|pounds?|dollars?|quid)\b/gi;
-const numberPattern = /\d[\d,]*(?:\.\d+)?\s?(?:k|m|bn|million|thousand|billion)?\b/gi;
+// Money in any market: symbols and codes for every currency in config/markets.json plus the common ones,
+// the words people use for them, and scale words including the Indian lakh and crore.
+const scales: Record<string, number> = {
+  k: 1e3, thousand: 1e3, mil: 1e3, m: 1e6, mn: 1e6, million: 1e6, millions: 1e6, millon: 1e6, "millón": 1e6, millones: 1e6, milhao: 1e6, "milhão": 1e6, milhoes: 1e6, "milhões": 1e6,
+  bn: 1e9, billion: 1e9, lakh: 1e5, lakhs: 1e5, lac: 1e5, lacs: 1e5, l: 1e5, crore: 1e7, crores: 1e7, cr: 1e7,
+};
+const scaleAlt = Object.keys(scales).sort((a, b) => b.length - a.length).join("|");
+const marketCurrencies = Object.values(markets).map((m) => m.currency);
+const codes = [...new Set([...marketCurrencies, "USD", "EUR", "GBP"])];
+function symbolsFor(code: string): string[] {
+  const out = new Set<string>();
+  for (const display of ["narrowSymbol", "symbol"] as const) {
+    try {
+      const part = new Intl.NumberFormat("en", { style: "currency", currency: code, currencyDisplay: display })
+        .formatToParts(1)
+        .find((p) => p.type === "currency")?.value;
+      if (part && part !== code) out.add(part);
+    } catch {
+      // Unknown to this runtime; the code itself still matches.
+    }
+  }
+  return [...out];
+}
+const symbols = [...new Set([...codes.flatMap(symbolsFor), "₦", "£", "$", "€", "₹", "Rs.", "Rs", "KSh", "GH₵", "₵", "R$", "MX$", "CA$", "US$", "AED"])];
+const currencyWords = "naira|pounds?|quid|dollars?|bucks|euros?|rupees?|cedis?|shillings?|rand|dirhams?|pesos?|reais|reals?";
+// A number glued to letters ("500sqm", "3bed") is a measurement, not money, so it never counts.
+const amount = `\\d[\\d,]*(?:\\.\\d+)?(?:\\s?(?:${scaleAlt})\\b)?(?![a-z\\d])`;
+const before = `(?:${symbols.map(escapeRe).sort((a, b) => b.length - a.length).join("|")}|\\b(?:${codes.join("|")})\\b|\\bn(?=\\d))`;
+const moneyPattern = new RegExp(`${before}\\s?${amount}|${amount}\\s?(?:\\b(?:${codes.join("|")})\\b|\\b(?:${currencyWords})\\b)`, "gi");
+const numberPattern = new RegExp(amount, "gi");
 
-/** Reads "₦85,000,000", "85m" or "85 million naira" as the number 85000000. */
+/** Reads "₦85,000,000", "85m", "85 million naira", "₹1,50,000" or "2.5 crore" as a plain number. */
 export function amountValue(raw: string): number | null {
-  const m = raw.toLowerCase().match(/(\d[\d,]*(?:\.\d+)?)\s?(k|m|bn|million|thousand|billion)?/);
+  const m = raw.toLowerCase().match(new RegExp(`(\\d[\\d,]*(?:\\.\\d+)?)\\s?(${scaleAlt})?\\b`));
   if (!m) return null;
   const base = Number(m[1].replace(/,/g, ""));
   if (!Number.isFinite(base)) return null;
-  const scale = { k: 1e3, thousand: 1e3, m: 1e6, million: 1e6, bn: 1e9, billion: 1e9 }[m[2] as "k"] ?? 1;
-  return Math.round(base * scale);
+  return Math.round(base * (m[2] ? scales[m[2]] : 1));
 }
 
 /** True when every amount of money in the reply is an amount the business wrote down. */
 export function pricesAreGrounded(reply: string, facts: string): boolean {
-  const known = new Set((facts.match(numberPattern) ?? []).map(amountValue).filter((v): v is number => v !== null));
+  // Known prices: money written anywhere in the facts, and any number in a service's price field.
+  const priceFields = facts.split("\n").flatMap((line) => line.match(/, price (.+)$/)?.[1] ?? []);
+  const known = new Set(
+    [...(facts.match(moneyPattern) ?? []), ...priceFields.flatMap((p) => p.match(numberPattern) ?? [])]
+      .map(amountValue)
+      .filter((v): v is number => v !== null),
+  );
   return (reply.match(moneyPattern) ?? []).every((m) => {
     const value = amountValue(m);
     return value !== null && known.has(value);
@@ -118,7 +173,7 @@ export function answerFromBrain(text: string, brain: BrandBrain, pack: NichePack
   }
   if (bestFaq) return bestFaq.a;
 
-  if (/\b(how much|price|prices|cost|costs|fee|fees|charge|rate|rates)\b/.test(t)) {
+  if (asksPrice(text)) {
     const scored = brain.services
       .map((s) => ({ s, shared: overlap(tokens, contentTokens(s.name)) }))
       .filter((x) => x.shared > 0 && x.s.price)

@@ -4,7 +4,7 @@
   "shortName": "Clinic",
   "description": "For private hospitals, clinics, laboratories and diagnostic centres.",
   "markets": [
-    "NG"
+    "*"
   ],
   "phase": 1,
   "keywords": [
@@ -39,16 +39,21 @@
     },
     {
       "key": "hmos",
-      "label": "HMOs accepted",
-      "help": "List the HMOs and insurers you work with.",
+      "label": "Insurers and HMOs accepted",
+      "help": "List the insurers, HMOs or health plans you work with.",
       "type": "textarea",
       "keywords": [
-        "hmo",
-        "insurance",
-        "insurer",
-        "nhis",
-        "hygeia",
         "axa",
+        "cover",
+        "health plan",
+        "hmo",
+        "hygeia",
+        "insurance",
+        "insurance plan",
+        "insurer",
+        "medicaid",
+        "medicare",
+        "nhis",
         "reliance"
       ]
     },

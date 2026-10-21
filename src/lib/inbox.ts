@@ -131,11 +131,11 @@ export async function automationOverview(workspaceId: string) {
 export async function channelsOverview(workspaceId: string) {
   return withTenant(workspaceId, async (c) => {
     const { rows } = await c.query<{
-      channel: "webchat" | "whatsapp";
+      channel: "webchat" | "whatsapp" | "sms";
       public_key: string | null;
       external_account_id: string | null;
       has_secret: boolean;
-      settings: { templateName?: string; templateLanguage?: string };
+      settings: { templateName?: string; templateLanguage?: string; accountSid?: string };
       status: string;
       last_event_at: Date | null;
       last_error: string | null;
@@ -145,6 +145,7 @@ export async function channelsOverview(workspaceId: string) {
     return {
       webchat: rows.find((r) => r.channel === "webchat") ?? null,
       whatsapp: rows.find((r) => r.channel === "whatsapp") ?? null,
+      sms: rows.find((r) => r.channel === "sms") ?? null,
       ready: {
         whatsappAppSecret: Boolean(process.env.WHATSAPP_APP_SECRET),
         whatsappVerifyToken: Boolean(process.env.WHATSAPP_VERIFY_TOKEN),

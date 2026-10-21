@@ -4,9 +4,10 @@ import { loadAppPage } from "@/lib/shell";
 import { relativeTime } from "@/lib/health";
 import { channelsOverview } from "@/lib/inbox";
 import { ensureWebchat } from "@/lib/webchat";
-import { disconnectWhatsApp, rotateWebchatKey } from "@/app/actions/pipeline";
+import { disconnectSms, disconnectWhatsApp, rotateWebchatKey } from "@/app/actions/pipeline";
 import { AppShell } from "@/components/AppShell";
-import { WhatsAppForm } from "@/components/AutomationForms";
+import { SmsForm, WhatsAppForm } from "@/components/AutomationForms";
+import { automationConfig, markets } from "@/lib/config";
 import { Icon } from "@/components/Icon";
 import { CopyButton, SubmitButton } from "@/components/ui";
 
@@ -36,12 +37,16 @@ function Check({ ok, label, fix }: { ok: boolean; label: string; fix: string }) 
 }
 
 export default async function ChannelsPage() {
-  const { session, shell } = await loadAppPage();
+  const { session, workspace, shell } = await loadAppPage();
   const key = await ensureWebchat(session.workspaceId);
   const [c, origin] = await Promise.all([channelsOverview(session.workspaceId), appOrigin()]);
-  const snippet = `<script src="${origin}/widget.js" data-key="${key}" async></script>`;
+  const lang = workspace.language !== "en" ? ` data-lang="${workspace.language}"` : "";
+  const snippet = `<script src="${origin}/widget.js" data-key="${key}"${lang} async></script>`;
   const wa = c.whatsapp;
   const webhook = `${origin}/api/webhooks/whatsapp`;
+  const smsWebhook = `${origin}/api/webhooks/sms`;
+  const sms = c.sms;
+  const market = workspace.country ? markets[workspace.country] : null;
 
   return (
     <AppShell {...shell} active="channels" title="Channels" subtitle="Where customers reach you, and where the assistant answers">
@@ -148,6 +153,65 @@ export default async function ChannelsPage() {
               </SubmitButton>
             </form>
           )}
+        </section>
+
+        {/* SMS */}
+        <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6 lg:col-span-2">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="flex items-center gap-2 text-[1.0625rem] font-semibold tracking-[-0.02em]">
+                <Icon name="phone" className="h-[18px] w-[18px]" /> SMS
+              </h2>
+              <p className="mt-1 text-[0.9375rem] text-ink-soft">Customers text your Twilio number and the same assistant answers. Best where texting is how people reach a business, such as the US and Canada.</p>
+            </div>
+            <span
+              className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-1 font-mono text-xs ${
+                sms?.has_secret ? "bg-ink text-white" : "border border-line text-ink-soft"
+              }`}
+            >
+              <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${sms?.has_secret ? "bg-accent" : "bg-line"}`} />
+              {sms?.has_secret ? "Connected" : "Not connected"}
+            </span>
+          </div>
+          {sms?.has_secret && (
+            <p className="mt-3 font-mono text-xs text-ink-soft">
+              {sms.external_account_id} / {sms.last_event_at ? `last text received ${relativeTime(sms.last_event_at)}` : "no texts received yet"}
+              {sms.last_error ? ` / ${sms.last_error}` : ""}
+            </p>
+          )}
+          <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div>
+              <SmsForm accountSid={sms?.settings?.accountSid ?? ""} phoneNumber={sms?.external_account_id ?? ""} hasToken={Boolean(sms?.has_secret)} />
+              {sms && (
+                <form action={disconnectSms} className="mt-3">
+                  <SubmitButton tone="quiet" pending="Disconnecting">
+                    Disconnect SMS
+                  </SubmitButton>
+                </form>
+              )}
+            </div>
+            <div className="space-y-4">
+              <div className="rounded-xl border border-line p-4">
+                <p className="text-sm font-medium">Webhook address for Twilio</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <code className="min-w-0 flex-1 break-all rounded-lg bg-mist px-3 py-2 font-mono text-[0.75rem]">{smsWebhook}</code>
+                  <CopyButton text={smsWebhook} />
+                </div>
+                <p className="mt-1 font-mono text-[0.6875rem] text-ink-soft">In Twilio, open your number, and under Messaging set &quot;A message comes in&quot; to this address with HTTP POST.</p>
+              </div>
+              <div className="rounded-xl bg-mist p-4 text-sm">
+                <p className="font-medium">Rules that apply automatically</p>
+                <ul className="mt-2 space-y-1.5 text-ink-soft">
+                  <li>Customers who text STOP (or ARRET, PARAR and the like) get nothing automatic again, on any channel, until they text START.</li>
+                  <li>
+                    No automatic texts between {automationConfig.quietHours.start}:00 and {automationConfig.quietHours.end}:00 in your time zone,{" "}
+                    {workspace.timeZone.split("/").pop()!.replaceAll("_", " ")}.
+                  </li>
+                  <li>{market?.smsFollowUps ? `Follow up texts are allowed in ${market.name}.` : market?.smsNote || "Automated follow up texts are off. Replies and booking reminders still go out."}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </AppShell>

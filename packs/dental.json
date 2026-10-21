@@ -4,8 +4,7 @@
   "shortName": "Dental",
   "description": "For dental practices offering private treatment.",
   "markets": [
-    "UK",
-    "NG"
+    "*"
   ],
   "phase": 1,
   "keywords": [
@@ -27,7 +26,7 @@
     {
       "key": "treatments",
       "label": "Private treatments and prices",
-      "help": "One per line. For example: Implant consultation, £95",
+      "help": "One per line. For example: Implant consultation, {currency}95",
       "type": "textarea",
       "keywords": [
         "treatment",
@@ -67,6 +66,9 @@
       "keywords": [
         "nhs",
         "private"
+      ],
+      "markets": [
+        "UK"
       ]
     },
     {

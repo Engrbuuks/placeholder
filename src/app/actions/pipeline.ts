@@ -10,6 +10,7 @@ import { isUuid, withTenant } from "@/lib/db";
 import { encryptSecret, encryptionReady, randomKey } from "@/lib/crypto";
 import { zonedLocalToDate } from "@/lib/time";
 import { getWorkspace } from "@/lib/workspaces";
+import { deleteCustomer } from "@/lib/privacy";
 import { approveMessage, discardMessage, markRead, ownerReply, setPaused, setStage } from "@/lib/pipeline/owner";
 import { runDueJobs } from "@/lib/pipeline/worker";
 import { logActivity } from "@/lib/activity";
@@ -66,7 +67,7 @@ export async function stageAction(_prev: ActionState, formData: FormData): Promi
     let bookedFor: Date | null = null;
     if (stage === "booked") {
       const workspace = await getWorkspace(workspaceId);
-      const zone = workspace?.country ? markets[workspace.country].timeZone : "UTC";
+      const zone = workspace?.timeZone ?? "UTC";
       bookedFor = zonedLocalToDate(String(formData.get("bookedFor") ?? ""), zone);
       if (!bookedFor) return { error: "Choose the date and time of the booking." };
       if (bookedFor.getTime() < Date.now() - 60_000) return { error: "That time has already passed." };
@@ -108,7 +109,20 @@ export async function saveAutomationSettings(_prev: ActionState, formData: FormD
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const s = parsed.data;
+  const workspace = await getWorkspace(workspaceId);
+  const market = workspace?.country ? markets[workspace.country] : null;
+  const zone = String(formData.get("timeZone") ?? "");
+  const language = String(formData.get("language") ?? "");
+  if (zone && market && !market.timeZones.includes(zone)) return { error: `Choose a time zone in ${market.name}.` };
+  if (language && market && !market.languages.includes(language)) return { error: `Choose a language offered in ${market.name}.` };
   await withTenant(workspaceId, async (c) => {
+    if (zone || language) {
+      await c.query("update workspaces set time_zone = coalesce(nullif($2, ''), time_zone), language = coalesce(nullif($3, ''), language) where id = $1", [
+        workspaceId,
+        zone,
+        language,
+      ]);
+    }
     await c.query(
       `insert into automation_settings (workspace_id, enabled, approval_mode, alert_email, weekly_check, updated_at)
        values ($1, $2, $3, $4, $5, now())
@@ -168,6 +182,59 @@ export async function saveWhatsApp(_prev: ActionState, formData: FormData): Prom
   return { notice: "WhatsApp connection saved." };
 }
 
+const smsSchema = z.object({
+  accountSid: z.string().trim().regex(/^AC[0-9a-fA-F]{32}$/, "The Account SID starts with AC and is 34 characters long. It is on your Twilio console home page."),
+  phoneNumber: z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/[\s().-]/g, ""))
+    .pipe(z.string().regex(/^\+[1-9]\d{7,14}$/, "Write the Twilio number in international form, starting with + and the country code.")),
+  token: z.string().trim().max(200),
+});
+
+export async function saveSms(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { workspaceId } = await requireSession();
+  if (!encryptionReady()) return { error: "The server has no encryption key yet, so tokens cannot be stored safely. Set ENCRYPTION_KEY first." };
+  const parsed = smsSchema.safeParse({
+    accountSid: String(formData.get("accountSid") ?? ""),
+    phoneNumber: String(formData.get("phoneNumber") ?? ""),
+    token: String(formData.get("smsToken") ?? ""),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const d = parsed.data;
+  if (d.token && !/^[0-9a-fA-F]{32}$/.test(d.token)) return { error: "The auth token is 32 letters and numbers, shown under Account Info in your Twilio console." };
+  try {
+    await withTenant(workspaceId, async (c) => {
+      const existing = await c.query<{ secret_enc: string | null }>("select secret_enc from channel_connections where workspace_id = $1 and channel = 'sms'", [workspaceId]);
+      // A blank token keeps the one already saved; the token itself is never shown again.
+      const secret = d.token ? encryptSecret(d.token) : existing.rows[0]?.secret_enc ?? null;
+      if (!secret) throw new Error("Paste the auth token from your Twilio console.");
+      await c.query(
+        `insert into channel_connections (workspace_id, channel, external_account_id, secret_enc, settings, status)
+         values ($1, 'sms', $2, $3, $4, 'active')
+         on conflict (workspace_id, channel) do update set external_account_id = $2, secret_enc = $3, settings = $4, status = 'active', last_error = null`,
+        [workspaceId, d.phoneNumber, secret, JSON.stringify({ accountSid: d.accountSid })],
+      );
+      await logActivity(c, workspaceId, { kind: "channel", summary: `SMS connected on ${d.phoneNumber}` });
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (/unique/i.test(message)) return { error: "That number is already connected to another business." };
+    return { error: message || "SMS settings did not save." };
+  }
+  revalidatePath("/channels");
+  return { notice: "SMS connected. Paste the webhook address below into your Twilio number's messaging settings." };
+}
+
+export async function disconnectSms() {
+  const { workspaceId } = await requireSession();
+  await withTenant(workspaceId, async (c) => {
+    await c.query("delete from channel_connections where workspace_id = $1 and channel = 'sms'", [workspaceId]);
+    await logActivity(c, workspaceId, { kind: "channel", summary: "SMS disconnected" });
+  });
+  revalidatePath("/channels");
+}
+
 export async function disconnectWhatsApp() {
   const { workspaceId } = await requireSession();
   await withTenant(workspaceId, async (c) => {
@@ -197,4 +264,15 @@ export async function runNowAction() {
   await requireSession();
   after(() => runDueJobs({ budgetMs: automationConfig.worker.inlineBudgetMs * 2 }));
   redirect("/automations?ran=1");
+}
+
+/** Permanently deletes one customer's data. Owners and managers only, and only after ticking the confirmation. */
+export async function deleteCustomerAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const session = await requireSession();
+  if (session.role === "agent") return { error: "Only the owner or a manager can delete a customer's data." };
+  if (formData.get("confirm") !== "yes") return { error: "Tick the box to confirm. Deleting cannot be undone." };
+  const deleted = await deleteCustomer(session.workspaceId, String(formData.get("leadId") ?? ""));
+  if (!deleted) return { error: "That customer was not found. They may already be deleted." };
+  revalidatePath("/inbox");
+  redirect("/inbox?filter=all&deleted=1");
 }

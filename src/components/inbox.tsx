@@ -26,8 +26,8 @@ export function StagePill({ stage }: { stage: string }) {
 export function ChannelChip({ channel }: { channel: string }) {
   return (
     <span className="inline-flex items-center gap-1 font-mono text-[0.6875rem] uppercase tracking-[0.04em] text-ink-soft">
-      <Icon name={channel === "whatsapp" ? "chat" : "globe"} className="h-3.5 w-3.5" />
-      {channel === "whatsapp" ? "WhatsApp" : "Web chat"}
+      <Icon name={channel === "whatsapp" ? "chat" : channel === "sms" ? "phone" : "globe"} className="h-3.5 w-3.5" />
+      {channel === "whatsapp" ? "WhatsApp" : channel === "sms" ? "SMS" : "Web chat"}
     </span>
   );
 }

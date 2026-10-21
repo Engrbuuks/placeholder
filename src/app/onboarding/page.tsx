@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth";
-import { appConfig, getPack, markets, packsForMarket, type MarketCode } from "@/lib/config";
+import { appConfig, getPack, packsForMarket } from "@/lib/config";
+import { exampleConsultationPrice } from "@/lib/marketOptions";
+import { marketOptions } from "@/lib/marketOptions";
 import { getBrandBrain, getWorkspace, latestAudits, type OnboardingStep } from "@/lib/workspaces";
 import { brainFormValues } from "@/lib/brainView";
 import { goBack } from "@/app/actions/onboarding";
@@ -40,7 +42,7 @@ export default async function OnboardingPage() {
 
   const step = workspace.onboardingStep;
   const index = steps.findIndex((s) => s.id === step);
-  const pack = getPack(workspace.nichePack);
+  const pack = getPack(workspace.nichePack, workspace.country);
 
   let body: React.ReactNode;
   let heading: string;
@@ -48,13 +50,13 @@ export default async function OnboardingPage() {
 
   if (step === "market") {
     heading = "Where does your business trade?";
-    intro = "This sets your currency, payments and data protection rules.";
-    const options = (Object.keys(markets) as MarketCode[]).map((code) => ({
-      code,
-      name: markets[code].name,
-      detail: `Prices in ${markets[code].currencySymbol}, payments through ${markets[code].paymentProvider}.`,
-    }));
-    body = <MarketStep options={options} current={workspace.country} />;
+    intro = "This sets your currency, time zone, language, payments and the data protection rules your assistant follows.";
+    body = (
+      <MarketStep
+        options={marketOptions()}
+        current={{ country: workspace.country, timeZone: workspace.chosenTimeZone, language: workspace.language }}
+      />
+    );
   } else if (step === "niche") {
     heading = "What kind of business do you run?";
     intro = "We set up your assistant, follow ups and content around how your kind of business wins customers.";
@@ -91,7 +93,7 @@ export default async function OnboardingPage() {
             </div>
           </div>
         )}
-        <BrainForm values={brainFormValues(brain.data)} intake={pack.intake} tones={appConfig.tones} confirmLabel="Confirm and finish" />
+        <BrainForm values={brainFormValues(brain.data)} intake={pack.intake} tones={appConfig.tones} confirmLabel="Confirm and finish" examplePrice={exampleConsultationPrice(workspace.country)} />
       </div>
     );
   }

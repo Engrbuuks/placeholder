@@ -1,20 +1,246 @@
 {
-  "NG": {
-    "name": "Nigeria",
-    "currency": "NGN",
-    "currencySymbol": "₦",
-    "phonePrefix": "+234",
-    "paymentProvider": "Paystack",
-    "dataLaw": "Nigeria Data Protection Act",
-    "timeZone": "Africa/Lagos"
+  "US": {
+    "name": "United States",
+    "currency": "USD",
+    "locale": "en-US",
+    "phonePrefix": "+1",
+    "paymentProvider": "Stripe",
+    "dataLaw": "State privacy laws such as the CCPA, and the TCPA for text messages",
+    "timeZones": [
+      "America/New_York",
+      "America/Chicago",
+      "America/Denver",
+      "America/Phoenix",
+      "America/Los_Angeles",
+      "America/Anchorage",
+      "Pacific/Honolulu"
+    ],
+    "languages": [
+      "en",
+      "es"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Automated follow up texts are off in the United States: the TCPA needs written consent for marketing texts. Replies and booking reminders still go out."
   },
   "UK": {
     "name": "United Kingdom",
     "currency": "GBP",
-    "currencySymbol": "£",
+    "locale": "en-GB",
     "phonePrefix": "+44",
     "paymentProvider": "Stripe",
-    "dataLaw": "UK GDPR",
-    "timeZone": "Europe/London"
+    "dataLaw": "UK GDPR and PECR",
+    "timeZones": [
+      "Europe/London"
+    ],
+    "languages": [
+      "en"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Automated follow up texts are off in the United Kingdom: PECR needs consent for marketing texts. Replies and booking reminders still go out."
+  },
+  "NG": {
+    "name": "Nigeria",
+    "currency": "NGN",
+    "locale": "en-NG",
+    "phonePrefix": "+234",
+    "paymentProvider": "Paystack",
+    "dataLaw": "Nigeria Data Protection Act",
+    "timeZones": [
+      "Africa/Lagos"
+    ],
+    "languages": [
+      "en"
+    ],
+    "smsFollowUps": true,
+    "smsNote": ""
+  },
+  "IN": {
+    "name": "India",
+    "currency": "INR",
+    "locale": "en-IN",
+    "phonePrefix": "+91",
+    "paymentProvider": "Razorpay",
+    "dataLaw": "Digital Personal Data Protection Act 2023",
+    "timeZones": [
+      "Asia/Kolkata"
+    ],
+    "languages": [
+      "en"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Business texts in India must use DLT registered templates, so automated follow up texts are off. Use WhatsApp for follow ups."
+  },
+  "CA": {
+    "name": "Canada",
+    "currency": "CAD",
+    "locale": "en-CA",
+    "phonePrefix": "+1",
+    "paymentProvider": "Stripe",
+    "dataLaw": "PIPEDA, and CASL for messages",
+    "timeZones": [
+      "America/Toronto",
+      "America/Winnipeg",
+      "America/Edmonton",
+      "America/Vancouver",
+      "America/Halifax",
+      "America/St_Johns"
+    ],
+    "languages": [
+      "en",
+      "fr"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Automated follow up texts are off in Canada: CASL needs consent for marketing messages. Replies and booking reminders still go out."
+  },
+  "GH": {
+    "name": "Ghana",
+    "currency": "GHS",
+    "locale": "en-GH",
+    "phonePrefix": "+233",
+    "paymentProvider": "Paystack",
+    "dataLaw": "Data Protection Act 2012",
+    "timeZones": [
+      "Africa/Accra"
+    ],
+    "languages": [
+      "en"
+    ],
+    "smsFollowUps": true,
+    "smsNote": ""
+  },
+  "KE": {
+    "name": "Kenya",
+    "currency": "KES",
+    "locale": "en-KE",
+    "phonePrefix": "+254",
+    "paymentProvider": "Paystack",
+    "dataLaw": "Data Protection Act 2019",
+    "timeZones": [
+      "Africa/Nairobi"
+    ],
+    "languages": [
+      "en"
+    ],
+    "smsFollowUps": true,
+    "smsNote": ""
+  },
+  "ZA": {
+    "name": "South Africa",
+    "currency": "ZAR",
+    "locale": "en-ZA",
+    "phonePrefix": "+27",
+    "paymentProvider": "Paystack",
+    "dataLaw": "POPIA",
+    "timeZones": [
+      "Africa/Johannesburg"
+    ],
+    "languages": [
+      "en"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Automated follow up texts are off in South Africa: POPIA needs consent for direct marketing. Replies and booking reminders still go out."
+  },
+  "IE": {
+    "name": "Ireland",
+    "currency": "EUR",
+    "locale": "en-IE",
+    "phonePrefix": "+353",
+    "paymentProvider": "Stripe",
+    "dataLaw": "GDPR",
+    "timeZones": [
+      "Europe/Dublin"
+    ],
+    "languages": [
+      "en"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Automated follow up texts are off under GDPR and the ePrivacy rules unless the customer has agreed. Replies and booking reminders still go out."
+  },
+  "AE": {
+    "name": "United Arab Emirates",
+    "currency": "AED",
+    "locale": "en-AE",
+    "phonePrefix": "+971",
+    "paymentProvider": "Stripe",
+    "dataLaw": "Personal Data Protection Law",
+    "timeZones": [
+      "Asia/Dubai"
+    ],
+    "languages": [
+      "en"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Automated follow up texts are off: promotional texts in the UAE need registration and consent. Replies and booking reminders still go out."
+  },
+  "FR": {
+    "name": "France",
+    "currency": "EUR",
+    "locale": "fr-FR",
+    "phonePrefix": "+33",
+    "paymentProvider": "Stripe",
+    "dataLaw": "GDPR",
+    "timeZones": [
+      "Europe/Paris"
+    ],
+    "languages": [
+      "fr",
+      "en"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Automated follow up texts are off under GDPR and the ePrivacy rules unless the customer has agreed. Replies and booking reminders still go out."
+  },
+  "ES": {
+    "name": "Spain",
+    "currency": "EUR",
+    "locale": "es-ES",
+    "phonePrefix": "+34",
+    "paymentProvider": "Stripe",
+    "dataLaw": "GDPR",
+    "timeZones": [
+      "Europe/Madrid"
+    ],
+    "languages": [
+      "es",
+      "en"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Automated follow up texts are off under GDPR and the ePrivacy rules unless the customer has agreed. Replies and booking reminders still go out."
+  },
+  "MX": {
+    "name": "Mexico",
+    "currency": "MXN",
+    "locale": "es-MX",
+    "phonePrefix": "+52",
+    "paymentProvider": "Stripe",
+    "dataLaw": "Federal Law on Protection of Personal Data",
+    "timeZones": [
+      "America/Mexico_City",
+      "America/Tijuana",
+      "America/Cancun"
+    ],
+    "languages": [
+      "es",
+      "en"
+    ],
+    "smsFollowUps": true,
+    "smsNote": ""
+  },
+  "BR": {
+    "name": "Brazil",
+    "currency": "BRL",
+    "locale": "pt-BR",
+    "phonePrefix": "+55",
+    "paymentProvider": "Stripe",
+    "dataLaw": "LGPD",
+    "timeZones": [
+      "America/Sao_Paulo",
+      "America/Manaus"
+    ],
+    "languages": [
+      "pt",
+      "en"
+    ],
+    "smsFollowUps": false,
+    "smsNote": "Automated follow up texts are off: the LGPD needs a legal basis such as consent for marketing messages. Replies and booking reminders still go out."
   }
 }

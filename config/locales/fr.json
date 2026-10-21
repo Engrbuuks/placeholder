@@ -1,0 +1,74 @@
+{
+  "name": "Français",
+  "assistant": {
+    "greeting": "Bonjour {firstName}, merci d'avoir contacté {businessName}.",
+    "greetingNoName": "Bonjour, merci d'avoir contacté {businessName}.",
+    "handoffReply": "Merci. J'ai transmis votre message à l'équipe {businessName}, quelqu'un vous répondra ici très bientôt.",
+    "unknownReply": "Bonne question. Je préfère ne pas deviner, j'ai donc demandé à l'équipe de vous répondre ici.",
+    "qualifiedReply": "Merci, j'ai tout ce qu'il me faut. {conversionPrompt}",
+    "afterHandoffReply": "Merci, l'équipe a bien reçu votre message et vous répondra ici.",
+    "bookingRequestReply": "Merci. J'ai transmis l'horaire que vous préférez à l'équipe {businessName}, qui vous confirmera ici très bientôt.",
+    "optOutReply": "Vous ne recevrez plus de messages automatiques de {businessName}. Répondez START si vous changez d'avis.",
+    "optInReply": "Bon retour. Vous recevrez à nouveau les réponses de {businessName}."
+  },
+  "handoffKeywords": [
+    "parler à une personne",
+    "parler à quelqu'un",
+    "un humain",
+    "une vraie personne",
+    "conseiller",
+    "responsable",
+    "réclamation",
+    "plainte",
+    "remboursement",
+    "arnaque",
+    "pas content",
+    "déçu",
+    "appelez moi"
+  ],
+  "optOutKeywords": [
+    "stop",
+    "arrêt",
+    "arret",
+    "désabonner",
+    "desabonner"
+  ],
+  "optInKeywords": [
+    "start",
+    "reprendre"
+  ],
+  "priceWords": [
+    "combien",
+    "prix",
+    "tarif",
+    "tarifs",
+    "coût",
+    "cout",
+    "frais"
+  ],
+  "questionStarts": [
+    "quoi",
+    "quel",
+    "quelle",
+    "quels",
+    "quelles",
+    "comment",
+    "quand",
+    "où",
+    "ou",
+    "pourquoi",
+    "qui",
+    "est ce",
+    "avez",
+    "pouvez",
+    "puis je",
+    "est il",
+    "combien"
+  ],
+  "webchat": {
+    "title": "Discutez avec nous",
+    "subtitle": "Nous répondons en quelques secondes",
+    "placeholder": "Écrivez votre message",
+    "launcherLabel": "Discutez avec nous"
+  }
+}

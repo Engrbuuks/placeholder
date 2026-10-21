@@ -9,7 +9,7 @@ export function render(template: string, vars: TemplateVars): string {
     .trim();
 }
 
-export function firstName(name: string | null | undefined): string {
+export function firstName(name: string | null | undefined, fallback = "there"): string {
   const first = (name ?? "").trim().split(/\s+/)[0] ?? "";
-  return first && /^[\p{L}'.]{1,30}$/u.test(first) ? first : "there";
+  return first && /^[\p{L}'.]{1,30}$/u.test(first) ? first : fallback;
 }

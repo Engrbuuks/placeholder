@@ -11,6 +11,7 @@ type Props = {
   subtitle: string;
   placeholder: string;
   pollSeconds: number;
+  language?: string;
 };
 
 function visitorId(chatKey: string): string {
@@ -26,7 +27,7 @@ function visitorId(chatKey: string): string {
   }
 }
 
-export function ChatWindow({ chatKey, businessName, title, subtitle, placeholder, pollSeconds }: Props) {
+export function ChatWindow({ chatKey, businessName, title, subtitle, placeholder, pollSeconds, language = "en" }: Props) {
   const [visitor, setVisitor] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
@@ -85,7 +86,7 @@ export function ChatWindow({ chatKey, businessName, title, subtitle, placeholder
   }
 
   return (
-    <div className="flex h-dvh flex-col bg-surface">
+    <div lang={language} className="flex h-dvh flex-col bg-surface">
       <header className="flex items-center gap-3 bg-ink px-5 py-4 text-white">
         <span aria-hidden className="grid h-9 w-9 place-items-center rounded-full bg-accent text-sm font-semibold">
           {businessName.slice(0, 1).toUpperCase()}

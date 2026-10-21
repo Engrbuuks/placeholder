@@ -5,21 +5,21 @@
 // 3. Hand over at once on a handoff phrase (asks for a person, complaint, emergency).
 // 4. Otherwise greet, answer any question from the brand brain, and work through the niche's qualifying questions.
 // 5. Queue the reply, schedule the no reply follow up, alert the owner when needed, then deliver.
-import { automationConfig } from "../config";
+import { automationConfig, everyLanguage } from "../config";
 import type { PoolClient } from "pg";
 import { withTenant } from "../db";
 import { aiEnabled, answerWithAi } from "../ai";
 import { logActivity, notify } from "../activity";
 import { cancelLeadJobs, enqueue } from "../queue";
 import { render, firstName } from "../templates";
-import { answerFromBrain, clip, detectHandoff, extractContact, factsText, isQuestion, pricesAreGrounded } from "./assistant";
+import { answerFromBrain, clip, detectHandoff, extractContact, factsText, isKeywordMessage, isQuestion, pricesAreGrounded } from "./assistant";
 import { loadContext, leadLabel, type Lead } from "./context";
 import { deliverMessage } from "./delivery";
 import { scheduleChainedStep } from "./sequences";
 
 export type InboundInput = {
   workspaceId: string;
-  channel: "webchat" | "whatsapp";
+  channel: "webchat" | "whatsapp" | "sms";
   externalId: string;
   text: string;
   externalMessageId?: string | null;
@@ -96,7 +96,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
        values ($1, $2, $3, $4, $5)
        on conflict (workspace_id, channel, external_id) do update set updated_at = now()
        returning id`,
-      [input.workspaceId, input.channel, input.externalId, input.name ?? null, input.channel === "whatsapp" ? `+${input.externalId}` : null],
+      [input.workspaceId, input.channel, input.externalId, input.name ?? null, input.channel === "whatsapp" ? `+${input.externalId}` : input.channel === "sms" ? input.externalId : null],
     );
     const leadId = upsert.rows[0].id;
     // One message at a time per lead, so two quick messages cannot both answer the same question.
@@ -128,7 +128,41 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
     const who = leadLabel(lead);
     const link = `/inbox/${leadId}`;
 
-    const stopReason = !ctx.settings.enabled
+    // STOP and START, in any language, on every channel. Twilio answers these itself on SMS, so only record them there.
+    const keyword = isKeywordMessage(text, everyLanguage("optOutKeywords"))
+      ? "out"
+      : lead.opted_out_at && isKeywordMessage(text, everyLanguage("optInKeywords"))
+        ? "in"
+        : null;
+    if (keyword) {
+      if (keyword === "out") {
+        await c.query("update leads set opted_out_at = now(), updated_at = now() where id = $1", [leadId]);
+        await cancelLeadJobs(c, leadId);
+        await c.query("update messages set status = 'discarded', status_detail = 'Customer opted out' where lead_id = $1 and status = 'pending_approval'", [leadId]);
+      } else {
+        await c.query("update leads set opted_out_at = null, updated_at = now() where id = $1", [leadId]);
+      }
+      await logActivity(c, input.workspaceId, {
+        leadId,
+        kind: keyword === "out" ? "opted_out" : "opted_in",
+        summary: keyword === "out" ? `${who} asked for no more messages. Nothing automatic will be sent to them.` : `${who} opted back in to messages.`,
+      });
+      if (input.channel === "sms") return { duplicate: false, leadId, replied: false, outgoingIds: [], reason: `Opted ${keyword}` };
+      const reply = render(keyword === "out" ? ctx.locale.assistant.optOutReply : ctx.locale.assistant.optInReply, {
+        firstName: firstName(lead.name),
+        businessName: ctx.businessName,
+      });
+      const out = await c.query<{ id: string }>(
+        `insert into messages (workspace_id, lead_id, direction, author, body, status, channel)
+         values ($1, $2, 'out', 'assistant', $3, 'queued', $4) returning id`,
+        [input.workspaceId, leadId, reply, input.channel],
+      );
+      return { duplicate: false, leadId, replied: true, outgoingIds: [out.rows[0].id], reason: `Opted ${keyword}` };
+    }
+
+    const stopReason = lead.opted_out_at
+      ? "This customer opted out of automatic messages"
+      : !ctx.settings.enabled
       ? "Automations are switched off"
       : !ctx.brainConfirmed
         ? "The brand brain is not confirmed yet"
@@ -143,7 +177,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
       return { duplicate: false, leadId, replied: false, outgoingIds: [], reason: stopReason };
     }
 
-    const a = automationConfig.assistant;
+    const a = ctx.locale.assistant;
     const vars = {
       firstName: firstName(lead.name),
       businessName: ctx.businessName,
@@ -156,7 +190,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
     let handoffReason: string | null = null;
     let answerSource: "rules" | "ai" | "cap" | null = null;
 
-    const handoffPhrase = detectHandoff(text, [...a.handoffKeywords, ...ctx.pack.handoffKeywords]);
+    const handoffPhrase = detectHandoff(text, [...everyLanguage("handoffKeywords"), ...ctx.pack.handoffKeywords]);
     if (handoffPhrase) {
       parts.push(render(a.handoffReply, vars));
       stage = "handoff";
@@ -180,7 +214,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
       }
     } else {
       const first = lead.stage === "new";
-      if (first) parts.push(render(a.greeting, vars));
+      if (first) parts.push(render(firstName(lead.name, "") ? a.greeting : a.greetingNoName, vars));
       const question = isQuestion(text);
       if (question) {
         const recent = await recentMessages(c, leadId);
@@ -207,7 +241,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
       }
     }
 
-    const body = clip(parts.filter(Boolean).join("\n\n"), a.maxReplyLength * 2);
+    const body = clip(parts.filter(Boolean).join("\n\n"), automationConfig.assistant.maxReplyLength * 2);
     const out = await c.query<{ id: string }>(
       `insert into messages (workspace_id, lead_id, direction, author, body, status, channel)
        values ($1, $2, 'out', 'assistant', $3, 'queued', $4) returning id`,
@@ -251,7 +285,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
         });
         await logActivity(c, input.workspaceId, { leadId, kind: "qualified", summary: `${who} answered every qualifying question` });
       }
-      const when = await scheduleChainedStep(c, ctx, { id: leadId }, "no_reply", 0, new Date());
+      const when = await scheduleChainedStep(c, ctx, { id: leadId, channel: input.channel }, "no_reply", 0, new Date());
       if (when) await logActivity(c, input.workspaceId, { leadId, kind: "followup_scheduled", summary: "Follow up scheduled in case they go quiet", detail: { at: when.toISOString() } });
     }
 

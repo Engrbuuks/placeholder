@@ -4,17 +4,24 @@ import { inboxCounts, listLeads } from "@/lib/inbox";
 import { AppShell } from "@/components/AppShell";
 import { InboxList, parseFilter } from "@/components/inbox";
 import { Icon } from "@/components/Icon";
+import { Notice } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Inbox" };
 export const dynamic = "force-dynamic";
 
-export default async function InboxPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
+export default async function InboxPage({ searchParams }: { searchParams: Promise<{ filter?: string; deleted?: string }> }) {
   const { session, shell } = await loadAppPage();
-  const filter = parseFilter((await searchParams).filter);
+  const params = await searchParams;
+  const filter = parseFilter(params.filter);
   const [rows, counts] = await Promise.all([listLeads(session.workspaceId, filter), inboxCounts(session.workspaceId)]);
 
   return (
     <AppShell {...shell} active="inbox" title="Inbox" subtitle="Every conversation, with the assistant's replies and what happens next">
+      {params.deleted && (
+        <div className="mb-4">
+          <Notice>The customer&apos;s data was deleted. A note that it was done, without their details, is in your activity log.</Notice>
+        </div>
+      )}
       <div className="grid gap-4 lg:h-[calc(100vh-9.5rem)] lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">
         <InboxList rows={rows} filter={filter} counts={counts} />
         <div className="hidden place-items-center rounded-2xl border border-dashed border-line lg:grid">

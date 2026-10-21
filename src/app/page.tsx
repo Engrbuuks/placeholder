@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { appConfig, auditConfig, markets, packs, type MarketCode } from "@/lib/config";
+import { appConfig, auditConfig, languageCodes, markets, packs, type MarketCode } from "@/lib/config";
 import { scoreAudit } from "@/lib/audit/score";
 import { SiteNav } from "@/components/SiteNav";
 import { Arrow, Wordmark } from "@/components/Wordmark";
@@ -113,7 +113,7 @@ export default async function Home() {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4 pb-14">
             <div className="flex items-center gap-5">
-              <span className="label text-ink">{copy.heroFooterLeft}</span>
+              <span className="label text-ink">{copy.heroFooterLeft.replace("{countries}", String(Object.keys(markets).length)).replace("{languages}", String(languageCodes.length))}</span>
               <span aria-hidden className="hidden h-px w-40 bg-ink/25 sm:block" />
             </div>
             <p className="label">{copy.heroFooterRight.join("   /   ")}</p>
@@ -153,7 +153,7 @@ export default async function Home() {
                     <h3 className="text-lg tracking-[-0.02em]">{p.shortName}</h3>
                     <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />
                   </div>
-                  <p className="font-mono text-xs text-ink-soft">{p.markets.map((m) => marketNames[m]).join(", ")}</p>
+                  <p className="font-mono text-xs text-ink-soft">{p.markets.includes("*") ? `All ${Object.keys(markets).length} countries` : p.markets.map((m) => marketNames[m] ?? m).join(", ")}</p>
                   <p className="mt-5 text-sm text-ink-soft">{p.description}</p>
                   <p className="label mt-5">
                     <span className="block">{copy.niches.goalPrefix}</span>

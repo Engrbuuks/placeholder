@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth";
-import { getPack, isMarketCode, packs } from "@/lib/config";
+import { getPack, isMarketCode, markets, packs } from "@/lib/config";
 import { matchNiche } from "@/lib/niche";
 import { normaliseGoogleProfile, normaliseInstagram, normaliseWebsite } from "@/lib/urls";
 import { runAudit } from "@/lib/audit/run";
@@ -29,7 +29,15 @@ export async function chooseMarket(_prev: StepState, formData: FormData): Promis
   const { workspaceId } = await requireSession();
   const country = formData.get("country");
   if (!isMarketCode(country)) return { error: "Choose where your business trades." };
-  await updateWorkspace(workspaceId, { country, onboardingStep: "niche" });
+  const market = markets[country];
+  const zone = String(formData.get("timeZone") ?? "");
+  const language = String(formData.get("language") ?? "");
+  await updateWorkspace(workspaceId, {
+    country,
+    timeZone: market.timeZones.includes(zone) ? zone : market.timeZones[0],
+    language: market.languages.includes(language) ? language : market.languages[0],
+    onboardingStep: "niche",
+  });
   redirect("/onboarding");
 }
 
@@ -76,7 +84,7 @@ export async function savePresence(_prev: StepState, formData: FormData): Promis
   const { outcome, pageText } = await runAudit(presence);
   await saveAudit(workspaceId, outcome, website.value);
 
-  const pack = getPack(workspace.nichePack);
+  const pack = getPack(workspace.nichePack, workspace.country);
   const current = await getBrandBrain(workspaceId);
   const draft = await draftBrandBrain({ facts: outcome.facts, pageText, existing: current.data, pack });
   if (draft.source === "ai") await recordUsage(workspaceId, "ai_draft", 1);
@@ -100,7 +108,7 @@ export async function saveBrain(_prev: StepState, formData: FormData): Promise<S
   const workspace = await getWorkspace(workspaceId);
   if (!workspace) redirect("/login");
 
-  const pack = getPack(workspace.nichePack);
+  const pack = getPack(workspace.nichePack, workspace.country);
   const intent = String(formData.get("intent") ?? "save");
   const result = brandBrainFromForm(formData, pack);
   if (!result.ok) return { error: result.error };

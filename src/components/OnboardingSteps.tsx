@@ -1,10 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { chooseMarket, chooseNiche, savePresence, type StepState } from "@/app/actions/onboarding";
-import { Field, FormError, SubmitButton } from "./ui";
-
-type MarketOption = { code: string; name: string; detail: string };
+import type { MarketOption } from "@/lib/marketOptions";
+import { Field, FormError, SelectField, SubmitButton } from "./ui";
 
 const card =
   "group flex cursor-pointer items-start gap-4 rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-ink/30 has-[:checked]:border-ink has-[:checked]:shadow-[inset_0_0_0_1px_var(--color-ink)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent";
@@ -20,24 +19,57 @@ function Dot() {
   );
 }
 
-export function MarketStep({ options, current }: { options: MarketOption[]; current: string | null }) {
+export function MarketStep({
+  options,
+  current,
+}: {
+  options: MarketOption[];
+  current: { country: string | null; timeZone: string | null; language: string };
+}) {
   const [state, action] = useActionState<StepState, FormData>(chooseMarket, {});
+  const [code, setCode] = useState(current.country ?? "");
+  const market = options.find((m) => m.code === code);
   return (
     <form action={action} className="space-y-6">
       <FormError message={state.error} />
-      <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="sr-only">Where your business trades</legend>
-        {options.map((m) => (
-          <label key={m.code} className={card}>
-            <input type="radio" name="country" value={m.code} defaultChecked={current === m.code} required className="sr-only" />
-            <Dot />
-            <span>
-              <span className="block text-lg font-medium tracking-[-0.02em]">{m.name}</span>
-              <span className="text-[0.9375rem] text-ink-soft">{m.detail}</span>
-            </span>
-          </label>
-        ))}
-      </fieldset>
+      <SelectField
+        label="Country"
+        name="country"
+        value={code}
+        onChange={setCode}
+        options={[{ value: "", label: "Choose a country" }, ...options.map((m) => ({ value: m.code, label: m.name }))]}
+      />
+      {market && (
+        <>
+          <p className="rounded-xl bg-mist px-4 py-3 text-[0.9375rem] text-ink-soft">{market.detail}</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {market.timeZones.length > 1 ? (
+              <SelectField
+                key={`tz_${market.code}`}
+                label="Time zone"
+                name="timeZone"
+                help="Follow ups and reminders respect quiet hours here."
+                options={market.timeZones}
+                defaultValue={current.country === market.code && current.timeZone ? current.timeZone : market.timeZones[0].value}
+              />
+            ) : (
+              <input type="hidden" name="timeZone" value={market.timeZones[0].value} />
+            )}
+            {market.languages.length > 1 ? (
+              <SelectField
+                key={`lang_${market.code}`}
+                label="Language for your assistant"
+                name="language"
+                help="Customers who write in another language still get answered in theirs when AI is on."
+                options={market.languages}
+                defaultValue={market.languages.some((l) => l.value === current.language) ? current.language : market.languages[0].value}
+              />
+            ) : (
+              <input type="hidden" name="language" value={market.languages[0].value} />
+            )}
+          </div>
+        </>
+      )}
       <SubmitButton pending="Saving">Continue</SubmitButton>
     </form>
   );

@@ -4,6 +4,10 @@ import appJson from "@config/app.json";
 import marketsJson from "@config/markets.json";
 import auditJson from "@config/audit.json";
 import automationJson from "@config/automation.json";
+import enLocale from "@config/locales/en.json";
+import frLocale from "@config/locales/fr.json";
+import esLocale from "@config/locales/es.json";
+import ptLocale from "@config/locales/pt.json";
 import { packFiles, fallbackPackId } from "@packs/index";
 
 const appSchema = z.object({
@@ -86,16 +90,58 @@ const appSchema = z.object({
   }),
 });
 
+function validTimeZone(zone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+function validCurrency(code: string): boolean {
+  try {
+    new Intl.NumberFormat("en", { style: "currency", currency: code });
+    return /^[A-Z]{3}$/.test(code);
+  } catch {
+    return false;
+  }
+}
+
 const marketSchema = z.object({
-  name: z.string(),
-  currency: z.string(),
-  currencySymbol: z.string(),
-  phonePrefix: z.string(),
+  name: z.string().min(1),
+  currency: z.string().refine(validCurrency, "Use a three letter ISO currency code, such as USD."),
+  locale: z.string().min(2),
+  phonePrefix: z.string().regex(/^\+\d{1,4}$/),
   paymentProvider: z.string(),
   dataLaw: z.string(),
-  timeZone: z.string(),
+  timeZones: z.array(z.string().refine(validTimeZone, "Unknown time zone.")).min(1),
+  languages: z.array(z.string().regex(/^[a-z]{2}$/)).min(1),
+  smsFollowUps: z.boolean(),
+  smsNote: z.string(),
 });
-const marketsSchema = z.record(z.enum(["NG", "UK"]), marketSchema);
+const marketsSchema = z.record(z.string().regex(/^[A-Z]{2}$/, "Market codes are two capital letters."), marketSchema);
+
+const localeSchema = z.object({
+  name: z.string(),
+  assistant: z.object({
+    greeting: z.string(),
+    /** Used when the customer has not given a name, so no language gets an English "there". */
+    greetingNoName: z.string(),
+    handoffReply: z.string(),
+    unknownReply: z.string(),
+    qualifiedReply: z.string(),
+    afterHandoffReply: z.string(),
+    bookingRequestReply: z.string(),
+    optOutReply: z.string(),
+    optInReply: z.string(),
+  }),
+  handoffKeywords: z.array(z.string()).min(1),
+  optOutKeywords: z.array(z.string()).min(1),
+  optInKeywords: z.array(z.string()).min(1),
+  priceWords: z.array(z.string()).min(1),
+  questionStarts: z.array(z.string()),
+  webchat: z.object({ title: z.string(), subtitle: z.string(), placeholder: z.string(), launcherLabel: z.string() }),
+});
 
 const checkSchema = z.object({
   id: z.string(),
@@ -142,6 +188,8 @@ const intakeSchema = z.object({
   help: z.string().default(""),
   type: z.enum(["text", "textarea"]),
   keywords: z.array(z.string()).default([]),
+  // Optional: only ask this in these markets (for example NHS status only in the UK).
+  markets: z.array(z.string()).optional(),
 });
 
 const stepSchema = z
@@ -169,26 +217,13 @@ const automationSchema = z.object({
   quietHours: z.object({ start: z.number().int().min(0).max(23), end: z.number().int().min(0).max(23) }),
   retry: z.object({ maxAttempts: z.number().int().min(1).max(20), baseMinutes: z.number().positive() }),
   worker: z.object({ batchSize: z.number().int().min(1).max(100), budgetMs: z.number().int().positive(), inlineBudgetMs: z.number().int().positive() }),
-  assistant: z.object({
-    greeting: z.string(),
-    handoffReply: z.string(),
-    unknownReply: z.string(),
-    qualifiedReply: z.string(),
-    afterHandoffReply: z.string(),
-    bookingRequestReply: z.string(),
-    handoffKeywords: z.array(z.string()),
-    maxReplyLength: z.number().int().positive(),
-  }),
+  assistant: z.object({ maxReplyLength: z.number().int().positive() }),
   ai: z.object({ monthlyCallsPerWorkspace: z.number().int().min(0), replyModel: z.string().min(1) }),
   whatsapp: z.object({ windowHours: z.number().positive(), graphVersion: z.string().regex(/^v\d+\.\d+$/) }),
   weekly: z.object({ scoreDropAlert: z.number().int().min(1) }),
   webchat: z.object({
     maxMessageLength: z.number().int().positive(),
     maxMessagesPerMinute: z.number().int().positive(),
-    title: z.string(),
-    subtitle: z.string(),
-    placeholder: z.string(),
-    launcherLabel: z.string(),
     pollSeconds: z.number().int().min(2),
   }),
   stages: z.array(z.object({ id: z.string(), label: z.string() })).min(1),
@@ -203,7 +238,8 @@ const packSchema = z.object({
   name: z.string(),
   shortName: z.string(),
   description: z.string(),
-  markets: z.array(z.enum(["NG", "UK"])).min(1),
+  // Market codes this pack is offered in, or ["*"] for every market.
+  markets: z.array(z.string()).min(1),
   phase: z.number().int(),
   keywords: z.array(z.string()),
   conversionAction: z.string(),
@@ -213,22 +249,49 @@ const packSchema = z.object({
   conversionPrompt: z.string().min(1),
   handoffKeywords: z.array(z.string()),
   contentThemes: z.array(z.string()),
-  adTemplates: z.array(z.object({ objective: z.string(), audience: z.string(), angle: z.string() })),
+  adTemplates: z.array(z.object({ objective: z.string(), audience: z.string(), angle: z.string(), markets: z.array(z.string()).optional() })),
   compliance: z.array(z.string()),
   kpis: z.array(z.string()),
 });
 
 export type AppConfig = z.infer<typeof appSchema>;
-export type MarketCode = "NG" | "UK";
+export type MarketCode = string;
 export type Market = z.infer<typeof marketSchema>;
+export type Locale = z.infer<typeof localeSchema>;
 export type AuditConfig = z.infer<typeof auditSchema>;
 export type AuditCheck = z.infer<typeof checkSchema>;
 export type NichePack = z.infer<typeof packSchema>;
 export type IntakeField = z.infer<typeof intakeSchema>;
 
 export const appConfig: AppConfig = appSchema.parse(appJson);
-export const markets = marketsSchema.parse(marketsJson) as Record<MarketCode, Market>;
+export const markets: Record<MarketCode, Market> = marketsSchema.parse(marketsJson);
 export const auditConfig: AuditConfig = auditSchema.parse(auditJson);
+
+// Languages. English is complete by definition; any other language falls back to English for a missing text.
+const localeFiles: Record<string, unknown> = { en: enLocale, fr: frLocale, es: esLocale, pt: ptLocale };
+export const locales: Record<string, Locale> = Object.fromEntries(
+  Object.entries(localeFiles).map(([code, data]) => {
+    const parsed = localeSchema.safeParse(data);
+    if (!parsed.success) throw new Error(`Language file config/locales/${code}.json is invalid: ${parsed.error.issues[0]?.message}`);
+    return [code, parsed.data];
+  }),
+);
+export const languageCodes = Object.keys(locales);
+
+for (const [code, market] of Object.entries(markets)) {
+  for (const lang of market.languages) {
+    if (!locales[lang]) throw new Error(`Market ${code} offers language "${lang}", but config/locales/${lang}.json does not exist.`);
+  }
+}
+
+export function localeFor(language: string | null | undefined): Locale {
+  return locales[language ?? "en"] ?? locales.en;
+}
+
+/** Phrases from every language, so a customer is understood whichever language they write in. */
+export function everyLanguage<K extends "handoffKeywords" | "optOutKeywords" | "optInKeywords" | "priceWords" | "questionStarts">(key: K): string[] {
+  return [...new Set(Object.values(locales).flatMap((l) => l[key]))];
+}
 
 const areaIds = new Set(auditConfig.areas.map((a) => a.id));
 for (const check of auditConfig.checks) {
@@ -240,17 +303,59 @@ export const packs: NichePack[] = packFiles.map((p) => packSchema.parse(p));
 const packIds = new Set(packs.map((p) => p.id));
 if (packIds.size !== packs.length) throw new Error("Two niche packs share the same id.");
 if (!packIds.has(fallbackPackId)) throw new Error(`Fallback pack "${fallbackPackId}" is missing.`);
-
-export function getPack(id: string | null | undefined): NichePack {
-  return packs.find((p) => p.id === id) ?? packs.find((p) => p.id === fallbackPackId)!;
-}
-
-export function packsForMarket(code: MarketCode | null | undefined): NichePack[] {
-  return code ? packs.filter((p) => p.markets.includes(code)) : packs;
+for (const pack of packs) {
+  const named = [...pack.markets, ...pack.intake.flatMap((f) => f.markets ?? []), ...pack.adTemplates.flatMap((t) => t.markets ?? [])];
+  for (const code of named) {
+    if (code !== "*" && !markets[code]) throw new Error(`Pack "${pack.id}" names market "${code}", which is not in config/markets.json.`);
+  }
 }
 
 export function isMarketCode(value: unknown): value is MarketCode {
-  return value === "NG" || value === "UK";
+  return typeof value === "string" && Object.prototype.hasOwnProperty.call(markets, value);
+}
+
+function offeredIn(list: string[] | undefined, code: MarketCode | null | undefined): boolean {
+  return !list || list.includes("*") || (code ? list.includes(code) : true);
+}
+
+/** The currency symbol as people in that market write it, for example $ for USD in the US and ₹ for INR. */
+export function currencySymbol(code: MarketCode | null | undefined): string {
+  const m = code ? markets[code] : null;
+  if (!m) return "";
+  const part = new Intl.NumberFormat(m.locale, { style: "currency", currency: m.currency, currencyDisplay: "narrowSymbol" })
+    .formatToParts(0)
+    .find((p) => p.type === "currency");
+  return part?.value ?? m.currency;
+}
+
+/** Formats an amount in the market's own way, for example ₹1,50,000 in India and $150,000 in the US. */
+export function formatMoney(amount: number, code: MarketCode | null | undefined): string {
+  const m = code ? markets[code] : null;
+  if (!m) return String(amount);
+  return new Intl.NumberFormat(m.locale, { style: "currency", currency: m.currency, currencyDisplay: "narrowSymbol", maximumFractionDigits: 0 }).format(amount);
+}
+
+/** A business's own time zone if it chose one that belongs to its market, otherwise the market's first. */
+export function workspaceTimeZone(code: MarketCode | null | undefined, chosen?: string | null): string {
+  const m = code ? markets[code] : null;
+  if (!m) return "UTC";
+  return chosen && m.timeZones.includes(chosen) ? chosen : m.timeZones[0];
+}
+
+/** The pack as a business in this market sees it: questions for other markets left out, prices shown in its currency. */
+export function getPack(id: string | null | undefined, code?: MarketCode | null): NichePack {
+  const pack = packs.find((p) => p.id === id) ?? packs.find((p) => p.id === fallbackPackId)!;
+  if (!code) return pack;
+  const symbol = currencySymbol(code);
+  return {
+    ...pack,
+    intake: pack.intake.filter((f) => offeredIn(f.markets, code)).map((f) => ({ ...f, help: f.help.replaceAll("{currency}", symbol) })),
+    adTemplates: pack.adTemplates.filter((t) => offeredIn(t.markets, code)),
+  };
+}
+
+export function packsForMarket(code: MarketCode | null | undefined): NichePack[] {
+  return packs.filter((p) => offeredIn(p.markets, code)).map((p) => getPack(p.id, code));
 }
 
 export { fallbackPackId };

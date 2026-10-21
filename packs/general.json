@@ -4,8 +4,7 @@
   "shortName": "General",
   "description": "For any business not listed. We tailor the setup from your own website and answers.",
   "markets": [
-    "NG",
-    "UK"
+    "*"
   ],
   "phase": 1,
   "keywords": [],

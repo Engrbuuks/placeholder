@@ -8,13 +8,13 @@ export async function workspaceForWebchat(key: string): Promise<string | null> {
   return rows[0]?.id ?? null;
 }
 
-export async function webchatBusinessName(workspaceId: string): Promise<string> {
+export async function webchatBusiness(workspaceId: string): Promise<{ name: string; language: string }> {
   return withTenant(workspaceId, async (c) => {
-    const { rows } = await c.query<{ name: string; brand: string | null }>(
-      "select w.name, b.data->>'businessName' as brand from workspaces w left join brand_brains b on b.workspace_id = w.id where w.id = $1",
+    const { rows } = await c.query<{ name: string; brand: string | null; language: string }>(
+      "select w.name, w.language, b.data->>'businessName' as brand from workspaces w left join brand_brains b on b.workspace_id = w.id where w.id = $1",
       [workspaceId],
     );
-    return rows[0]?.brand || rows[0]?.name || "";
+    return { name: rows[0]?.brand || rows[0]?.name || "", language: rows[0]?.language ?? "en" };
   });
 }
 

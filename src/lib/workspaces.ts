@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 import { withTenant } from "./db";
 import { brandBrainSchema, parseStoredBrandBrain, type BrandBrain, type DraftSource } from "./brandBrain";
-import type { MarketCode } from "./config";
+import { workspaceTimeZone, type MarketCode } from "./config";
 import type { AuditOutcome } from "./audit/score";
 
 export type OnboardingStep = "market" | "niche" | "presence" | "brain" | "done";
@@ -17,6 +17,11 @@ export type Workspace = {
   instagramUrl: string | null;
   googleProfileUrl: string | null;
   onboardingStep: OnboardingStep;
+  /** The business's own choice; may be empty. Use timeZone for the zone actually in effect. */
+  chosenTimeZone: string | null;
+  /** The zone in effect: the business's choice when it belongs to its market, otherwise the market's first. */
+  timeZone: string;
+  language: string;
   createdAt: Date;
 };
 
@@ -29,6 +34,8 @@ type WorkspaceRow = {
   instagram_url: string | null;
   google_profile_url: string | null;
   onboarding_step: OnboardingStep;
+  time_zone: string | null;
+  language: string;
   created_at: Date;
 };
 
@@ -42,6 +49,9 @@ function toWorkspace(row: WorkspaceRow): Workspace {
     instagramUrl: row.instagram_url,
     googleProfileUrl: row.google_profile_url,
     onboardingStep: row.onboarding_step,
+    chosenTimeZone: row.time_zone,
+    timeZone: workspaceTimeZone(row.country, row.time_zone),
+    language: row.language ?? "en",
     createdAt: row.created_at,
   };
 }
@@ -106,6 +116,8 @@ type WorkspaceUpdate = Partial<{
   instagramUrl: string | null;
   googleProfileUrl: string | null;
   onboardingStep: OnboardingStep;
+  timeZone: string | null;
+  language: string;
 }>;
 
 const columnFor: Record<keyof WorkspaceUpdate, string> = {
@@ -116,6 +128,8 @@ const columnFor: Record<keyof WorkspaceUpdate, string> = {
   instagramUrl: "instagram_url",
   googleProfileUrl: "google_profile_url",
   onboardingStep: "onboarding_step",
+  timeZone: "time_zone",
+  language: "language",
 };
 
 export async function updateWorkspace(workspaceId: string, update: WorkspaceUpdate): Promise<void> {

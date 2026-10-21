@@ -11,7 +11,7 @@ import { counts } from "../health";
 import { getWorkspace, latestAudits, saveAudit } from "../workspaces";
 import { getLead, leadLabel, loadContext } from "./context";
 import { deliverMessage } from "./delivery";
-import { scheduleChainedStep } from "./sequences";
+import { scheduleChainedStep, smsFollowUpsAllowed } from "./sequences";
 
 type FollowupPayload = {
   trigger: "no_reply" | "booked" | "won";
@@ -31,7 +31,9 @@ async function followup(job: ClaimedJob) {
     const lead = await getLead(c, leadId);
     if (!ctx || !lead) return { skip: "The conversation no longer exists" };
 
-    const skip = !ctx.settings.enabled
+    const skip = lead.opted_out_at
+      ? "The customer opted out of messages"
+      : !ctx.settings.enabled
       ? "Automations are switched off"
       : lead.automation_paused
         ? "Automation is paused for this conversation"
@@ -43,7 +45,9 @@ async function followup(job: ClaimedJob) {
               ? "The booking changed"
               : p.trigger === "won" && lead.stage !== "won"
                 ? "The lead is no longer marked as won"
-                : null;
+                : p.trigger !== "booked" && !smsFollowUpsAllowed(ctx, lead)
+                  ? "Automated follow up texts are off in this market"
+                  : null;
     if (skip) {
       await logActivity(c, job.workspace_id, { leadId, kind: "followup_skipped", summary: `Follow up skipped: ${skip}` });
       return { skip };

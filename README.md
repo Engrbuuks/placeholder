@@ -14,6 +14,7 @@ AI marketing platform for owner run businesses in Nigeria and the UK. Build roun
 * **Audit page:** every leak with its fix.
 
 * **Automation pipeline (round 2):** see the next section.
+* **Global (round 4):** 14 countries in config, a time zone and language per business, money in any currency (including lakh and crore) in the price guard, English, French, Spanish and Portuguese, SMS through Twilio, STOP and START on every channel, follow up rules per market, and customer data export and deletion. See **Going global**.
 * **Free hosting (round 3):** one command install on Oracle Cloud's free server with the database, an every minute worker, HTTPS, daily backups, deploys from GitHub that keep the site up and roll back on their own, and a monthly AI spending cap per workspace. See **Deploy free on Oracle Cloud**.
 
 Calendar self booking and ads come in the next rounds, as set out in the product spec.
@@ -49,6 +50,16 @@ Replies to customers are instant everywhere. Timed steps (follow ups, reminders,
 * **On Vercel:** `vercel.json` calls the tick once a day, which is all the free plan allows. Add a free every minute job at [cron-job.org](https://cron-job.org) for `https://YOUR-APP/api/cron/tick`, with the header `Authorization` set to `Bearer YOUR_CRON_SECRET`.
 * Due steps also run for a few seconds after every chat message, and owners can press **Run due steps now** on the Automations page.
 
+### Connecting SMS (Twilio)
+
+Each business uses its own Twilio account and number.
+
+1. In **Channels**, under SMS, enter the Twilio number (with the country code), the Account SID and the auth token. The token is stored encrypted and never shown again.
+2. In Twilio, open the number and set **A message comes in** to `https://YOUR-APP/api/webhooks/sms`, HTTP POST.
+3. Leave Twilio's Advanced Opt Out on (it is on by default). Twilio then answers STOP, START and HELP itself, and the platform records STOP and START so nothing automatic goes out on any channel to a customer who opted out.
+
+Every text is checked against Twilio's signature with that business's auth token, using `APP_URL` as the address Twilio signed, so `APP_URL` must be the public address. Unsigned, tampered or forged requests get 401.
+
 ### Connecting WhatsApp
 
 The platform uses one Meta app; each business connects its own number.
@@ -56,6 +67,34 @@ The platform uses one Meta app; each business connects its own number.
 1. In your Meta app, set the webhook address to `https://YOUR-APP/api/webhooks/whatsapp` with the same verify token as `WHATSAPP_VERIFY_TOKEN`, and subscribe to the **messages** field.
 2. Set `WHATSAPP_APP_SECRET` (from the app's basic settings) and `ENCRYPTION_KEY` on the server.
 3. Each business opens **Channels**, pastes its phone number ID and a permanent access token (stored encrypted, never shown again), and optionally names an approved follow up template whose first variable is the customer's first name.
+
+## Going global
+
+Everything about a country lives in `config/markets.json`, and everything about a language in `config/locales/`.
+
+**Add a country:** add an entry with a two letter code (the existing UK entry keeps `UK`), a name, an ISO currency code, a locale such as `en-AU`, the phone prefix, the payment provider, the data law, one or more IANA time zones (the first is the default), the languages offered, and the SMS rule:
+
+```json
+"AU": {
+  "name": "Australia", "currency": "AUD", "locale": "en-AU", "phonePrefix": "+61", "paymentProvider": "Stripe",
+  "dataLaw": "Privacy Act 1988 and the Spam Act for messages",
+  "timeZones": ["Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", "Australia/Adelaide", "Australia/Perth"],
+  "languages": ["en"], "smsFollowUps": false,
+  "smsNote": "Automated follow up texts are off: the Spam Act needs consent for marketing messages. Replies and booking reminders still go out."
+}
+```
+
+The app checks every code, currency and time zone when it starts. Money in that currency is recognised by the price guard straight away.
+
+**Add a language:** copy `config/locales/en.json` to, for example, `de.json`, translate every text and phrase list, add the file to the list at the top of `src/lib/config.ts`, and add `"de"` to the markets that should offer it. Handoff phrases and STOP words from every language are always recognised, whatever the business's own language.
+
+**What changes per business:** a business picks its country, time zone (when the country has several) and language during onboarding, and can change the zone and language later under Automations. Quiet hours, follow ups and booking reminders use the business's own time zone.
+
+**Follow up rules per market:** `smsFollowUps` decides whether no reply and won follow ups may go by text. It is off where marketing texts need prior consent (the US under the TCPA, Canada under CASL, the UK and EU under PECR and ePrivacy, India under DLT rules, and others), and on in Nigeria, Ghana, Kenya and Mexico. Replies to a customer's own text and booking reminders always go out. Web chat and WhatsApp are not affected.
+
+**Niche packs:** every pack is offered in every market (`"markets": ["*"]`). A question can be limited to some markets (the dental NHS question is UK only), an ad template too, and `{currency}` in help text becomes the business's currency symbol. Pack questions and follow up messages are written in English for now; translating them is a config change in the pack file.
+
+**Customer data rights:** on any conversation, **Download their data** gives a JSON file of everything held about that customer, and **Delete customer data** (owners and managers, after ticking a confirmation) removes the customer, their messages, scheduled steps, activity and the alerts that named them, leaving one line in the log without their details.
 
 ## Run it locally
 
@@ -208,10 +247,11 @@ Nothing a business owner reads is hardcoded in page code.
 | What | File |
 | --- | --- |
 | Product name, tagline, landing page copy, sign in page copy, dashboard copy, score bands, sidebar items, tones, rate limits, session length | `config/app.json` |
-| Markets, currencies, payment providers, time zones | `config/markets.json` |
+| Countries, currencies, payment providers, data laws, time zones, languages offered, SMS follow up rules | `config/markets.json` |
+| The assistant's fixed messages, chat window text, handoff phrases, STOP and START words, price and question words, per language | `config/locales/*.json` |
 | Audit checks, weights, areas, impact levels, wording, fixes, thresholds | `config/audit.json` |
 | Niche packs, including qualifying questions, handoff words, the booking prompt and follow up sequences | `packs/*.json`, listed in `packs/index.ts` |
-| Assistant wording, handoff phrases, quiet hours, retries, web chat text, weekly alert threshold | `config/automation.json` |
+| Quiet hours, retries, AI cap and reply model, reply length, web chat limits, weekly alert threshold | `config/automation.json` |
 | Database changes | a new numbered file in `db/migrations` |
 
 All config files are validated when the app starts, so a mistake in one shows a clear error instead of a broken page.

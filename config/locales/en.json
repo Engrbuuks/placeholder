@@ -1,0 +1,87 @@
+{
+  "name": "English",
+  "assistant": {
+    "greeting": "Hi {firstName}, thanks for messaging {businessName}.",
+    "greetingNoName": "Hi, thanks for messaging {businessName}.",
+    "handoffReply": "Thank you. I have passed this to the {businessName} team and someone will reply here shortly.",
+    "unknownReply": "Good question. I would rather not guess, so I have asked the team to answer you here.",
+    "qualifiedReply": "Thank you, that is everything I need. {conversionPrompt}",
+    "afterHandoffReply": "Thanks, the team has your message and will reply here.",
+    "bookingRequestReply": "Thank you. I have passed your preferred time to the {businessName} team and they will confirm here shortly.",
+    "optOutReply": "You will not get any more automatic messages from {businessName}. Reply START if you change your mind.",
+    "optInReply": "Welcome back. You will get replies from {businessName} again."
+  },
+  "handoffKeywords": [
+    "speak to a person",
+    "speak to someone",
+    "talk to a person",
+    "talk to someone",
+    "real person",
+    "human",
+    "agent",
+    "manager",
+    "complaint",
+    "complain",
+    "refund",
+    "scam",
+    "not happy",
+    "disappointed",
+    "call me"
+  ],
+  "optOutKeywords": [
+    "stop",
+    "stopall",
+    "unsubscribe",
+    "cancel",
+    "end",
+    "quit",
+    "opt out"
+  ],
+  "optInKeywords": [
+    "start",
+    "unstop",
+    "yes start"
+  ],
+  "priceWords": [
+    "how much",
+    "price",
+    "prices",
+    "cost",
+    "costs",
+    "fee",
+    "fees",
+    "charge",
+    "rate",
+    "rates"
+  ],
+  "questionStarts": [
+    "what",
+    "whats",
+    "what's",
+    "how",
+    "when",
+    "where",
+    "which",
+    "who",
+    "why",
+    "do",
+    "does",
+    "did",
+    "can",
+    "could",
+    "is",
+    "are",
+    "will",
+    "would",
+    "should",
+    "have",
+    "has",
+    "any"
+  ],
+  "webchat": {
+    "title": "Chat with us",
+    "subtitle": "We usually reply in seconds",
+    "placeholder": "Type your message",
+    "launcherLabel": "Chat with us"
+  }
+}

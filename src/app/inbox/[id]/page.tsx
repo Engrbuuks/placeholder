@@ -10,7 +10,7 @@ import { markRead } from "@/lib/pipeline/owner";
 import { approveAction, discardAction, pauseAction } from "@/app/actions/pipeline";
 import { AppShell } from "@/components/AppShell";
 import { ChannelChip, InboxList, StagePill, parseFilter } from "@/components/inbox";
-import { ReplyBox, ScrollToEnd, StageForm } from "@/components/InboxForms";
+import { DeleteCustomerForm, ReplyBox, ScrollToEnd, StageForm } from "@/components/InboxForms";
 import { Icon } from "@/components/Icon";
 import { SubmitButton } from "@/components/ui";
 
@@ -58,10 +58,10 @@ export default async function ConversationPage({
   ]);
   if (!detail) notFound();
   const { lead, messages, upcoming, activity } = detail;
-  const pack = getPack(workspace.nichePack);
-  const timeZone = workspace.country ? markets[workspace.country].timeZone : "UTC";
+  const pack = getPack(workspace.nichePack, workspace.country);
+  const timeZone = workspace.timeZone;
   const when = new Intl.DateTimeFormat("en-GB", { timeZone, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
-  const channelLabel = lead.channel === "whatsapp" ? "WhatsApp" : "web chat";
+  const channelLabel = lead.channel === "whatsapp" ? "WhatsApp" : lead.channel === "sms" ? "SMS" : "web chat";
   const defaultBooking = localInput(lead.booked_for ?? new Date(Date.now() + 24 * 3600_000), timeZone);
   const seqName = (sid: string) => pack.sequences.find((s) => s.id === sid)?.name ?? "Follow up";
 
@@ -215,6 +215,25 @@ export default async function ConversationPage({
                 ))}
               </ul>
             )}
+          </section>
+
+          <section className="rounded-2xl border border-line bg-surface p-5">
+            <h3 className="text-[1.0625rem] tracking-[-0.02em]">Privacy</h3>
+            {lead.opted_out_at && (
+              <p className="mt-2 rounded-lg bg-accent-wash px-3 py-2 text-[0.8125rem]">
+                Opted out on {when.format(lead.opted_out_at)}. Nothing automatic is sent to them until they reply START.
+              </p>
+            )}
+            <p className="mt-2 text-[0.8125rem] text-ink-soft">If this customer asks what you hold about them, or asks you to delete it.</p>
+            <a
+              href={`/api/customers/${lead.id}/export`}
+              className="mt-3 inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm hover:border-ink/30"
+            >
+              <Icon name="download" className="h-4 w-4" /> Download their data
+            </a>
+            <div className="mt-4 border-t border-line pt-4">
+              <DeleteCustomerForm leadId={lead.id} />
+            </div>
           </section>
 
           <section className="rounded-2xl border border-line bg-surface p-5">
