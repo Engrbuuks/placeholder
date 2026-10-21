@@ -35,7 +35,7 @@ export function ReplyBox({ leadId, channelLabel }: { leadId: string; channelLabe
   );
 }
 
-export function StageForm({ leadId, defaultBookedFor }: { leadId: string; defaultBookedFor: string }) {
+export function StageForm({ leadId, defaultBookedFor, currency }: { leadId: string; defaultBookedFor: string; currency: string }) {
   const [state, action] = useActionState<ActionState, FormData>(stageAction, {});
   return (
     <div className="space-y-3">
@@ -60,14 +60,27 @@ export function StageForm({ leadId, defaultBookedFor }: { leadId: string; defaul
         </SubmitButton>
         <p className="font-mono text-[0.6875rem] text-ink-soft">Reminders are scheduled before this time.</p>
       </form>
+      <form action={action} className="space-y-2 border-t border-line pt-3">
+        <input type="hidden" name="leadId" value={leadId} />
+        <input type="hidden" name="stage" value="won" />
+        <label htmlFor="sale-value" className="block text-sm font-medium">
+          Sale value <span className="font-normal text-ink-soft">(optional, for your results)</span>
+        </label>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-sm text-ink-soft">{currency}</span>
+          <input
+            id="sale-value"
+            name="value"
+            inputMode="decimal"
+            placeholder="0"
+            className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm focus:border-ink focus:outline-none"
+          />
+        </div>
+        <SubmitButton tone="dark" pending="Saving">
+          Mark won
+        </SubmitButton>
+      </form>
       <div className="flex gap-2">
-        <form action={action}>
-          <input type="hidden" name="leadId" value={leadId} />
-          <input type="hidden" name="stage" value="won" />
-          <SubmitButton tone="quiet" pending="Saving">
-            Mark won
-          </SubmitButton>
-        </form>
         <form action={action}>
           <input type="hidden" name="leadId" value={leadId} />
           <input type="hidden" name="stage" value="lost" />

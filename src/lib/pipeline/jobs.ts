@@ -8,10 +8,14 @@ import { formatBookingTime } from "../time";
 import { sendEmail } from "../channels/email";
 import { runAudit } from "../audit/run";
 import { counts } from "../health";
+import { change, formatDuration, resultsFor } from "../results";
+import { formatMoney } from "../config";
 import { getWorkspace, latestAudits, saveAudit } from "../workspaces";
 import { getLead, leadLabel, loadContext } from "./context";
 import { deliverMessage } from "./delivery";
 import { scheduleChainedStep, smsFollowUpsAllowed } from "./sequences";
+import { writeReviewRequest } from "./reviews";
+import { campaignSend } from "./campaigns";
 
 type FollowupPayload = {
   trigger: "no_reply" | "booked" | "won";
@@ -122,6 +126,8 @@ async function weeklyCheck(job: ClaimedJob) {
   const { outcome } = await runAudit(presence);
   await saveAudit(job.workspace_id, outcome, workspace.websiteUrl);
 
+  await sendWeeklyResults(job.workspace_id, workspace.timeZone, workspace.country);
+
   await withTenant(job.workspace_id, async (c) => {
     const after = { ...outcome, createdAt: new Date() };
     const drop = before ? before.score - outcome.score : 0;
@@ -149,11 +155,76 @@ async function weeklyCheck(job: ClaimedJob) {
   });
 }
 
+async function reviewRequest(job: ClaimedJob) {
+  if (!job.lead_id) throw new PermanentError("Review request has no lead.");
+  const leadId = job.lead_id;
+  const result = await withTenant(job.workspace_id, async (c) => {
+    const ctx = await loadContext(c, job.workspace_id);
+    const lead = await getLead(c, leadId);
+    if (!ctx || !lead) return { skip: "The conversation no longer exists" };
+    const written = await writeReviewRequest(c, ctx, lead);
+    if ("skip" in written) await logActivity(c, job.workspace_id, { leadId, kind: "review_skipped", summary: `Review request not sent: ${written.skip}` });
+    return written;
+  });
+  if ("messageId" in result) await deliverOrQueue(job.workspace_id, leadId, result.messageId);
+}
+
+/** Sends now; if the channel is briefly down, a delivery job retries it with backoff. */
+export async function deliverOrQueue(workspaceId: string, leadId: string, messageId: string) {
+  try {
+    await deliverMessage(workspaceId, messageId);
+  } catch {
+    await withTenant(workspaceId, (c) =>
+      enqueue(c, { workspaceId, kind: "deliver", leadId, payload: { messageId }, dedupeKey: `deliver:${messageId}` }),
+    );
+  }
+}
+
+/** The owner's weekly report: what came in, how fast it was answered, what it turned into, and where from. */
+export async function sendWeeklyResults(workspaceId: string, timeZone: string, country: string | null) {
+  const r = await resultsFor(workspaceId, 7, timeZone);
+  const money = (v: number) => formatMoney(v, country);
+  const diff = (now: number, before: number) => {
+    const pct = change(now, before);
+    return pct === null ? "" : pct === 0 ? " (same as last week)" : ` (${pct > 0 ? "up" : "down"} ${Math.abs(pct)}% on last week)`;
+  };
+  const top = r.sources[0];
+  const lines = [
+    `Leads: ${r.current.leads}${diff(r.current.leads, r.previous.leads)}`,
+    `Booked: ${r.current.booked}. Won: ${r.current.won}. Revenue: ${money(r.current.revenue)}${diff(r.current.revenue, r.previous.revenue)}`,
+    `Typical first reply: ${formatDuration(r.medianFirstReplySeconds)}. ${Math.round(r.answeredWithinMinute * 100)}% answered within a minute.`,
+    r.afterHours > 0 ? `${r.afterHours} came in while you were closed and were answered straight away.` : null,
+    top ? `Best source: ${top.label}, with ${top.leads} lead${top.leads === 1 ? "" : "s"} and ${money(top.revenue)}.` : null,
+    r.reviews.rated > 0 ? `Reviews: ${r.reviews.rated} rated, average ${r.reviews.average} out of 5, ${r.reviews.clicks} opened your review link.` : null,
+    r.campaigns.sent > 0 ? `Campaigns: ${r.campaigns.sent} sent, ${r.campaigns.replied} replies, ${money(r.campaigns.revenue)} won back.` : null,
+  ].filter(Boolean);
+  await withTenant(workspaceId, (c) =>
+    notify(c, workspaceId, {
+      kind: "weekly_results",
+      title: `Your week: ${r.current.leads} lead${r.current.leads === 1 ? "" : "s"}, ${r.current.won} sale${r.current.won === 1 ? "" : "s"}, ${money(r.current.revenue)}`,
+      body: lines.join("\n"),
+      link: "/results?days=7",
+      email: true,
+    }),
+  );
+}
+
 export const handlers: Record<ClaimedJob["kind"], (job: ClaimedJob) => Promise<void>> = {
   followup,
   deliver,
   email,
   weekly_check: weeklyCheck,
+  review_request: reviewRequest,
+  campaign_send: campaignSend,
+};
+
+const jobNames: Record<ClaimedJob["kind"], string> = {
+  deliver: "A message",
+  email: "An alert email",
+  weekly_check: "The weekly check",
+  followup: "A follow up",
+  review_request: "A review request",
+  campaign_send: "A campaign batch",
 };
 
 /** Runs when a job has used up its retries, so nothing is left silently waiting. */
@@ -169,7 +240,7 @@ export async function onGiveUp(job: ClaimedJob, error: unknown) {
     await logActivity(c, job.workspace_id, {
       leadId: job.lead_id,
       kind: "job_failed",
-      summary: `${job.kind === "deliver" ? "A message" : job.kind === "email" ? "An alert email" : job.kind === "weekly_check" ? "The weekly check" : "A follow up"} failed after ${job.attempts} attempts: ${reason}`,
+      summary: `${jobNames[job.kind]} failed after ${job.attempts} attempts: ${reason}`,
     });
     if (job.kind !== "email") {
       await notify(c, job.workspace_id, {

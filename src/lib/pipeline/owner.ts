@@ -4,6 +4,8 @@ import { withTenant } from "../db";
 import { logActivity } from "../activity";
 import { cancelLeadJobs, enqueue } from "../queue";
 import { formatBookingTime } from "../time";
+import { formatMoney } from "../config";
+import { scheduleReviewRequest } from "./reviews";
 import { getLead, loadContext, type Lead } from "./context";
 import { deliverMessage } from "./delivery";
 import { scheduleBookingReminders, scheduleChainedStep } from "./sequences";
@@ -69,18 +71,23 @@ export async function discardMessage(workspaceId: string, messageId: string) {
   });
 }
 
-export async function setStage(workspaceId: string, leadId: string, stage: Lead["stage"], bookedFor?: Date | null) {
+export async function setStage(workspaceId: string, leadId: string, stage: Lead["stage"], bookedFor?: Date | null, value?: number | null) {
   return withTenant(workspaceId, async (c) => {
     const ctx = await loadContext(c, workspaceId);
     const lead = await getLead(c, leadId);
     if (!ctx || !lead) throw new Error("Conversation not found.");
     if (stage === "booked" && (!bookedFor || Number.isNaN(bookedFor.getTime()))) throw new Error("Choose the date and time of the booking.");
 
-    await c.query("update leads set stage = $2, booked_for = $3, updated_at = now() where id = $1", [
-      leadId,
-      stage,
-      stage === "booked" ? bookedFor : lead.booked_for,
-    ]);
+    if (value !== undefined && value !== null && (!Number.isFinite(value) || value < 0)) throw new Error("Enter the sale value as a number, or leave it empty.");
+    await c.query(
+      `update leads set stage = $2, booked_for = $3, updated_at = now(),
+         booked_at = case when $2 = 'booked' then coalesce(booked_at, now()) else booked_at end,
+         won_at = case when $2 = 'won' then now() when $2 in ('lost') then null else won_at end,
+         lost_at = case when $2 = 'lost' then now() when $2 = 'won' then null else lost_at end,
+         value = case when $2 = 'won' and $4::numeric is not null then $4::numeric else value end
+       where id = $1`,
+      [leadId, stage, stage === "booked" ? bookedFor : lead.booked_for, value ?? null],
+    );
     await cancelLeadJobs(c, leadId, "no_reply");
 
     let summary = `Moved to ${stage}`;
@@ -90,7 +97,11 @@ export async function setStage(workspaceId: string, leadId: string, stage: Lead[
     } else if (stage === "won") {
       await cancelLeadJobs(c, leadId, "booked");
       const at = await scheduleChainedStep(c, ctx, lead, "won", 0, new Date());
-      summary = at ? "Marked as won; thank you message scheduled" : "Marked as won";
+      const review = await scheduleReviewRequest(c, ctx, { ...lead, stage: "won" });
+      const worth = value ? `, worth ${formatMoney(value, ctx.country)}` : "";
+      summary = [`Marked as won${worth}`, at && "thank you message scheduled", review && `review request on ${formatBookingTime(review, ctx.timeZone)}`]
+        .filter(Boolean)
+        .join("; ");
     } else if (stage === "lost") {
       await cancelLeadJobs(c, leadId);
       summary = "Marked as lost; all follow ups stopped";

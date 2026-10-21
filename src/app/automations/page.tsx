@@ -8,7 +8,7 @@ import { marketOptions } from "@/lib/marketOptions";
 import { automationOverview } from "@/lib/inbox";
 import { runNowAction } from "@/app/actions/pipeline";
 import { AppShell } from "@/components/AppShell";
-import { AutomationSettingsForm } from "@/components/AutomationForms";
+import { AutomationSettingsForm, ReviewSettingsForm } from "@/components/AutomationForms";
 import { Icon } from "@/components/Icon";
 import { Notice, SubmitButton } from "@/components/ui";
 
@@ -155,6 +155,23 @@ export default async function AutomationsPage({ searchParams }: { searchParams: 
           </Card>
         </div>
 
+        <section id="reviews" className="scroll-mt-6 rounded-2xl border border-line bg-surface p-5 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-[1.0625rem] font-semibold tracking-[-0.02em]">Reviews</h2>
+              <p className="mt-1 max-w-2xl text-[0.9375rem] text-ink-soft">
+                More good reviews bring more customers. Happy customers are sent straight to your review page; unhappy ones come to you first, privately.
+              </p>
+            </div>
+            <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-mono text-xs ${o.settings.reviewEnabled ? "bg-ink text-white" : "border border-line text-ink-soft"}`}>
+              {o.settings.reviewEnabled ? "On" : "Off"}
+            </span>
+          </div>
+          <div className="mt-4 max-w-2xl">
+            <ReviewSettingsForm enabled={o.settings.reviewEnabled} link={o.settings.reviewLink ?? ""} delayHours={o.settings.reviewDelayHours} />
+          </div>
+        </section>
+
         {/* Sequences */}
         <Card title={`Follow up sequences for ${pack.shortName.toLowerCase()}`}>
           <p className="-mt-2 mb-4 text-sm text-ink-soft">Shown for an example customer called Ada. Each message uses the customer&apos;s own first name.</p>
@@ -190,7 +207,7 @@ export default async function AutomationsPage({ searchParams }: { searchParams: 
                 <li key={f.id} className="flex flex-wrap items-start justify-between gap-2 py-3">
                   <span>
                     <span className="block text-sm font-medium">
-                      {f.kind === "deliver" ? "Message delivery" : f.kind === "email" ? "Alert email" : f.kind === "weekly_check" ? "Weekly check" : "Follow up"} after{" "}
+                      {({ deliver: "Message delivery", email: "Alert email", weekly_check: "Weekly check", review_request: "Review request", campaign_send: "Campaign batch" } as Record<string, string>)[f.kind] ?? "Follow up"} after{" "}
                       {f.attempts} attempts
                     </span>
                     <span className="block text-[0.8125rem] text-accent-deep">{f.last_error}</span>

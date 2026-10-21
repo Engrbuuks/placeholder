@@ -5,6 +5,7 @@ export function render(template: string, vars: TemplateVars): string {
   return template
     .replace(/\{(\w+)\}/g, (_, name: string) => (vars[name] ?? "").toString())
     .replace(/\s+([,.!?])/g, "$1")
+    .replace(/,([.!?])/g, "$1") // "Thank you, {firstName}!" with no name reads "Thank you!"
     .replace(/\s{2,}/g, " ")
     .trim();
 }

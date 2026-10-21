@@ -228,6 +228,12 @@
         "icon": "home"
       },
       {
+        "id": "results",
+        "label": "Results",
+        "href": "/results",
+        "icon": "gauge"
+      },
+      {
         "id": "inbox",
         "label": "Inbox",
         "href": "/inbox",
@@ -238,6 +244,12 @@
         "label": "Automations",
         "href": "/automations",
         "icon": "flow"
+      },
+      {
+        "id": "campaigns",
+        "label": "Campaigns",
+        "href": "/campaigns",
+        "icon": "megaphone"
       },
       {
         "id": "channels",
@@ -262,10 +274,6 @@
       {
         "label": "Ads",
         "icon": "megaphone"
-      },
-      {
-        "label": "Reports",
-        "icon": "file"
       }
     ],
     "soonLabel": "Soon",

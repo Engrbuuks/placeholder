@@ -14,6 +14,13 @@ type Props = {
   language?: string;
 };
 
+/** The host page and referrer the widget passed in, if any. Opened directly, the chat has neither. */
+function pageContext(): { page?: string; referrer?: string } {
+  if (typeof window === "undefined") return {};
+  const q = new URLSearchParams(window.location.search);
+  return { page: q.get("page")?.slice(0, 600) || undefined, referrer: q.get("ref")?.slice(0, 300) || undefined };
+}
+
 function visitorId(chatKey: string): string {
   const storageKey = `ph_chat_${chatKey}`;
   try {
@@ -72,7 +79,7 @@ export function ChatWindow({ chatKey, businessName, title, subtitle, placeholder
       const res = await fetch(`/api/chat/${chatKey}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ visitor, text: body }),
+        body: JSON.stringify({ visitor, text: body, context: pageContext() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Your message was not sent.");

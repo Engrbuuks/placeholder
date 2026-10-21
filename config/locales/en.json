@@ -9,7 +9,15 @@
     "afterHandoffReply": "Thanks, the team has your message and will reply here.",
     "bookingRequestReply": "Thank you. I have passed your preferred time to the {businessName} team and they will confirm here shortly.",
     "optOutReply": "You will not get any more automatic messages from {businessName}. Reply START if you change your mind.",
-    "optInReply": "Welcome back. You will get replies from {businessName} again."
+    "optInReply": "Welcome back. You will get replies from {businessName} again.",
+    "reviewAsk": "Thank you for choosing {businessName}, {firstName}. How did we do? Reply with a number from 1 (poor) to 5 (excellent).",
+    "reviewHappy": "Thank you, {firstName}! Would you share that in a quick review? It really helps others find us: {link}",
+    "reviewUnhappy": "Thank you for telling us, {firstName}. I am sorry it was not better. I have passed this to the {businessName} team and someone will be in touch.",
+    "missedCallText": "Hi, this is {businessName}. Sorry we missed your call. How can we help? Reply here and we will get straight back to you.",
+    "missedCallVoice": "Sorry, we could not take your call. We have just sent you a text message.",
+    "formThanks": "Thank you. We have your message and will reply shortly.",
+    "formConsent": "I agree to receive texts from {businessName} about my enquiry and offers. Reply STOP to opt out at any time.",
+    "formIntro": "Leave your details and we will get back to you in minutes."
   },
   "handoffKeywords": [
     "speak to a person",
@@ -83,5 +91,12 @@
     "subtitle": "We usually reply in seconds",
     "placeholder": "Type your message",
     "launcherLabel": "Chat with us"
+  },
+  "voiceLanguage": "en-US",
+  "campaignIdeas": {
+    "quiet": "Hi {firstName}, it's {businessName}. You asked about us a little while ago. Are you still looking? Reply here and we will help straight away.",
+    "lost": "Hi {firstName}, {businessName} here. We have something new that may suit you better than before. Would you like the details?",
+    "customers": "Hi {firstName}, thank you again for choosing {businessName}. As a past customer you get the first look at our latest offer. Reply YES for the details.",
+    "booked_no_show": "Hi {firstName}, we missed you at your appointment with {businessName}. Would you like to choose a new time?"
   }
 }

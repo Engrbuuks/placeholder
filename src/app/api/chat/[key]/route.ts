@@ -5,6 +5,7 @@ import { automationConfig } from "@/lib/config";
 import { isUuid } from "@/lib/db";
 import { overLimit, clientIp } from "@/lib/auth";
 import { visitorMessages, workspaceForWebchat } from "@/lib/webchat";
+import { attributionFromPage } from "@/lib/attribution";
 import { handleInbound } from "@/lib/pipeline/engine";
 import { runDueJobs } from "@/lib/pipeline/worker";
 
@@ -28,6 +29,7 @@ const sendSchema = z.object({
   visitor: z.string().refine(isUuid, "Invalid visitor"),
   text: z.string().trim().min(1).max(automationConfig.webchat.maxMessageLength),
   name: z.string().trim().max(80).optional(),
+  context: z.object({ page: z.string().max(600).optional(), referrer: z.string().max(300).optional() }).optional(),
 });
 
 export async function POST(request: Request, { params }: Params) {
@@ -50,6 +52,7 @@ export async function POST(request: Request, { params }: Params) {
     externalId: parsed.data.visitor,
     text: parsed.data.text,
     name: parsed.data.name ?? null,
+    attribution: { source: "webchat", ...attributionFromPage(parsed.data.context?.page, parsed.data.context?.referrer) },
   });
   after(() => runDueJobs({ budgetMs: automationConfig.worker.inlineBudgetMs }));
   return NextResponse.json({ messages: await visitorMessages(workspaceId, parsed.data.visitor) }, { headers: noStore });

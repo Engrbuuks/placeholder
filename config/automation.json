@@ -60,5 +60,11 @@
       "id": "lost",
       "label": "Lost"
     }
-  ]
+  ],
+  "campaigns": {
+    "frequencyCapDays": 7,
+    "batchSize": 25,
+    "maxAudience": 5000,
+    "attributionDays": 60
+  }
 }

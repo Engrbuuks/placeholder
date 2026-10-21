@@ -14,6 +14,7 @@ AI marketing platform for owner run businesses in Nigeria and the UK. Build roun
 * **Audit page:** every leak with its fix.
 
 * **Automation pipeline (round 2):** see the next section.
+* **Results engine (round 5):** every lead's source and campaign, deal values, a Results page (funnel, speed to lead, after hours leads, revenue by source), a weekly results email, the review engine, reactivation campaigns, missed call text back and a lead form with consent. See **Automations that bring results**.
 * **Global (round 4):** 14 countries in config, a time zone and language per business, money in any currency (including lakh and crore) in the price guard, English, French, Spanish and Portuguese, SMS through Twilio, STOP and START on every channel, follow up rules per market, and customer data export and deletion. See **Going global**.
 * **Free hosting (round 3):** one command install on Oracle Cloud's free server with the database, an every minute worker, HTTPS, daily backups, deploys from GitHub that keep the site up and roll back on their own, and a monthly AI spending cap per workspace. See **Deploy free on Oracle Cloud**.
 
@@ -67,6 +68,18 @@ The platform uses one Meta app; each business connects its own number.
 1. In your Meta app, set the webhook address to `https://YOUR-APP/api/webhooks/whatsapp` with the same verify token as `WHATSAPP_VERIFY_TOKEN`, and subscribe to the **messages** field.
 2. Set `WHATSAPP_APP_SECRET` (from the app's basic settings) and `ENCRYPTION_KEY` on the server.
 3. Each business opens **Channels**, pastes its phone number ID and a permanent access token (stored encrypted, never shown again), and optionally names an approved follow up template whose first variable is the customer's first name.
+
+## Automations that bring results
+
+**Know what works (Results page).** Every lead keeps where it came from: the channel, the page, and the utm_source, utm_medium and utm_campaign of the link (Google and Facebook ad click ids and search referrers are recognised too). When you mark a sale won, add its value. The Results page shows leads, booked, won and revenue against the previous period, the funnel, speed to lead and the share answered within a minute, leads that arrived while you were closed, revenue by source, reviews, and what campaigns brought back. Every week the owner gets the same numbers by email with the weekly check.
+
+**Reviews.** Under Automations, add your review link (on Google: Business Profile, then Ask for reviews) and turn requests on. A set number of hours after a sale is marked won, outside quiet hours, the customer is asked for a rating from 1 to 5. A 4 or 5 gets your review link through a tracked address (`/r/...`), so opened links are counted. 1 to 3 gets an apology and you get an alert, so you can put it right before anything is posted. Each customer is asked once, never after STOP, and by text only where the market allows it or they gave consent.
+
+**Reactivation campaigns.** On Campaigns, pick a group (went quiet for a number of days, lost, past customers, or booked and then nothing), write one short message, and press **Check who gets it**. Each person is checked before anything is sent: opted out, messaged by another campaign in the last 7 days, web chat visitors (who cannot be messaged first), the market's consent rule for texts, and WhatsApp's 24 hour window (outside it, your approved template is sent instead, and the preview says so). The reasons for everyone left out are listed. Sending runs in batches of 25, waits out quiet hours in your time zone, and can be stopped. Replies alert you with the campaign's name, and replies, bookings, sales and revenue within 60 days are counted per campaign. The limits are in `config/automation.json` under `campaigns`, and the suggested messages per group in each language file under `campaignIdeas`.
+
+**Missed call text back.** With SMS connected, set your Twilio number's Voice webhook ("A call comes in") to `https://YOUR-APP/api/webhooks/voice` and, under Channels, give the phone that should ring. Calls ring that phone for 20 seconds. If nobody answers, the caller hears a short message, gets a text at once, and the conversation starts in your inbox; their reply is not greeted a second time. Both voice webhooks check Twilio's signature like the SMS one.
+
+**Lead form.** Every business gets a form at `https://YOUR-APP/f/<key>` (the same key as the web chat), to link from Instagram, Google or a QR code, or embed with the iframe code on Channels. Local phone numbers are turned into international form with the business's country code. With SMS connected, the person gets a text from the assistant within seconds; without it, you are alerted to call them. The consent box records agreement to marketing texts, which allows follow ups even where the law needs consent.
 
 ## Going global
 
@@ -248,10 +261,10 @@ Nothing a business owner reads is hardcoded in page code.
 | --- | --- |
 | Product name, tagline, landing page copy, sign in page copy, dashboard copy, score bands, sidebar items, tones, rate limits, session length | `config/app.json` |
 | Countries, currencies, payment providers, data laws, time zones, languages offered, SMS follow up rules | `config/markets.json` |
-| The assistant's fixed messages, chat window text, handoff phrases, STOP and START words, price and question words, per language | `config/locales/*.json` |
+| The assistant's fixed messages, review, missed call and form texts, suggested campaign messages, chat window text, handoff phrases, STOP and START words, price and question words, per language | `config/locales/*.json` |
 | Audit checks, weights, areas, impact levels, wording, fixes, thresholds | `config/audit.json` |
 | Niche packs, including qualifying questions, handoff words, the booking prompt and follow up sequences | `packs/*.json`, listed in `packs/index.ts` |
-| Quiet hours, retries, AI cap and reply model, reply length, web chat limits, weekly alert threshold | `config/automation.json` |
+| Quiet hours, retries, AI cap and reply model, reply length, web chat limits, weekly alert threshold, campaign limits (frequency cap, batch size, audience size, days a sale counts towards a campaign) | `config/automation.json` |
 | Database changes | a new numbered file in `db/migrations` |
 
 All config files are validated when the app starts, so a mistake in one shows a clear error instead of a broken page.

@@ -14,10 +14,12 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@node-rs/argon2", "pg"],
   async headers() {
     return [
-      // Every page except the chat window refuses to be shown inside another site.
-      { source: "/((?!chat/).*)", headers: [...shared, { key: "X-Frame-Options", value: "DENY" }, { key: "Content-Security-Policy", value: "frame-ancestors 'none'" }] },
+      // Every page except the chat window and the lead form refuses to be shown inside another site.
+      { source: "/((?!chat/|f/).*)", headers: [...shared, { key: "X-Frame-Options", value: "DENY" }, { key: "Content-Security-Policy", value: "frame-ancestors 'none'" }] },
       // The chat window is embedded on businesses' own websites by the widget.
       { source: "/chat/:path*", headers: [...shared, { key: "Content-Security-Policy", value: "frame-ancestors *" }] },
+      // The lead form is embedded on businesses' own websites with an iframe.
+      { source: "/f/:path*", headers: [...shared, { key: "Content-Security-Policy", value: "frame-ancestors *" }] },
     ];
   },
 };

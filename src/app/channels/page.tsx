@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { loadAppPage } from "@/lib/shell";
 import { relativeTime } from "@/lib/health";
-import { channelsOverview } from "@/lib/inbox";
+import { automationSettingsFor, channelsOverview } from "@/lib/inbox";
 import { ensureWebchat } from "@/lib/webchat";
 import { disconnectSms, disconnectWhatsApp, rotateWebchatKey } from "@/app/actions/pipeline";
 import { AppShell } from "@/components/AppShell";
-import { SmsForm, WhatsAppForm } from "@/components/AutomationForms";
+import { MissedCallForm, SmsForm, WhatsAppForm } from "@/components/AutomationForms";
 import { automationConfig, markets } from "@/lib/config";
 import { Icon } from "@/components/Icon";
 import { CopyButton, SubmitButton } from "@/components/ui";
@@ -39,12 +39,15 @@ function Check({ ok, label, fix }: { ok: boolean; label: string; fix: string }) 
 export default async function ChannelsPage() {
   const { session, workspace, shell } = await loadAppPage();
   const key = await ensureWebchat(session.workspaceId);
-  const [c, origin] = await Promise.all([channelsOverview(session.workspaceId), appOrigin()]);
+  const [c, origin, settings] = await Promise.all([channelsOverview(session.workspaceId), appOrigin(), automationSettingsFor(session.workspaceId)]);
   const lang = workspace.language !== "en" ? ` data-lang="${workspace.language}"` : "";
   const snippet = `<script src="${origin}/widget.js" data-key="${key}"${lang} async></script>`;
   const wa = c.whatsapp;
   const webhook = `${origin}/api/webhooks/whatsapp`;
   const smsWebhook = `${origin}/api/webhooks/sms`;
+  const voiceWebhook = `${origin}/api/webhooks/voice`;
+  const formLink = `${origin}/f/${key}`;
+  const formEmbed = `<iframe src="${formLink}" title="Contact form" style="width:100%;max-width:480px;height:640px;border:0" loading="lazy"></iframe>`;
   const sms = c.sms;
   const market = workspace.country ? markets[workspace.country] : null;
 
@@ -210,6 +213,64 @@ export default async function ChannelsPage() {
                   <li>{market?.smsFollowUps ? `Follow up texts are allowed in ${market.name}.` : market?.smsNote || "Automated follow up texts are off. Replies and booking reminders still go out."}</li>
                 </ul>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Lead form */}
+        <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6 lg:col-span-2">
+          <h2 className="flex items-center gap-2 text-[1.0625rem] font-semibold tracking-[-0.02em]">
+            <Icon name="file" className="h-[18px] w-[18px]" /> Lead form
+          </h2>
+          <p className="mt-1 max-w-3xl text-[0.9375rem] text-ink-soft">
+            A short form for your website, Instagram bio, Google profile or a QR code on a flyer.{" "}
+            {sms?.has_secret
+              ? "People who leave a phone number get a text from the assistant within seconds."
+              : "Connect SMS above so people who leave a phone number get a text within seconds; until then you are alerted to call them."}{" "}
+            A consent box lets them agree to follow up texts, which unlocks follow ups even where the law needs consent.
+          </p>
+          <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div>
+              <p className="text-sm font-medium">Link to share</p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <code className="min-w-0 flex-1 break-all rounded-lg bg-mist px-3 py-2 font-mono text-[0.75rem]">{formLink}</code>
+                <CopyButton text={formLink} />
+              </div>
+              <a href={`/f/${key}`} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-2 text-sm underline underline-offset-4">
+                Open the form
+              </a>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Code for your website</p>
+              <div className="mt-1 rounded-xl bg-ink p-3">
+                <code className="block break-all font-mono text-[0.75rem] leading-relaxed text-white/90">{formEmbed}</code>
+              </div>
+              <div className="mt-2">
+                <CopyButton text={formEmbed} label="Copy code" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Missed calls */}
+        <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6 lg:col-span-2">
+          <h2 className="flex items-center gap-2 text-[1.0625rem] font-semibold tracking-[-0.02em]">
+            <Icon name="phone" className="h-[18px] w-[18px]" /> Missed call text back
+          </h2>
+          <p className="mt-1 max-w-3xl text-[0.9375rem] text-ink-soft">
+            Most people who reach voicemail call the next business on the list. A text within seconds keeps them with you.
+          </p>
+          <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <MissedCallForm enabled={settings.missedCallEnabled} forwardTo={settings.forwardTo ?? ""} smsReady={Boolean(sms?.has_secret)} />
+            <div className="rounded-xl border border-line p-4 self-start">
+              <p className="text-sm font-medium">Voice webhook for Twilio</p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <code className="min-w-0 flex-1 break-all rounded-lg bg-mist px-3 py-2 font-mono text-[0.75rem]">{voiceWebhook}</code>
+                <CopyButton text={voiceWebhook} />
+              </div>
+              <p className="mt-1 font-mono text-[0.6875rem] text-ink-soft">
+                In Twilio, open your number, and under Voice set &quot;A call comes in&quot; to this address with HTTP POST. Put your Twilio number on your website and ads.
+              </p>
             </div>
           </div>
         </section>

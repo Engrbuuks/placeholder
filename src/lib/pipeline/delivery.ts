@@ -12,7 +12,7 @@ type Row = {
   lead_id: string;
   body: string;
   status: string;
-  channel: "webchat" | "whatsapp" | "sms";
+  channel: "webchat" | "whatsapp" | "sms" | "form";
   author: string;
   external_id: string;
   opted_out_at: Date | null;
@@ -62,6 +62,11 @@ export async function deliverMessage(workspaceId: string, messageId: string, fet
   // Follow ups never go to a customer who opted out, whatever the channel.
   if (row.opted_out_at && row.author === "automation") {
     await finish("skipped", "Not sent: the customer opted out of messages.");
+    return "skipped";
+  }
+
+  if (row.channel === "form") {
+    await finish("skipped", "This customer came from the lead form and has no text channel. Call or email them.");
     return "skipped";
   }
 

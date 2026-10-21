@@ -72,7 +72,15 @@ export async function stageAction(_prev: ActionState, formData: FormData): Promi
       if (!bookedFor) return { error: "Choose the date and time of the booking." };
       if (bookedFor.getTime() < Date.now() - 60_000) return { error: "That time has already passed." };
     }
-    const summary = await setStage(workspaceId, id, stage as (typeof stages)[number], bookedFor);
+    let value: number | null = null;
+    if (stage === "won") {
+      const raw = String(formData.get("value") ?? "").replace(/[^\d.]/g, "");
+      if (raw) {
+        value = Number(raw);
+        if (!Number.isFinite(value) || value < 0 || value > 1e12) return { error: "Enter the sale value as a number, or leave it empty." };
+      }
+    }
+    const summary = await setStage(workspaceId, id, stage as (typeof stages)[number], bookedFor, value);
     revalidatePath(`/inbox/${id}`);
     return { notice: summary };
   } catch (error) {
@@ -275,4 +283,62 @@ export async function deleteCustomerAction(_prev: ActionState, formData: FormDat
   if (!deleted) return { error: "That customer was not found. They may already be deleted." };
   revalidatePath("/inbox");
   redirect("/inbox?filter=all&deleted=1");
+}
+
+const reviewSchema = z.object({
+  enabled: z.boolean(),
+  link: z.union([z.literal(""), z.string().trim().url("Paste the full review link, starting with https://.").refine((v) => /^https:\/\//.test(v), "The review link must start with https://.")]),
+  delayHours: z.coerce.number().int().min(1, "Wait at least 1 hour.").max(720, "Ask within 30 days of the sale."),
+});
+
+export async function saveReviewSettings(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { workspaceId } = await requireSession();
+  const parsed = reviewSchema.safeParse({
+    enabled: formData.get("reviewEnabled") === "on",
+    link: String(formData.get("reviewLink") ?? ""),
+    delayHours: formData.get("reviewDelayHours") ?? 24,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const d = parsed.data;
+  if (d.enabled && !d.link) return { error: "Add your review link before turning review requests on." };
+  await withTenant(workspaceId, async (c) => {
+    await c.query(
+      `insert into automation_settings (workspace_id, review_enabled, review_link, review_delay_hours) values ($1, $2, $3, $4)
+       on conflict (workspace_id) do update set review_enabled = $2, review_link = $3, review_delay_hours = $4, updated_at = now()`,
+      [workspaceId, d.enabled, d.link || null, d.delayHours],
+    );
+    await logActivity(c, workspaceId, { kind: "settings", summary: `Review requests ${d.enabled ? `on, ${d.delayHours} hours after a sale` : "off"}` });
+  });
+  revalidatePath("/automations");
+  return { notice: d.enabled ? "Saved. Customers you mark as won will be asked for a rating." : "Saved. Review requests are off." };
+}
+
+const missedCallSchema = z.object({
+  enabled: z.boolean(),
+  forwardTo: z.union([
+    z.literal(""),
+    z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/[\s().-]/g, ""))
+      .pipe(z.string().regex(/^\+[1-9]\d{7,14}$/, "Write the phone to ring in international form, starting with + and the country code.")),
+  ]),
+});
+
+export async function saveMissedCalls(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { workspaceId } = await requireSession();
+  const parsed = missedCallSchema.safeParse({ enabled: formData.get("missedCallEnabled") === "on", forwardTo: String(formData.get("forwardTo") ?? "") });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const d = parsed.data;
+  if (d.enabled && !d.forwardTo) return { error: "Add the phone that should ring when customers call your Twilio number." };
+  await withTenant(workspaceId, async (c) => {
+    await c.query(
+      `insert into automation_settings (workspace_id, missed_call_enabled, forward_to) values ($1, $2, $3)
+       on conflict (workspace_id) do update set missed_call_enabled = $2, forward_to = $3, updated_at = now()`,
+      [workspaceId, d.enabled, d.forwardTo || null],
+    );
+    await logActivity(c, workspaceId, { kind: "settings", summary: `Missed call text back ${d.enabled ? "on" : "off"}` });
+  });
+  revalidatePath("/channels");
+  return { notice: d.enabled ? "Saved. Calls ring your phone, and a missed call gets a text straight away." : "Saved. Missed call text back is off." };
 }

@@ -9,7 +9,15 @@
     "afterHandoffReply": "Merci, l'équipe a bien reçu votre message et vous répondra ici.",
     "bookingRequestReply": "Merci. J'ai transmis l'horaire que vous préférez à l'équipe {businessName}, qui vous confirmera ici très bientôt.",
     "optOutReply": "Vous ne recevrez plus de messages automatiques de {businessName}. Répondez START si vous changez d'avis.",
-    "optInReply": "Bon retour. Vous recevrez à nouveau les réponses de {businessName}."
+    "optInReply": "Bon retour. Vous recevrez à nouveau les réponses de {businessName}.",
+    "reviewAsk": "Merci d'avoir choisi {businessName}, {firstName}. Comment cela s'est passé ? Répondez avec une note de 1 (mauvais) à 5 (excellent).",
+    "reviewHappy": "Merci {firstName} ! Pourriez vous le dire dans un court avis ? Cela aide beaucoup : {link}",
+    "reviewUnhappy": "Merci de nous l'avoir dit, {firstName}. Je suis désolé que ce ne soit pas mieux. J'ai transmis votre message à l'équipe {businessName}, quelqu'un vous contactera.",
+    "missedCallText": "Bonjour, ici {businessName}. Désolé d'avoir manqué votre appel. Comment pouvons nous vous aider ? Répondez ici et nous revenons vers vous tout de suite.",
+    "missedCallVoice": "Désolé, nous n'avons pas pu prendre votre appel. Nous venons de vous envoyer un SMS.",
+    "formThanks": "Merci. Nous avons bien reçu votre message et vous répondrons très vite.",
+    "formConsent": "J'accepte de recevoir des SMS de {businessName} au sujet de ma demande et de ses offres. Répondez STOP pour vous désinscrire.",
+    "formIntro": "Laissez vos coordonnées, nous vous répondons en quelques minutes."
   },
   "handoffKeywords": [
     "parler à une personne",
@@ -70,5 +78,12 @@
     "subtitle": "Nous répondons en quelques secondes",
     "placeholder": "Écrivez votre message",
     "launcherLabel": "Discutez avec nous"
+  },
+  "voiceLanguage": "fr-FR",
+  "campaignIdeas": {
+    "quiet": "Bonjour {firstName}, ici {businessName}. Vous nous avez contactés il y a quelque temps. Cherchez vous toujours ? Répondez ici et nous vous aidons tout de suite.",
+    "lost": "Bonjour {firstName}, ici {businessName}. Nous avons du nouveau qui pourrait mieux vous convenir. Voulez vous les détails ?",
+    "customers": "Bonjour {firstName}, merci encore d'avoir choisi {businessName}. En tant que client, découvrez en premier notre dernière offre. Répondez OUI pour les détails.",
+    "booked_no_show": "Bonjour {firstName}, nous ne vous avons pas vu à votre rendez vous chez {businessName}. Voulez vous choisir un nouvel horaire ?"
   }
 }

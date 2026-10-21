@@ -9,7 +9,15 @@
     "afterHandoffReply": "Obrigado, a equipe recebeu a sua mensagem e vai responder aqui.",
     "bookingRequestReply": "Obrigado. Passei o horário que você prefere para a equipe de {businessName}, que vai confirmar aqui em breve.",
     "optOutReply": "Você não vai receber mais mensagens automáticas de {businessName}. Responda START se mudar de ideia.",
-    "optInReply": "Bem vindo de volta. Você voltará a receber respostas de {businessName}."
+    "optInReply": "Bem vindo de volta. Você voltará a receber respostas de {businessName}.",
+    "reviewAsk": "Obrigado por escolher {businessName}, {firstName}. Como foi? Responda com um número de 1 (ruim) a 5 (excelente).",
+    "reviewHappy": "Obrigado, {firstName}! Poderia deixar uma avaliação rápida? Ajuda muito outras pessoas a nos encontrar: {link}",
+    "reviewUnhappy": "Obrigado por nos contar, {firstName}. Sinto muito que não tenha sido melhor. Passei a sua mensagem para a equipe de {businessName} e alguém vai entrar em contato.",
+    "missedCallText": "Olá, aqui é {businessName}. Desculpe não termos atendido a sua ligação. Como podemos ajudar? Responda aqui e retornamos logo.",
+    "missedCallVoice": "Desculpe, não conseguimos atender a sua ligação. Acabamos de enviar uma mensagem de texto.",
+    "formThanks": "Obrigado. Recebemos a sua mensagem e vamos responder em breve.",
+    "formConsent": "Aceito receber mensagens de texto de {businessName} sobre o meu pedido e ofertas. Responda STOP para cancelar.",
+    "formIntro": "Deixe os seus dados e respondemos em minutos."
   },
   "handoffKeywords": [
     "falar com uma pessoa",
@@ -68,5 +76,12 @@
     "subtitle": "Respondemos em segundos",
     "placeholder": "Escreva a sua mensagem",
     "launcherLabel": "Fale conosco"
+  },
+  "voiceLanguage": "pt-BR",
+  "campaignIdeas": {
+    "quiet": "Olá {firstName}, aqui é {businessName}. Você falou conosco há algum tempo. Ainda está procurando? Responda aqui e ajudamos na hora.",
+    "lost": "Olá {firstName}, aqui é {businessName}. Temos algo novo que pode servir melhor para você. Quer os detalhes?",
+    "customers": "Olá {firstName}, obrigado mais uma vez por escolher {businessName}. Como cliente, você vê primeiro a nossa nova oferta. Responda SIM para os detalhes.",
+    "booked_no_show": "Olá {firstName}, sentimos a sua falta no horário marcado com {businessName}. Quer escolher um novo horário?"
   }
 }

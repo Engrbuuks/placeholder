@@ -13,8 +13,9 @@ export function sequenceFor(ctx: WorkspaceContext, trigger: Sequence["trigger"])
  * Whether marketing style follow ups (no reply, won) may go to this customer by SMS in this market.
  * Booking reminders are service messages and always allowed. Other channels are not affected.
  */
-export function smsFollowUpsAllowed(ctx: Pick<WorkspaceContext, "country">, lead: Pick<Lead, "channel">): boolean {
+export function smsFollowUpsAllowed(ctx: Pick<WorkspaceContext, "country">, lead: Pick<Lead, "channel"> & { marketing_consent_at?: Date | null }): boolean {
   if (lead.channel !== "sms") return true;
+  if (lead.marketing_consent_at) return true; // the customer agreed on the lead form
   return ctx.country ? (markets[ctx.country]?.smsFollowUps ?? false) : false;
 }
 
@@ -22,7 +23,7 @@ export function smsFollowUpsAllowed(ctx: Pick<WorkspaceContext, "country">, lead
 export async function scheduleChainedStep(
   c: PoolClient,
   ctx: WorkspaceContext,
-  lead: Pick<Lead, "id" | "channel">,
+  lead: Pick<Lead, "id" | "channel"> & { marketing_consent_at?: Date | null },
   trigger: "no_reply" | "won",
   stepIndex: number,
   base: Date,

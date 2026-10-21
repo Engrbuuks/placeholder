@@ -20,7 +20,8 @@ const script = `(function () {
   var open = false;
 
   var frame = document.createElement("iframe");
-  frame.src = origin + "/chat/" + encodeURIComponent(key);
+  // The page the visitor is on and the site that sent them, so the business sees which ads and pages bring enquiries.
+  frame.src = origin + "/chat/" + encodeURIComponent(key) + "?page=" + encodeURIComponent(location.href.slice(0, 600)) + "&ref=" + encodeURIComponent((document.referrer || "").slice(0, 300));
   frame.title = label;
   frame.style.cssText = "position:fixed;right:16px;bottom:84px;width:min(380px,calc(100vw - 32px));height:min(600px,calc(100vh - 110px));border:0;border-radius:18px;box-shadow:0 16px 48px rgba(17,17,17,.18);z-index:2147483646;display:none;background:#fff";
 

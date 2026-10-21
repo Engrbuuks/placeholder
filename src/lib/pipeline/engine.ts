@@ -6,6 +6,7 @@
 // 4. Otherwise greet, answer any question from the brand brain, and work through the niche's qualifying questions.
 // 5. Queue the reply, schedule the no reply follow up, alert the owner when needed, then deliver.
 import { automationConfig, everyLanguage } from "../config";
+import type { Attribution } from "../attribution";
 import type { PoolClient } from "pg";
 import { withTenant } from "../db";
 import { aiEnabled, answerWithAi } from "../ai";
@@ -16,14 +17,21 @@ import { answerFromBrain, clip, detectHandoff, extractContact, factsText, isKeyw
 import { loadContext, leadLabel, type Lead } from "./context";
 import { deliverMessage } from "./delivery";
 import { scheduleChainedStep } from "./sequences";
+import { handleRatingReply } from "./reviews";
 
 export type InboundInput = {
   workspaceId: string;
-  channel: "webchat" | "whatsapp" | "sms";
+  channel: "webchat" | "whatsapp" | "sms" | "form";
   externalId: string;
   text: string;
   externalMessageId?: string | null;
   name?: string | null;
+  /** Where the lead came from. Only the first arrival's details are kept. */
+  attribution?: Attribution;
+  /** The customer ticked a marketing consent box (lead form). */
+  consent?: boolean;
+  email?: string | null;
+  phone?: string | null;
 };
 
 export type InboundResult = {
@@ -112,11 +120,27 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
     if (inserted.rowCount === 0) return { duplicate: true, leadId, replied: false, outgoingIds: [], reason: "Duplicate message ignored" };
 
     const contact = extractContact(text);
+    const from = input.attribution ?? {};
     await c.query(
       `update leads set last_inbound_at = now(), unread = unread + 1, updated_at = now(),
-         name = coalesce(name, $2), email = coalesce(email, $3), phone = coalesce(phone, $4)
+         name = coalesce(name, $2), email = coalesce(email, $3), phone = coalesce(phone, $4),
+         source = coalesce(source, $5), utm_source = coalesce(utm_source, $6), utm_medium = coalesce(utm_medium, $7),
+         utm_campaign = coalesce(utm_campaign, $8), landing_page = coalesce(landing_page, $9), referrer = coalesce(referrer, $10),
+         marketing_consent_at = case when $11 then coalesce(marketing_consent_at, now()) else marketing_consent_at end
        where id = $1`,
-      [leadId, input.name ?? contact.name ?? null, contact.email ?? null, contact.phone ?? null],
+      [
+        leadId,
+        input.name ?? contact.name ?? null,
+        input.email ?? contact.email ?? null,
+        input.phone ?? contact.phone ?? null,
+        from.source ?? input.channel,
+        from.utmSource ?? null,
+        from.utmMedium ?? null,
+        from.utmCampaign ?? null,
+        from.landingPage ?? null,
+        from.referrer ?? null,
+        input.consent === true,
+      ],
     );
     // The customer replied, so pending "no reply" follow ups no longer apply.
     await cancelLeadJobs(c, leadId, "no_reply");
@@ -160,8 +184,16 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
       return { duplicate: false, leadId, replied: true, outgoingIds: [out.rows[0].id], reason: `Opted ${keyword}` };
     }
 
+    // A reply to a review request is a rating, whatever stage the sale is in.
+    if (!lead.opted_out_at) {
+      const ratingReply = await handleRatingReply(c, ctx, lead, text);
+      if (ratingReply) return { duplicate: false, leadId, replied: true, outgoingIds: [ratingReply], reason: "Rating received" };
+    }
+
     const stopReason = lead.opted_out_at
       ? "This customer opted out of automatic messages"
+      : input.channel === "form"
+      ? "This came from your lead form and no text channel is connected to answer it. Call or email them"
       : !ctx.settings.enabled
       ? "Automations are switched off"
       : !ctx.brainConfirmed
@@ -172,7 +204,21 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
             ? "A person is handling this conversation"
             : null;
     if (stopReason) {
-      await notify(c, input.workspaceId, { kind: "message", title: `New message from ${who}`, body: clip(text, 300), link });
+      // A reply to a campaign is the result the owner is waiting for, so the alert says which campaign brought them back.
+      const campaign = (
+        await c.query<{ name: string }>(
+          `select ca.name from campaign_recipients r join campaigns ca on ca.id = r.campaign_id
+           where r.lead_id = $1 and r.status = 'sent' and r.sent_at > now() - interval '30 days' order by r.sent_at desc limit 1`,
+          [leadId],
+        )
+      ).rows[0];
+      await notify(c, input.workspaceId, {
+        kind: campaign ? "campaign_reply" : "message",
+        title: campaign ? `${who} replied to your campaign "${campaign.name}"` : `New message from ${who}`,
+        body: clip(text, 300),
+        link,
+        email: Boolean(campaign),
+      });
       await logActivity(c, input.workspaceId, { leadId, kind: "no_auto_reply", summary: `No automatic reply: ${stopReason}` });
       return { duplicate: false, leadId, replied: false, outgoingIds: [], reason: stopReason };
     }
@@ -213,7 +259,11 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
         handoffReason = `Wants to book: "${clip(text, 120)}"`;
       }
     } else {
-      const first = lead.stage === "new";
+      // A missed call text or campaign may already have opened the conversation; then there is no second greeting.
+      const alreadyTalking =
+        lead.stage === "new" &&
+        ((await c.query("select 1 from messages where lead_id = $1 and direction = 'out' and status <> 'discarded' limit 1", [leadId])).rowCount ?? 0) > 0;
+      const first = lead.stage === "new" && !alreadyTalking;
       if (first) parts.push(render(firstName(lead.name, "") ? a.greeting : a.greetingNoName, vars));
       const question = isQuestion(text);
       if (question) {
@@ -285,7 +335,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
         });
         await logActivity(c, input.workspaceId, { leadId, kind: "qualified", summary: `${who} answered every qualifying question` });
       }
-      const when = await scheduleChainedStep(c, ctx, { id: leadId, channel: input.channel }, "no_reply", 0, new Date());
+      const when = await scheduleChainedStep(c, ctx, { id: leadId, channel: input.channel, marketing_consent_at: lead.marketing_consent_at }, "no_reply", 0, new Date());
       if (when) await logActivity(c, input.workspaceId, { leadId, kind: "followup_scheduled", summary: "Follow up scheduled in case they go quiet", detail: { at: when.toISOString() } });
     }
 

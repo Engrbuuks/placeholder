@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isUuid } from "@/lib/db";
 import { loadAppPage } from "@/lib/shell";
-import { getPack, markets } from "@/lib/config";
+import { currencySymbol, formatMoney, getPack, markets } from "@/lib/config";
+import { sourceLabel } from "@/lib/attribution";
 import { inboxCounts, leadDetail, listLeads } from "@/lib/inbox";
 import { leadLabel } from "@/lib/pipeline/context";
 import { markRead } from "@/lib/pipeline/owner";
@@ -61,7 +62,7 @@ export default async function ConversationPage({
   const pack = getPack(workspace.nichePack, workspace.country);
   const timeZone = workspace.timeZone;
   const when = new Intl.DateTimeFormat("en-GB", { timeZone, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
-  const channelLabel = lead.channel === "whatsapp" ? "WhatsApp" : lead.channel === "sms" ? "SMS" : "web chat";
+  const channelLabel = lead.channel === "whatsapp" ? "WhatsApp" : lead.channel === "sms" ? "SMS" : lead.channel === "form" ? "lead form" : "web chat";
   const defaultBooking = localInput(lead.booked_for ?? new Date(Date.now() + 24 * 3600_000), timeZone);
   const seqName = (sid: string) => pack.sequences.find((s) => s.id === sid)?.name ?? "Follow up";
 
@@ -170,11 +171,23 @@ export default async function ConversationPage({
           <section className="rounded-2xl border border-line bg-surface p-5">
             <h3 className="text-[1.0625rem] tracking-[-0.02em]">What happened</h3>
             <div className="mt-4">
-              <StageForm leadId={lead.id} defaultBookedFor={defaultBooking} />
+              <StageForm leadId={lead.id} defaultBookedFor={defaultBooking} currency={currencySymbol(workspace.country)} />
             </div>
             {lead.booked_for && (
               <p className="mt-3 font-mono text-xs text-ink-soft">Booked for {when.format(lead.booked_for)}</p>
             )}
+            {lead.won_at && (
+              <p className="mt-1 font-mono text-xs text-ink-soft">
+                Won {when.format(lead.won_at)}
+                {lead.value !== null && ` / ${formatMoney(Number(lead.value), workspace.country)}`}
+              </p>
+            )}
+            {lead.review_status && (
+              <p className="mt-1 font-mono text-xs text-ink-soft">
+                {lead.review_status === "rated" ? `Rated ${lead.review_rating} out of 5` : "Asked for a rating"}
+              </p>
+            )}
+            <p className="mt-1 font-mono text-xs text-ink-soft">Source: {sourceLabel(lead)}</p>
           </section>
 
           <section className="rounded-2xl border border-line bg-surface p-5">

@@ -2,7 +2,7 @@
 import { withTenant } from "./db";
 import { encryptionReady } from "./crypto";
 import { emailConfigured } from "./channels/email";
-import { defaultSettings, type Lead, type Settings } from "./pipeline/context";
+import { settingsFromRow, type Lead, type Settings } from "./pipeline/context";
 
 export type InboxFilter = "all" | "needs_you" | "open" | "booked" | "closed";
 
@@ -87,15 +87,9 @@ export async function leadDetail(workspaceId: string, leadId: string) {
 
 export async function automationOverview(workspaceId: string) {
   return withTenant(workspaceId, async (c) => {
-    const s = (
-      await c.query<{ enabled: boolean; approval_mode: "auto" | "approve"; alert_email: string | null; weekly_check: boolean }>(
-        "select enabled, approval_mode, alert_email, weekly_check from automation_settings where workspace_id = $1",
-        [workspaceId],
-      )
-    ).rows[0];
-    const settings: Settings = s
-      ? { enabled: s.enabled, approvalMode: s.approval_mode, alertEmail: s.alert_email, weeklyCheck: s.weekly_check }
-      : defaultSettings;
+    const settings: Settings = settingsFromRow(
+      (await c.query("select * from automation_settings where workspace_id = $1", [workspaceId])).rows[0],
+    );
     const stats = (
       await c.query<{ scheduled: number; due: number; done_7d: number; failed_7d: number; replies_7d: number; followups_7d: number; handoffs_7d: number }>(
         `select
@@ -169,4 +163,8 @@ export async function notificationsFor(workspaceId: string, limit = 8) {
     const needsYou = (await c.query<{ n: number }>(`select count(*)::int as n from leads where stage = 'handoff' or unread > 0`)).rows[0].n;
     return { list, unread, needsYou };
   });
+}
+
+export async function automationSettingsFor(workspaceId: string): Promise<Settings> {
+  return withTenant(workspaceId, async (c) => settingsFromRow((await c.query("select * from automation_settings where workspace_id = $1", [workspaceId])).rows[0]));
 }

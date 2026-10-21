@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { saveAutomationSettings, saveSms, saveWhatsApp, type ActionState } from "@/app/actions/pipeline";
+import { saveAutomationSettings, saveMissedCalls, saveReviewSettings, saveSms, saveWhatsApp, type ActionState } from "@/app/actions/pipeline";
 import { Field, FormError, Notice, SelectField, SubmitButton } from "./ui";
 
 type Settings = { enabled: boolean; approvalMode: "auto" | "approve"; alertEmail: string | null; weeklyCheck: boolean };
@@ -152,6 +152,53 @@ export function SmsForm({ accountSid, phoneNumber, hasToken }: { accountSid: str
         required={!hasToken}
       />
       <SubmitButton pending="Saving">Save SMS</SubmitButton>
+    </form>
+  );
+}
+
+export function ReviewSettingsForm({ enabled, link, delayHours }: { enabled: boolean; link: string; delayHours: number }) {
+  const [state, action] = useActionState<ActionState, FormData>(saveReviewSettings, {});
+  return (
+    <form action={action} className="space-y-4">
+      <FormError message={state.error} />
+      {state.notice && <Notice>{state.notice}</Notice>}
+      <Toggle
+        name="reviewEnabled"
+        label="Ask for a rating after a sale"
+        help="When you mark a customer as won, they are asked for a rating from 1 to 5. A 4 or 5 gets your review link; 1 to 3 comes privately to you."
+        defaultChecked={enabled}
+      />
+      <Field
+        label="Your review link"
+        name="reviewLink"
+        type="url"
+        help="On Google: open your Business Profile, choose Ask for reviews, and copy the link. Any https review page works."
+        defaultValue={link}
+        placeholder="https://g.page/r/..."
+      />
+      <div className="max-w-[12rem]">
+        <Field label="Ask after (hours)" name="reviewDelayHours" type="number" defaultValue={String(delayHours)} />
+      </div>
+      <SubmitButton pending="Saving">Save reviews</SubmitButton>
+    </form>
+  );
+}
+
+export function MissedCallForm({ enabled, forwardTo, smsReady }: { enabled: boolean; forwardTo: string; smsReady: boolean }) {
+  const [state, action] = useActionState<ActionState, FormData>(saveMissedCalls, {});
+  return (
+    <form action={action} className="space-y-4">
+      <FormError message={state.error} />
+      {state.notice && <Notice>{state.notice}</Notice>}
+      {!smsReady && <p className="rounded-xl bg-accent-wash px-4 py-3 text-sm">Connect SMS above first: the text back goes out from your Twilio number.</p>}
+      <Toggle
+        name="missedCallEnabled"
+        label="Text back missed calls"
+        help="Calls to your Twilio number ring your phone. If nobody answers, the caller gets a text at once and the conversation starts in your inbox."
+        defaultChecked={enabled}
+      />
+      <Field label="Phone to ring" name="forwardTo" help="Your business mobile or landline, with the country code." defaultValue={forwardTo} placeholder="+13125550100" />
+      <SubmitButton pending="Saving">Save missed calls</SubmitButton>
     </form>
   );
 }
