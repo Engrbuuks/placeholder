@@ -25,7 +25,9 @@
     "emailSubject": "Un message de {businessName}",
     "emailFooter": "Vous recevez ce message car vous avez contacté {businessName}. Pour ne plus recevoir ces emails : {link}",
     "unsubscribed": "Vous ne recevrez plus de messages de {businessName}.",
-    "reviewAskEmail": "Merci d'avoir choisi {businessName}, {firstName}. Si vous êtes satisfait, pourriez vous laisser un court avis ? {link} Si quelque chose n'allait pas, répondez simplement à cet email et nous corrigerons cela."
+    "reviewAskEmail": "Merci d'avoir choisi {businessName}, {firstName}. Si vous êtes satisfait, pourriez vous laisser un court avis ? {link} Si quelque chose n'allait pas, répondez simplement à cet email et nous corrigerons cela.",
+    "concernReply": "Merci de me le dire. Je demande à l'équipe de {businessName} de vous répondre personnellement.",
+    "wantsToBookReply": "Oui, bien sûr. J'ai demandé à l'équipe de {businessName} de convenir d'un horaire avec vous ici très vite."
   },
   "handoffKeywords": [
     "parler à une personne",
@@ -93,5 +95,113 @@
     "lost": "Bonjour {firstName}, ici {businessName}. Nous avons du nouveau qui pourrait mieux vous convenir. Voulez vous les détails ?",
     "customers": "Bonjour {firstName}, merci encore d'avoir choisi {businessName}. En tant que client, découvrez en premier notre dernière offre. Répondez OUI pour les détails.",
     "booked_no_show": "Bonjour {firstName}, nous ne vous avons pas vu à votre rendez vous chez {businessName}. Voulez vous choisir un nouvel horaire ?"
+  },
+  "signals": {
+    "urgentNow": [
+      "aujourd'hui",
+      "ce soir",
+      "demain",
+      "urgent",
+      "urgence",
+      "tout de suite",
+      "immédiatement",
+      "au plus vite",
+      "dès que possible",
+      "ce matin",
+      "cet après-midi"
+    ],
+    "urgentSoon": [
+      "cette semaine",
+      "la semaine prochaine",
+      "ce week-end",
+      "dans quelques jours",
+      "bientôt",
+      "ce mois-ci"
+    ],
+    "notUrgent": [
+      "je regarde",
+      "juste pour voir",
+      "pas pressé",
+      "pas pressée",
+      "pas urgent",
+      "dans quelques mois",
+      "l'année prochaine",
+      "plus tard"
+    ],
+    "buying": [
+      "réserver",
+      "réservation",
+      "rendez-vous",
+      "disponible",
+      "disponibilité",
+      "quand pouvez-vous",
+      "je peux venir",
+      "comment payer",
+      "acompte",
+      "payer",
+      "prêt à",
+      "je veux acheter",
+      "je le prends",
+      "visite"
+    ],
+    "budgetWords": [
+      "budget",
+      "environ",
+      "autour de",
+      "entre",
+      "jusqu'à",
+      "maximum",
+      "pas plus de"
+    ],
+    "concerns": {
+      "price": [
+        "cher",
+        "trop cher",
+        "trop élevé",
+        "moins cher",
+        "réduction",
+        "remise",
+        "je n'ai pas les moyens",
+        "hors budget",
+        "négociable",
+        "dernier prix",
+        "meilleur prix"
+      ],
+      "trust": [
+        "arnaque",
+        "faux",
+        "fiable",
+        "confiance",
+        "avis",
+        "garantie",
+        "preuve",
+        "vérifié",
+        "fraude",
+        "sérieux"
+      ],
+      "timing": [
+        "réfléchir",
+        "pas maintenant",
+        "peut-être plus tard",
+        "pas prêt",
+        "pas prête",
+        "je reviens vers vous",
+        "pas encore sûr",
+        "en parler à mon mari",
+        "en parler à ma femme"
+      ],
+      "competitor": [
+        "une autre entreprise",
+        "autre entreprise",
+        "ailleurs",
+        "un autre devis",
+        "autre devis",
+        "concurrent",
+        "une autre clinique",
+        "un autre agent",
+        "mon frère connaît",
+        "un ami connaît"
+      ]
+    }
   }
 }

@@ -26,6 +26,12 @@ export function brandBrainFromForm(formData: FormData, pack: NichePack): BrainFo
     faqs: parseFaqLines(text(formData, "faqs")),
     tone: appConfig.tones.some((t) => t.id === tone) ? tone : "",
     answers,
+    objections: {
+      price: text(formData, "objection_price"),
+      trust: text(formData, "objection_trust"),
+      timing: text(formData, "objection_timing"),
+      competitor: text(formData, "objection_competitor"),
+    },
   });
   if (!parsed.success) {
     const issue = parsed.error.issues[0];

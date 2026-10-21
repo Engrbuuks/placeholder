@@ -71,7 +71,7 @@ const outgoing = (ws: string, leadId: string) =>
   );
 const lead = async (ws: string, leadId: string) => (await q<Record<string, any>>(ws, "select * from leads where id = $1", [leadId]))[0];
 const queued = (ws: string, leadId: string) =>
-  q<{ id: number; kind: string; payload: any; run_at: Date }>(ws, "select id, kind, payload, run_at from jobs where lead_id = $1 and status = 'queued' order by run_at", [leadId]);
+  q<{ id: number; kind: string; payload: any; run_at: Date }>(ws, "select id, kind, payload, run_at from jobs where lead_id = $1 and kind = 'followup' and status = 'queued' order by run_at", [leadId]);
 const makeDue = (ws: string, jobId: number) => q(ws, "update jobs set run_at = now() - interval '1 second' where id = $1", [jobId]);
 
 const say = (ws: string, text: string, who = "visitor-1", channel: "webchat" | "whatsapp" = "webchat", id?: string) =>

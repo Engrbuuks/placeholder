@@ -1,16 +1,18 @@
 // Read models for the owner's screens: inbox, conversation, automations, channels, notifications.
 import { withTenant } from "./db";
+import { automationConfig } from "./config";
 import { encryptionReady } from "./crypto";
 import { emailConfigured } from "./channels/email";
 import { settingsFromRow, type Lead, type Settings } from "./pipeline/context";
 
-export type InboxFilter = "all" | "needs_you" | "open" | "booked" | "closed";
+export type InboxFilter = "all" | "needs_you" | "hot" | "open" | "booked" | "closed";
 
 export type InboxRow = Lead & { last_body: string | null; last_at: Date | null; last_direction: "in" | "out" | null; last_author: string | null; pending: number };
 
 const filterSql: Record<InboxFilter, string> = {
   all: "true",
   needs_you: "(l.stage = 'handoff' or l.unread > 0 or exists (select 1 from messages p where p.lead_id = l.id and p.status = 'pending_approval'))",
+  hot: `l.heat >= ${Number(automationConfig.scoring.hot)} and l.stage in ('new', 'qualifying', 'qualified', 'handoff')`,
   open: "l.stage in ('new', 'qualifying', 'qualified', 'handoff')",
   booked: "l.stage = 'booked'",
   closed: "l.stage in ('won', 'lost')",
@@ -27,7 +29,7 @@ export async function listLeads(workspaceId: string, filter: InboxFilter = "all"
          order by created_at desc, id desc limit 1
        ) last on true
        where ${filterSql[filter]}
-       order by coalesce(last.created_at, l.updated_at) desc
+       order by ${filter === "hot" ? "l.heat desc, " : ""}coalesce(last.created_at, l.updated_at) desc
        limit $1`,
       [limit],
     );
@@ -40,6 +42,7 @@ export async function inboxCounts(workspaceId: string) {
     const { rows } = await c.query<Record<InboxFilter, number>>(
       `select count(*)::int as all,
               count(*) filter (where ${filterSql.needs_you})::int as needs_you,
+              count(*) filter (where ${filterSql.hot})::int as hot,
               count(*) filter (where ${filterSql.open})::int as open,
               count(*) filter (where ${filterSql.booked})::int as booked,
               count(*) filter (where ${filterSql.closed})::int as closed
@@ -56,6 +59,7 @@ export type ThreadMessage = {
   body: string;
   status: string;
   status_detail: string | null;
+  ai_written: boolean;
   created_at: Date;
 };
 
@@ -65,7 +69,7 @@ export async function leadDetail(workspaceId: string, leadId: string) {
     if (!lead) return null;
     const messages = (
       await c.query<ThreadMessage>(
-        "select id, direction, author, body, status, status_detail, created_at from messages where lead_id = $1 order by created_at, id",
+        "select id, direction, author, body, status, status_detail, ai_written, created_at from messages where lead_id = $1 order by created_at, id",
         [leadId],
       )
     ).rows;

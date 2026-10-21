@@ -19,6 +19,9 @@ import { deliverMessage } from "./delivery";
 import { scheduleChainedStep } from "./sequences";
 import { handleRatingReply } from "./reviews";
 import { bookingInvite } from "../booking";
+import { recordAiUse, reserveAiCall } from "../aiUsage";
+import { concernIn, concernLabel, wantsToBook } from "../insight";
+import { scheduleReading } from "./reading";
 
 export type InboundInput = {
   workspaceId: string;
@@ -45,31 +48,7 @@ export type InboundResult = {
 
 const automatedStages = new Set(["new", "qualifying", "qualified"]);
 
-/**
- * Reserves one Claude call against the workspace's monthly cap. Returns false once the cap is reached,
- * so the question goes to the owner instead. The owner is told once, when the last allowed call is used.
- */
-export async function reserveAiCall(c: PoolClient, workspaceId: string, leadId: string | null): Promise<boolean> {
-  const limit = automationConfig.ai.monthlyCallsPerWorkspace;
-  if (limit <= 0) return false;
-  const { rows } = await c.query<{ calls: number }>(
-    `insert into ai_usage (workspace_id, month, calls)
-     values ($1, date_trunc('month', now() at time zone 'utc')::date, 1)
-     on conflict (workspace_id, month) do update set calls = ai_usage.calls + 1
-     where ai_usage.calls < $2
-     returning calls`,
-    [workspaceId, limit],
-  );
-  if (rows.length === 0) return false;
-  if (rows[0].calls === limit) {
-    await logActivity(c, workspaceId, {
-      leadId,
-      kind: "ai_cap",
-      summary: `AI answers reached this month's limit of ${limit}. New questions the rules cannot answer will come to you until next month.`,
-    });
-  }
-  return true;
-}
+export { reserveAiCall } from "../aiUsage";
 
 async function findAnswer(
   c: PoolClient,
@@ -185,6 +164,9 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
       return { duplicate: false, leadId, replied: true, outgoingIds: [out.rows[0].id], reason: `Opted ${keyword}` };
     }
 
+    // Read the conversation shortly after, for the heat score, the summary and the owner's alerts.
+    await scheduleReading(c, input.workspaceId, leadId);
+
     // A reply to a review request is a rating, whatever stage the sale is in.
     if (!lead.opted_out_at) {
       const ratingReply = await handleRatingReply(c, ctx, lead, text);
@@ -240,6 +222,22 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
     let answerSource: "rules" | "ai" | "cap" | null = null;
 
     const handoffPhrase = detectHandoff(text, [...everyLanguage("handoffKeywords"), ...ctx.pack.handoffKeywords]);
+    const concern = !handoffPhrase && input.channel !== "email" ? concernIn(text) : null;
+    let concernAnswered = false;
+    let offeredBooking = false;
+    // A question the brand brain cannot answer that is really a request to book is a sale, not a gap:
+    // offer the booking page, or hand it over as a booking request.
+    const askToBook = async () => {
+      const offer = invite ?? (await bookingInvite(c, ctx, leadId));
+      if (offer) {
+        parts.push(offer);
+        offeredBooking = true;
+        return;
+      }
+      parts.push(render(a.wantsToBookReply, vars));
+      stage = "handoff";
+      handoffReason = `Wants to book: "${clip(text, 120)}"`;
+    };
     if (input.channel === "email" && !handoffPhrase) {
       // By email the customer's replies go to the owner's own inbox, so the assistant answers once,
       // offers the booking page, and hands the conversation over.
@@ -257,6 +255,29 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
       parts.push(render(a.handoffReply, vars));
       stage = "handoff";
       handoffReason = `Customer wrote "${handoffPhrase}"`;
+    } else if (concern) {
+      // A concern is answered with the owner's own words, or handed to the owner. Never improvised.
+      const answer = ctx.brain.objections[concern];
+      const opened =
+        lead.stage !== "new" ||
+        ((await c.query("select 1 from messages where lead_id = $1 and direction = 'out' and status <> 'discarded' limit 1", [leadId])).rowCount ?? 0) > 0;
+      if (!opened) parts.push(render(firstName(lead.name, "") ? a.greeting : a.greetingNoName, vars));
+      if (answer) {
+        parts.push(answer);
+        concernAnswered = true;
+        if (lead.stage === "qualified") parts.push(vars.conversionPrompt);
+        else if (index < ctx.pack.qualifiers.length) {
+          parts.push(ctx.pack.qualifiers[index]);
+          stage = "qualifying";
+        } else {
+          parts.push(render(a.qualifiedReply, vars));
+          stage = "qualified";
+        }
+      } else {
+        parts.push(render(a.concernReply, vars));
+        stage = "handoff";
+        handoffReason = `Raised ${concernLabel[concern]}: "${clip(text, 120)}"`;
+      }
     } else if (lead.stage === "qualified") {
       // After qualifying, the customer usually replies with a time that suits them.
       if (isQuestion(text)) {
@@ -264,6 +285,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
         const found = await findAnswer(c, input.workspaceId, leadId, text, ctx, recent);
         answerSource = found.source;
         if (found.answer) parts.push(found.answer, vars.conversionPrompt);
+        else if (wantsToBook(text)) await askToBook();
         else {
           parts.push(render(a.unknownReply, vars));
           stage = "handoff";
@@ -287,6 +309,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
         const found = await findAnswer(c, input.workspaceId, leadId, text, ctx, recent);
         answerSource = found.source;
         if (found.answer) parts.push(found.answer);
+        else if (wantsToBook(text)) await askToBook();
         else {
           parts.push(render(a.unknownReply, vars));
           stage = "handoff";
@@ -296,7 +319,7 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
         answers.push({ q: ctx.pack.qualifiers[index], a: clip(text, 500) });
         index += 1;
       }
-      if (stage !== "handoff") {
+      if (stage !== "handoff" && !offeredBooking) {
         if (index < ctx.pack.qualifiers.length) {
           parts.push(ctx.pack.qualifiers[index]);
           stage = "qualifying";
@@ -326,8 +349,9 @@ export async function handleInbound(input: InboundInput): Promise<InboundResult>
       summary: `Replied to ${who}${answerSource === "ai" ? " using AI" : ""}`,
       detail: { stage, answerSource },
     });
-    if (answerSource === "ai") {
-      await c.query("insert into usage_ledger (workspace_id, kind, units) values ($1, 'ai_reply', 1)", [input.workspaceId]);
+    if (answerSource === "ai") await recordAiUse(c, input.workspaceId, "ai_reply");
+    if (concernAnswered && concern) {
+      await logActivity(c, input.workspaceId, { leadId, kind: "concern_answered", summary: `Answered ${who}'s concern about ${concernLabel[concern]} with your own words` });
     }
 
     if (stage === "handoff") {

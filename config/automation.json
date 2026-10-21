@@ -17,7 +17,15 @@
   },
   "ai": {
     "monthlyCallsPerWorkspace": 2000,
-    "replyModel": "claude-haiku-5-5"
+    "defaultModel": "claude-sonnet-5-5",
+    "replyModel": "claude-haiku-5-5",
+    "readModel": "claude-haiku-5-5",
+    "followUpModel": "claude-haiku-5-5",
+    "timeoutMs": 25000,
+    "personaliseTriggers": [
+      "no_reply"
+    ],
+    "freeTimesOffered": 3
   },
   "whatsapp": {
     "windowHours": 24,
@@ -66,5 +74,41 @@
     "batchSize": 25,
     "maxAudience": 5000,
     "attributionDays": 60
+  },
+  "insight": {
+    "debounceSeconds": 20,
+    "recentMessages": 12,
+    "minCustomerWords": 2
+  },
+  "scoring": {
+    "hot": 65,
+    "warm": 35,
+    "weights": {
+      "urgencyNow": 35,
+      "urgencySoon": 20,
+      "urgencyLater": -10,
+      "readyToBook": 25,
+      "comparing": 0,
+      "justAsking": -5,
+      "buyingSignal": 10,
+      "buyingSignalMax": 25,
+      "budgetStated": 10,
+      "qualifiersAnswered": 15,
+      "qualifiedStage": 15,
+      "paidSource": 5,
+      "concern": -5,
+      "engaged": 5
+    },
+    "engagedMessages": 4,
+    "paidMediums": [
+      "cpc",
+      "ppc",
+      "paid",
+      "paid_social",
+      "paidsocial",
+      "display",
+      "ads",
+      "ad"
+    ]
   }
 }

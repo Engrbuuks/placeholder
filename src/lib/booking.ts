@@ -150,14 +150,29 @@ export async function slotsFor(workspaceId: string, excludeBookingId?: string) {
 
 const appUrl = () => (process.env.APP_URL ?? "").replace(/\/$/, "");
 
-/** The booking page link for one customer, so the booking lands on their conversation. */
-export async function bookingInvite(c: PoolClient, ctx: WorkspaceContext, leadId: string): Promise<string | null> {
+/** The booking page link for one customer, so the booking lands on their conversation. Null when booking is off. */
+export async function bookingLinkFor(c: PoolClient, ctx: WorkspaceContext, leadId: string): Promise<string | null> {
   const settings = await bookingSettings(c, ctx.workspaceId);
   if (!settings.enabled) return null;
   const key = (await c.query<{ public_key: string }>("select public_key from channel_connections where channel = 'webchat'")).rows[0]?.public_key;
   if (!key) return null;
   const token = await publicTokenFor(c, leadId);
-  return render(ctx.locale.assistant.bookingInvite, { link: `${appUrl()}/b/${key}?l=${token}` });
+  return `${appUrl()}/b/${key}?l=${token}`;
+}
+
+/** The booking page offer in the business's language, or null when booking is off. */
+export async function bookingInvite(c: PoolClient, ctx: WorkspaceContext, leadId: string): Promise<string | null> {
+  const link = await bookingLinkFor(c, ctx, leadId);
+  return link ? render(ctx.locale.assistant.bookingInvite, { link }) : null;
+}
+
+/** The next few free times, written out in the business's language and time zone. Real slots only. */
+export async function nextFreeTimes(c: PoolClient, ctx: WorkspaceContext, count: number): Promise<string[]> {
+  const settings = await bookingSettings(c, ctx.workspaceId);
+  if (!settings.enabled) return [];
+  return availableSlots(settings, ctx.timeZone, await takenSlots(c))
+    .slice(0, count)
+    .map((s) => formatBookingTime(s.start, ctx.timeZone, ctx.language));
 }
 
 export const bookingRequestSchema = z

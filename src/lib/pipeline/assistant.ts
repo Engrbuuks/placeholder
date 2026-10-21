@@ -41,7 +41,7 @@ export function contentTokens(text: string): string[] {
     .map(stem);
 }
 
-function hasPhrase(text: string, phrase: string): boolean {
+export function hasPhrase(text: string, phrase: string): boolean {
   const escaped = normalise(phrase).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}($|[^\\p{L}\\p{N}])`, "u").test(normalise(text));
 }
@@ -128,6 +128,16 @@ const amount = `\\d[\\d,]*(?:\\.\\d+)?(?:\\s?(?:${scaleAlt})\\b)?(?![a-z\\d])`;
 const before = `(?:${symbols.map(escapeRe).sort((a, b) => b.length - a.length).join("|")}|\\b(?:${codes.join("|")})\\b|\\bn(?=\\d))`;
 const moneyPattern = new RegExp(`${before}\\s?${amount}|${amount}\\s?(?:\\b(?:${codes.join("|")})\\b|\\b(?:${currencyWords})\\b)`, "gi");
 const numberPattern = new RegExp(amount, "gi");
+
+/** Every amount of money written in the text, as written: "₦3m", "85 million naira", "£95". */
+export function findMoney(text: string): string[] {
+  return text.match(moneyPattern) ?? [];
+}
+
+/** Every plain number in the text, with any scale word: "3m", "2.5 crore", "500". */
+export function findAmounts(text: string): string[] {
+  return text.match(numberPattern) ?? [];
+}
 
 /** Reads "₦85,000,000", "85m", "85 million naira", "₹1,50,000" or "2.5 crore" as a plain number. */
 export function amountValue(raw: string): number | null {

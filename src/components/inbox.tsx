@@ -2,6 +2,7 @@ import Link from "next/link";
 import { automationConfig } from "@/lib/config";
 import { relativeTime } from "@/lib/health";
 import { leadLabel } from "@/lib/pipeline/context";
+import { heatBand } from "@/lib/insight";
 import type { InboxFilter, InboxRow } from "@/lib/inbox";
 import { Icon } from "./Icon";
 
@@ -23,6 +24,19 @@ export function StagePill({ stage }: { stage: string }) {
   );
 }
 
+const heatStyle = { hot: "bg-accent text-white", warm: "bg-accent-wash text-ink", cold: "border border-line text-ink-soft" } as const;
+const heatName = { hot: "Hot", warm: "Warm", cold: "Cold" } as const;
+
+/** The lead's heat, as a word and a number, so colour is never the only signal. */
+export function HeatChip({ heat }: { heat: number }) {
+  const band = heatBand(heat);
+  return (
+    <span title={`Heat ${heat} out of 100`} className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 font-mono text-[0.6875rem] ${heatStyle[band]}`}>
+      {heatName[band]} {heat}
+    </span>
+  );
+}
+
 export function ChannelChip({ channel }: { channel: string }) {
   return (
     <span className="inline-flex items-center gap-1 font-mono text-[0.6875rem] uppercase tracking-[0.04em] text-ink-soft">
@@ -34,6 +48,7 @@ export function ChannelChip({ channel }: { channel: string }) {
 
 const filters: { id: InboxFilter; label: string }[] = [
   { id: "needs_you", label: "Needs you" },
+  { id: "hot", label: "Hot" },
   { id: "open", label: "Open" },
   { id: "booked", label: "Booked" },
   { id: "closed", label: "Closed" },
@@ -68,7 +83,11 @@ export function InboxList({
       </nav>
       {rows.length === 0 ? (
         <div className="p-6 text-[0.9375rem] text-ink-soft">
-          {filter === "needs_you" ? "Nothing needs you right now. The assistant is handling every conversation." : "No conversations here yet."}
+          {filter === "needs_you"
+            ? "Nothing needs you right now. The assistant is handling every conversation."
+            : filter === "hot"
+              ? "No hot leads right now. You are alerted the moment one turns hot."
+              : "No conversations here yet."}
           <p className="mt-2">
             New conversations arrive from your <Link href="/channels" className="underline underline-offset-4">web chat and WhatsApp</Link>.
           </p>
@@ -94,6 +113,7 @@ export function InboxList({
                 <div className="mt-2 flex items-center gap-2">
                   <StagePill stage={r.stage} />
                   <ChannelChip channel={r.channel} />
+                  {r.insight_at && <HeatChip heat={r.heat} />}
                   {r.pending > 0 && <span className="font-mono text-[0.6875rem] text-accent-deep">{r.pending} to approve</span>}
                 </div>
               </Link>
@@ -106,5 +126,5 @@ export function InboxList({
 }
 
 export function parseFilter(value: string | undefined): InboxFilter {
-  return (["all", "needs_you", "open", "booked", "closed"] as const).find((f) => f === value) ?? "needs_you";
+  return (["all", "needs_you", "hot", "open", "booked", "closed"] as const).find((f) => f === value) ?? "needs_you";
 }

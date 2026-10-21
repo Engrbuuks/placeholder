@@ -125,6 +125,12 @@ export type Lead = {
   unread: number;
   last_inbound_at: Date | null;
   last_outbound_at: Date | null;
+  insight: import("../insight").Insight | null;
+  insight_source: "rules" | "ai" | null;
+  insight_at: Date | null;
+  heat: number;
+  hot_alerted_at: Date | null;
+  concerns_alerted: string[];
   created_at: Date;
   updated_at: Date;
 };

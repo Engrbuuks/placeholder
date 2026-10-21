@@ -16,7 +16,15 @@ export type BrainFormValues = {
   faqs: string;
   tone: string;
   answers: Record<string, string>;
+  objections: { price: string; trust: string; timing: string; competitor: string };
 };
+
+const concernFields = [
+  { key: "price", label: "When they say it costs too much", example: "We understand. The price includes everything, with no extra fees, and you can spread it over 6 months." },
+  { key: "trust", label: "When they ask if they can trust you", example: "You are welcome to visit our office first. You can read our Google reviews here: (your review link)." },
+  { key: "timing", label: "When they want to think about it", example: "Of course, take your time. I can hold a place for you until Friday if that helps." },
+  { key: "competitor", label: "When they mention someone else", example: "Good to compare. What makes us different is that every job comes with a written guarantee." },
+] as const;
 
 type Intake = { key: string; label: string; help: string; type: "text" | "textarea" };
 
@@ -96,6 +104,26 @@ export function BrainForm({
           ))}
         </section>
       )}
+
+      <section className="space-y-5 rounded-3xl border border-line bg-surface p-6 sm:p-8">
+        <div>
+          <h2 className="text-[1.6rem] tracking-[-0.03em]">Concerns</h2>
+          <p className="mt-1 text-[0.9375rem] text-ink-soft">
+            How you answer when a customer hesitates. The assistant uses your exact words. Leave one empty and that conversation comes to you instead.
+          </p>
+        </div>
+        {concernFields.map((f) => (
+          <Field
+            key={f.key}
+            label={f.label}
+            name={`objection_${f.key}`}
+            multiline
+            rows={3}
+            placeholder={f.example}
+            defaultValue={values.objections[f.key]}
+          />
+        ))}
+      </section>
 
       <section className="space-y-4 rounded-3xl border border-line bg-surface p-6 sm:p-8">
         <h2 className="text-[1.6rem] tracking-[-0.03em]">How your assistant should sound</h2>

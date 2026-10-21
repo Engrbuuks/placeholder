@@ -25,7 +25,9 @@
     "emailSubject": "Un mensaje de {businessName}",
     "emailFooter": "Recibes este mensaje porque contactaste con {businessName}. Para dejar de recibir estos correos: {link}",
     "unsubscribed": "No recibirás más mensajes de {businessName}.",
-    "reviewAskEmail": "Gracias por elegir {businessName}, {firstName}. Si quedaste contento, ¿nos dejarías una reseña rápida? {link} Si algo no fue bien, responde a este correo y lo arreglamos."
+    "reviewAskEmail": "Gracias por elegir {businessName}, {firstName}. Si quedaste contento, ¿nos dejarías una reseña rápida? {link} Si algo no fue bien, responde a este correo y lo arreglamos.",
+    "concernReply": "Gracias por decírmelo. Le pediré al equipo de {businessName} que le responda personalmente.",
+    "wantsToBookReply": "Sí, claro. Le pedí al equipo de {businessName} que acuerde una hora con usted aquí en breve."
   },
   "handoffKeywords": [
     "hablar con una persona",
@@ -97,5 +99,119 @@
     "lost": "Hola {firstName}, somos {businessName}. Tenemos algo nuevo que puede encajarte mejor. ¿Quieres los detalles?",
     "customers": "Hola {firstName}, gracias de nuevo por elegir {businessName}. Como cliente, eres el primero en ver nuestra nueva oferta. Responde SÍ para los detalles.",
     "booked_no_show": "Hola {firstName}, te echamos de menos en tu cita con {businessName}. ¿Quieres elegir una nueva hora?"
+  },
+  "signals": {
+    "urgentNow": [
+      "hoy",
+      "esta noche",
+      "mañana",
+      "urgente",
+      "urgentemente",
+      "ahora mismo",
+      "inmediatamente",
+      "lo antes posible",
+      "cuanto antes",
+      "esta mañana",
+      "esta tarde"
+    ],
+    "urgentSoon": [
+      "esta semana",
+      "la próxima semana",
+      "la semana que viene",
+      "este fin de semana",
+      "en unos días",
+      "pronto",
+      "este mes"
+    ],
+    "notUrgent": [
+      "solo mirando",
+      "solo estoy viendo",
+      "sin prisa",
+      "no hay prisa",
+      "no es urgente",
+      "en unos meses",
+      "el próximo año",
+      "el año que viene",
+      "más adelante"
+    ],
+    "buying": [
+      "reservar",
+      "reserva",
+      "cita",
+      "disponible",
+      "disponibilidad",
+      "cuándo pueden",
+      "puedo ir",
+      "cómo pago",
+      "como pago",
+      "depósito",
+      "anticipo",
+      "pagar",
+      "listo para",
+      "lista para",
+      "quiero comprar",
+      "me lo quedo",
+      "visita"
+    ],
+    "budgetWords": [
+      "presupuesto",
+      "alrededor de",
+      "más o menos",
+      "entre",
+      "hasta",
+      "máximo",
+      "no más de"
+    ],
+    "concerns": {
+      "price": [
+        "caro",
+        "muy caro",
+        "más barato",
+        "descuento",
+        "no me alcanza",
+        "fuera de mi presupuesto",
+        "negociable",
+        "último precio",
+        "mejor precio",
+        "rebaja",
+        "demasiado caro"
+      ],
+      "trust": [
+        "estafa",
+        "falso",
+        "confiable",
+        "confianza",
+        "reseñas",
+        "opiniones",
+        "garantía",
+        "prueba",
+        "verificado",
+        "fraude",
+        "serio"
+      ],
+      "timing": [
+        "pensarlo",
+        "lo voy a pensar",
+        "ahora no",
+        "tal vez después",
+        "no estoy listo",
+        "no estoy lista",
+        "le aviso",
+        "todavía no sé",
+        "hablarlo con mi esposo",
+        "hablarlo con mi esposa"
+      ],
+      "competitor": [
+        "otra empresa",
+        "en otro lado",
+        "otro presupuesto",
+        "otra cotización",
+        "competencia",
+        "otra clínica",
+        "otro agente",
+        "mi hermano conoce",
+        "un amigo conoce"
+      ]
+    }
   }
 }

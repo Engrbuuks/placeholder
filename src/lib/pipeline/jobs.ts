@@ -16,6 +16,8 @@ import { deliverMessage } from "./delivery";
 import { scheduleChainedStep, smsFollowUpsAllowed } from "./sequences";
 import { writeReviewRequest } from "./reviews";
 import { campaignSend } from "./campaigns";
+import { personalFollowUp } from "./personal";
+import { leadInsight } from "./reading";
 
 type FollowupPayload = {
   trigger: "no_reply" | "booked" | "won";
@@ -67,19 +69,22 @@ async function followup(job: ClaimedJob) {
       bookingTime: lead.booked_for ? formatBookingTime(lead.booked_for, ctx.timeZone) : "",
       conversionAction: ctx.pack.conversionAction.toLowerCase(),
     });
+    // The AI may rewrite it from the conversation; every draft is checked, and the template is the fallback.
+    const personal = await personalFollowUp(c, ctx, lead, p.trigger, body);
     const needsApproval = ctx.settings.approvalMode === "approve";
     const { rows } = await c.query<{ id: string }>(
-      `insert into messages (workspace_id, lead_id, direction, author, body, status, channel, sequence_id)
-       values ($1, $2, 'out', 'automation', $3, $4, $5, $6) returning id`,
-      [job.workspace_id, leadId, body, needsApproval ? "pending_approval" : "queued", lead.channel, seq.id],
+      `insert into messages (workspace_id, lead_id, direction, author, body, status, channel, sequence_id, ai_written)
+       values ($1, $2, 'out', 'automation', $3, $4, $5, $6, $7) returning id`,
+      [job.workspace_id, leadId, personal.body, needsApproval ? "pending_approval" : "queued", lead.channel, seq.id, personal.aiWritten],
     );
+    if (personal.note) await logActivity(c, job.workspace_id, { leadId, kind: "followup_template", summary: personal.note });
 
-    const label = `${seq.name}, step ${p.stepIndex + 1} of ${seq.steps.length}`;
+    const label = `${seq.name}, step ${p.stepIndex + 1} of ${seq.steps.length}${personal.aiWritten ? ", written personally by AI" : ""}`;
     if (needsApproval) {
       await notify(c, job.workspace_id, {
         kind: "approval",
         title: `Follow up for ${leadLabel(lead)} is waiting for you`,
-        body: body,
+        body: personal.body,
         link: `/inbox/${leadId}`,
       });
       await logActivity(c, job.workspace_id, { leadId, kind: "awaiting_approval", summary: `${label} is waiting for your approval` });
@@ -216,6 +221,7 @@ export const handlers: Record<ClaimedJob["kind"], (job: ClaimedJob) => Promise<v
   weekly_check: weeklyCheck,
   review_request: reviewRequest,
   campaign_send: campaignSend,
+  lead_insight: leadInsight,
 };
 
 const jobNames: Record<ClaimedJob["kind"], string> = {
@@ -225,6 +231,7 @@ const jobNames: Record<ClaimedJob["kind"], string> = {
   followup: "A follow up",
   review_request: "A review request",
   campaign_send: "A campaign batch",
+  lead_insight: "Reading a conversation",
 };
 
 /** Runs when a job has used up its retries, so nothing is left silently waiting. */
@@ -242,7 +249,7 @@ export async function onGiveUp(job: ClaimedJob, error: unknown) {
       kind: "job_failed",
       summary: `${jobNames[job.kind]} failed after ${job.attempts} attempts: ${reason}`,
     });
-    if (job.kind !== "email") {
+    if (job.kind !== "email" && job.kind !== "lead_insight") {
       await notify(c, job.workspace_id, {
         kind: "job_failed",
         title: job.kind === "deliver" ? "A message could not be sent" : "An automation step failed",

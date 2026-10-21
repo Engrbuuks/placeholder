@@ -26,6 +26,18 @@ export const brandBrainSchema = z.object({
   faqs: z.array(faqSchema).max(100).default([]),
   tone: z.string().trim().max(40).default(""),
   answers: z.record(z.string(), z.string().trim().max(4000)).default({}),
+  /**
+   * The owner's own answers to common concerns. The assistant only ever uses these words for a concern;
+   * when a concern has no answer here, the conversation goes to the owner instead.
+   */
+  objections: z
+    .object({
+      price: z.string().trim().max(1000).default(""),
+      trust: z.string().trim().max(1000).default(""),
+      timing: z.string().trim().max(1000).default(""),
+      competitor: z.string().trim().max(1000).default(""),
+    })
+    .default({ price: "", trust: "", timing: "", competitor: "" }),
 });
 
 export type BrandBrain = z.infer<typeof brandBrainSchema>;

@@ -15,5 +15,6 @@ export function brainFormValues(brain: BrandBrain): BrainFormValues {
     faqs: faqLines(brain.faqs),
     tone: brain.tone,
     answers: brain.answers,
+    objections: brain.objections,
   };
 }

@@ -10,7 +10,10 @@ import { leadLabel } from "@/lib/pipeline/context";
 import { markRead } from "@/lib/pipeline/owner";
 import { approveAction, discardAction, pauseAction } from "@/app/actions/pipeline";
 import { AppShell } from "@/components/AppShell";
-import { ChannelChip, InboxList, StagePill, parseFilter } from "@/components/inbox";
+import { ChannelChip, HeatChip, InboxList, StagePill, parseFilter } from "@/components/inbox";
+import { concernLabel, urgencyLabel } from "@/lib/insight";
+import type { ConcernType } from "@/lib/config";
+import { getBrandBrain } from "@/lib/workspaces";
 import { DeleteCustomerForm, ReplyBox, ScrollToEnd, StageForm } from "@/components/InboxForms";
 import { Icon } from "@/components/Icon";
 import { SubmitButton } from "@/components/ui";
@@ -59,6 +62,8 @@ export default async function ConversationPage({
   ]);
   if (!detail) notFound();
   const { lead, messages, upcoming, activity } = detail;
+  const insight = lead.insight as (NonNullable<typeof lead.insight> & { reasons?: string[] }) | null;
+  const brain = (await getBrandBrain(session.workspaceId)).data;
   const pack = getPack(workspace.nichePack, workspace.country);
   const timeZone = workspace.timeZone;
   const when = new Intl.DateTimeFormat("en-GB", { timeZone, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
@@ -134,7 +139,9 @@ export default async function ConversationPage({
                     {m.body}
                   </p>
                   <p className={`mt-1 font-mono text-[0.6875rem] ${problem ? "text-accent-deep" : "text-ink-soft"}`}>
-                    {[authorLabel[m.author], when.format(m.created_at), mine ? statusText[m.status] : null].filter(Boolean).join(" / ")}
+                    {[m.ai_written ? "Follow up, written by AI" : authorLabel[m.author], when.format(m.created_at), mine ? statusText[m.status] : null]
+                      .filter(Boolean)
+                      .join(" / ")}
                   </p>
                   {problem && m.status_detail && <p className="mt-0.5 max-w-[85%] text-right text-[0.8125rem] text-accent-deep">{m.status_detail}</p>}
                   {m.status === "pending_approval" && (
@@ -168,6 +175,79 @@ export default async function ConversationPage({
 
         {/* Lead details and what happens next */}
         <aside className="space-y-4 xl:h-[calc(100vh-9.5rem)] xl:overflow-y-auto">
+          <section aria-labelledby="reading-title" className="rounded-2xl border border-line bg-surface p-5">
+            <div className="flex items-start justify-between gap-3">
+              <h3 id="reading-title" className="text-[1.0625rem] tracking-[-0.02em]">What they want</h3>
+              {insight && <HeatChip heat={lead.heat} />}
+            </div>
+            {!insight ? (
+              <p className="mt-2 text-sm text-ink-soft">Not read yet. Each conversation is read a few seconds after the customer writes.</p>
+            ) : (
+              <>
+                <p className="mt-2 text-[0.9375rem] leading-snug">{insight.summary}</p>
+                <dl className="mt-4 space-y-3">
+                  <div>
+                    <dt className="text-[0.8125rem] text-ink-soft">Wants</dt>
+                    <dd className="text-sm font-medium">{insight.wants ?? "Not said yet"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[0.8125rem] text-ink-soft">Timing</dt>
+                    <dd className="text-sm font-medium">{urgencyLabel[insight.urgency]}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[0.8125rem] text-ink-soft">Budget</dt>
+                    <dd className="text-sm font-medium">{insight.budget ?? "Not said yet"}</dd>
+                  </div>
+                  {insight.concerns.length > 0 && (
+                    <div>
+                      <dt className="text-[0.8125rem] text-ink-soft">Concerns</dt>
+                      {insight.concerns.map((x) => (
+                        <dd key={x.type} className="mt-1 text-sm">
+                          <span className="font-medium">About {concernLabel[x.type as ConcernType]}:</span> &ldquo;{x.quote}&rdquo;
+                          <span className="block font-mono text-[0.6875rem] text-ink-soft">
+                            {brain.objections[x.type as ConcernType] ? (
+                              "The assistant answers this with your words"
+                            ) : (
+                              <Link href="/brain" className="text-accent-deep underline underline-offset-4">
+                                No answer yet. Add yours in the brand brain
+                              </Link>
+                            )}
+                          </span>
+                        </dd>
+                      ))}
+                    </div>
+                  )}
+                  {insight.signals.length > 0 && (
+                    <div>
+                      <dt className="text-[0.8125rem] text-ink-soft">Buying signals, in their words</dt>
+                      {insight.signals.map((x) => (
+                        <dd key={x} className="mt-1 text-sm">&ldquo;{x}&rdquo;</dd>
+                      ))}
+                    </div>
+                  )}
+                </dl>
+                <p className="mt-4 rounded-lg bg-accent-wash px-3 py-2 text-[0.875rem]">
+                  <span className="font-medium">Next: </span>
+                  {insight.nextStep}
+                </p>
+                {(insight.reasons ?? []).length > 0 && (
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-[0.8125rem] text-ink-soft">Why {lead.heat} out of 100</summary>
+                    <ul className="mt-2 space-y-1 font-mono text-[0.6875rem] text-ink-soft">
+                      {(insight.reasons ?? []).map((x) => (
+                        <li key={x}>{x}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                <p className="mt-3 font-mono text-[0.6875rem] text-ink-soft">
+                  {lead.insight_source === "ai" ? "Read by AI, checked against their words" : "Read by the rules"}
+                  {lead.insight_at ? ` / ${when.format(lead.insight_at)}` : ""}
+                </p>
+              </>
+            )}
+          </section>
+
           <section className="rounded-2xl border border-line bg-surface p-5">
             <h3 className="text-[1.0625rem] tracking-[-0.02em]">What happened</h3>
             <div className="mt-4">

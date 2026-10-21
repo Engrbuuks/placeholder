@@ -4,7 +4,7 @@ import type { PoolClient } from "pg";
 import { automationConfig } from "./config";
 import { globalQuery, withTenant } from "./db";
 
-export type JobKind = "followup" | "deliver" | "email" | "weekly_check" | "review_request" | "campaign_send";
+export type JobKind = "followup" | "deliver" | "email" | "weekly_check" | "review_request" | "campaign_send" | "lead_insight";
 
 export type ClaimedJob = {
   id: number;

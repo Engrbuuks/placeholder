@@ -151,6 +151,10 @@ const localeSchema = z.object({
     emailSubject: z.string(),
     emailFooter: z.string(),
     unsubscribed: z.string(),
+    /** Sent when a customer raises a concern the owner has not written an answer for. */
+    concernReply: z.string(),
+    /** Sent when a customer asks to book and there is no booking page to offer. */
+    wantsToBookReply: z.string(),
   }),
   /** Starting messages for each campaign group, which the owner edits before sending. */
   campaignIdeas: z.object({ quiet: z.string(), lost: z.string(), customers: z.string(), booked_no_show: z.string() }),
@@ -161,6 +165,20 @@ const localeSchema = z.object({
   optInKeywords: z.array(z.string()).min(1),
   priceWords: z.array(z.string()).min(1),
   questionStarts: z.array(z.string()),
+  /** Phrases the rules use to read a conversation, in this language. The AI reads beyond these. */
+  signals: z.object({
+    urgentNow: z.array(z.string()),
+    urgentSoon: z.array(z.string()),
+    notUrgent: z.array(z.string()),
+    buying: z.array(z.string()),
+    budgetWords: z.array(z.string()),
+    concerns: z.object({
+      price: z.array(z.string()),
+      trust: z.array(z.string()),
+      timing: z.array(z.string()),
+      competitor: z.array(z.string()),
+    }),
+  }),
   webchat: z.object({ title: z.string(), subtitle: z.string(), placeholder: z.string(), launcherLabel: z.string() }),
 });
 
@@ -245,7 +263,48 @@ const automationSchema = z.object({
     maxAudience: z.number().int().min(1),
     attributionDays: z.number().int().min(1),
   }),
-  ai: z.object({ monthlyCallsPerWorkspace: z.number().int().min(0), replyModel: z.string().min(1) }),
+  ai: z.object({
+    monthlyCallsPerWorkspace: z.number().int().min(0),
+    defaultModel: z.string().min(1),
+    replyModel: z.string().min(1),
+    readModel: z.string().min(1),
+    followUpModel: z.string().min(1),
+    timeoutMs: z.number().int().positive(),
+    /** Which follow up sequences the AI may rewrite from the conversation. */
+    personaliseTriggers: z.array(z.enum(["no_reply", "won"])),
+    /** How many real free times a personal follow up may offer. */
+    freeTimesOffered: z.number().int().min(0).max(10),
+  }),
+  insight: z.object({
+    /** Waits this long after a message, so a burst of messages is read once. */
+    debounceSeconds: z.number().int().min(0),
+    recentMessages: z.number().int().min(2).max(50),
+    /** Messages shorter than this ("ok", "yes") are read by the rules only, never sent to the AI. */
+    minCustomerWords: z.number().int().min(1),
+  }),
+  scoring: z.object({
+    hot: z.number().int().min(1).max(100),
+    warm: z.number().int().min(0).max(100),
+    weights: z.object({
+      urgencyNow: z.number(),
+      urgencySoon: z.number(),
+      urgencyLater: z.number(),
+      readyToBook: z.number(),
+      comparing: z.number(),
+      justAsking: z.number(),
+      buyingSignal: z.number(),
+      buyingSignalMax: z.number(),
+      budgetStated: z.number(),
+      qualifiersAnswered: z.number(),
+      qualifiedStage: z.number(),
+      paidSource: z.number(),
+      concern: z.number(),
+      engaged: z.number(),
+    }),
+    engagedMessages: z.number().int().min(1),
+    /** utm_medium values that mean the lead came from a paid ad. */
+    paidMediums: z.array(z.string()),
+  }),
   whatsapp: z.object({ windowHours: z.number().positive(), graphVersion: z.string().regex(/^v\d+\.\d+$/) }),
   weekly: z.object({ scoreDropAlert: z.number().int().min(1) }),
   webchat: z.object({
@@ -316,6 +375,18 @@ export function localeFor(language: string | null | undefined): Locale {
 }
 
 /** Phrases from every language, so a customer is understood whichever language they write in. */
+export type ConcernType = "price" | "trust" | "timing" | "competitor";
+export const concernTypes: ConcernType[] = ["price", "trust", "timing", "competitor"];
+
+/** Reading phrases from every language, so a concern is noticed whichever language the customer writes in. */
+export function everySignal(key: "urgentNow" | "urgentSoon" | "notUrgent" | "buying" | "budgetWords" | ConcernType): string[] {
+  return [
+    ...new Set(
+      Object.values(locales).flatMap((l) => ((concernTypes as string[]).includes(key) ? l.signals.concerns[key as ConcernType] : l.signals[key as "buying"])),
+    ),
+  ];
+}
+
 export function everyLanguage<K extends "handoffKeywords" | "optOutKeywords" | "optInKeywords" | "priceWords" | "questionStarts">(key: K): string[] {
   return [...new Set(Object.values(locales).flatMap((l) => l[key]))];
 }
