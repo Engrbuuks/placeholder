@@ -1,0 +1,99 @@
+# Placeholder illustration prompts
+
+The prompts for the real illustrations that replace the drawn art. Generate each image, name it as shown, and upload them to the chat; Claude places them, sizes them for phones and desktops, and adds alt text.
+
+**Style tail.** Every prompt ends with this so all the images match:
+
+> Style: modern editorial illustration, flat shapes with soft paper grain and gentle shadows, limited palette of warm off white #F4F2EF, charcoal #111111, vivid orange #FF5A14 and soft peach #FFEDE3, orange used only on the key element. Calm, confident, optimistic. No text, letters, numbers, logos, brand names or readable screens anywhere.
+
+**Tip.** Make the hero first. When you like it, give it to the image tool as a style reference for all the others.
+
+## Landing page
+
+### hero.png (1600 x 1200, landscape 4:3)
+Beside the headline "A customer messaged you at 9pm. Who answered?"
+```
+A small business owner, a Black woman in her thirties, relaxing at home in the evening on a sofa, a mug in her hand, a moon visible through the window behind her. Her phone rests on the side table, glowing softly, and a gentle stream of small rounded chat bubbles rises from it; the bubbles start grey and turn orange as they float upward, each with a small orange tick. She is not looking at the phone: she is calm because it is handled. Plain #F4F2EF background, generous empty space on the left. Style: modern editorial illustration, flat shapes with soft paper grain and gentle shadows, limited palette of warm off white #F4F2EF, charcoal #111111, vivid orange #FF5A14 and soft peach #FFEDE3, orange used only on the key element. Calm, confident, optimistic. No text, letters, numbers, logos, brand names or readable screens anywhere.
+```
+
+### Niche pack cards (1200 x 900 each, landscape 4:3)
+```
+niche_dental.png: A friendly dentist, a Nigerian woman in a white coat, standing beside a modern dental chair in a bright clinic, giving a reassuring smile, holding a tablet. A single orange accent on the lamp above the chair. Plain #F4F2EF background, subject centred with space around. [style tail]
+```
+```
+niche_clinic.png: A doctor, a South Asian man with a stethoscope, welcoming a patient at a calm clinic reception, a small potted plant on the desk. A single orange accent on the appointment card the patient holds. Plain #F4F2EF background, subject centred with space around. [style tail]
+```
+```
+niche_real_estate.png: An estate agent, a Latin American woman in smart casual clothes, handing a set of keys to a young couple in front of a modern terraced house. The keys and door are the orange accent. Plain #F4F2EF background, subject centred with space around. [style tail]
+```
+```
+niche_general.png: A shop owner, a white British man in an apron, behind the counter of a cosy independent shop, waving to a customer coming in. The shop's awning is the orange accent. Plain #F4F2EF background, subject centred with space around. [style tail]
+```
+```
+niche_home_services.png: A borehole drilling crew at work in a sunny Nigerian residential compound, a compact drilling rig and two workers in hard hats, water just starting to flow from a new pipe. The rig is the orange accent. Plain #F4F2EF background, subject centred with space around. [style tail]
+```
+
+### How it works, three steps (1200 x 900 each, landscape 4:3)
+```
+step_find_leaks.png: A large simple website page shown as a shape with blank blocks instead of words, and a magnifying glass held over it revealing three small orange drips leaking from gaps in the page, like water escaping. Plain #F4F2EF background. [style tail]
+```
+```
+step_answer.png: A smartphone standing upright like a small friendly kiosk, with rounded chat bubbles flowing in from the left (grey) and answers flowing out to the right (orange), at night with a few small stars, suggesting replies within seconds at any hour. No readable words in the bubbles. Plain #F4F2EF background. [style tail]
+```
+```
+step_convert.png: A wall calendar with several days filled with orange markers, a small upward trend line rising beside it, and a handshake in the foreground, showing enquiries turned into booked appointments and revenue. No numbers or words. Plain #F4F2EF background. [style tail]
+```
+
+### band_first_customer.png (1000 x 1000, square)
+In the orange "Start today" band, so it must sit on orange.
+```
+A happy business owner, an East African man, shaking hands across a counter with his first new customer, both smiling, a small celebratory burst of shapes above them. Drawn in charcoal, off white and peach only, with no orange, because the image sits on an orange background. Transparent background, or a plain #FF5A14 background if transparency is not possible. Style: modern editorial illustration, flat shapes with soft paper grain and gentle shadows. Calm, confident, optimistic. No text, letters, numbers, logos, brand names or readable screens anywhere.
+```
+
+## Sign up and log in
+
+### auth_panel.png (900 x 1200, portrait 3:4)
+Beside "Every enquiry answered. Every lead followed up."
+```
+A confident business owner, a South Asian woman in a workshop apron, standing in the doorway of her small business at closing time, glancing at her phone with a relaxed smile while a few orange chat bubbles float beside her. Warm late afternoon light. Plain #F4F2EF background with space at the top. [style tail]
+```
+
+## Inside the app: empty states (800 x 800 each, square)
+These show when a list is empty, so keep them small, simple and quiet: one idea each, lots of empty space.
+```
+empty_inbox.png: A tidy empty mailbox with its little orange flag down, a coffee cup beside it, conveying "all caught up". Plain #F4F2EF background. [style tail]
+```
+```
+empty_hot.png: A small thermometer at a cool level beside a quiet bell with an orange clapper, suggesting "you will be alerted when a lead heats up". Plain #F4F2EF background. [style tail]
+```
+```
+empty_bookings.png: A blank desk calendar with one orange pin waiting to be placed, conveying "your first booking will appear here". Plain #F4F2EF background. [style tail]
+```
+```
+empty_campaigns.png: A paper plane resting on a desk, ready to launch, with a faint dotted flight path ahead and an orange tip. Plain #F4F2EF background. [style tail]
+```
+```
+empty_results.png: A young plant sprouting from a small pot, with one orange leaf, beside an empty bar chart shape, conveying "results will grow here". No numbers. Plain #F4F2EF background. [style tail]
+```
+
+## Customer facing
+
+### booking_confirmed.png (800 x 800, square)
+Shown to a customer after they book.
+```
+A smiling customer, a young Black man, holding his phone and giving a thumbs up, with a calendar card beside him marked by a big orange tick. Plain #F4F2EF background. [style tail]
+```
+
+## Sharing
+
+### social_share.png (1200 x 630, wide)
+The preview when the site link is shared on WhatsApp, LinkedIn or X. Claude adds the headline over it in code.
+```
+A wide calm scene: on the right, a small business owner looking relaxed with a phone, orange chat bubbles flowing towards the phone from the left across the image. Keep the left half mostly empty for a headline. Plain #F4F2EF background. [style tail]
+```
+
+## When you upload
+- PNG or WebP, at the sizes above or larger.
+- Transparent backgrounds are welcome; otherwise keep the exact #F4F2EF so the images blend into the page.
+- Upload them in any order with these file names. Claude converts them to WebP, makes phone and desktop sizes, writes alt text, keeps the drawn art as a fallback, and checks every page at 390px and desktop.
+- The footer dunes stay as the drawn shapes.
