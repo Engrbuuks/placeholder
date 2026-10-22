@@ -16,21 +16,19 @@ Beside the headline "A customer messaged you at 9pm. Who answered?"
 A small business owner, a Black woman in her thirties, relaxing at home in the evening on a sofa, a mug in her hand, a moon visible through the window behind her. Her phone rests on the side table, glowing softly, and a gentle stream of small rounded chat bubbles rises from it; the bubbles start grey and turn orange as they float upward, each with a small orange tick. She is not looking at the phone: she is calm because it is handled. Plain #F4F2EF background, generous empty space on the left. Style: modern editorial illustration, flat shapes with soft paper grain and gentle shadows, limited palette of warm off white #F4F2EF, charcoal #111111, vivid orange #FF5A14 and soft peach #FFEDE3, orange used only on the key element. Calm, confident, optimistic. No text, letters, numbers, logos, brand names or readable screens anywhere.
 ```
 
-### Niche pack cards (1200 x 900 each, landscape 4:3)
+### What it does, four cards (1200 x 900 each, landscape 4:3)
+These replace the icons on the four cards. No particular trade or industry: any business that gets enquiries.
 ```
-niche_dental.png: A friendly dentist, a Nigerian woman in a white coat, standing beside a modern dental chair in a bright clinic, giving a reassuring smile, holding a tablet. A single orange accent on the lamp above the chair. Plain #F4F2EF background, subject centred with space around. [style tail]
-```
-```
-niche_clinic.png: A doctor, a South Asian man with a stethoscope, welcoming a patient at a calm clinic reception, a small potted plant on the desk. A single orange accent on the appointment card the patient holds. Plain #F4F2EF background, subject centred with space around. [style tail]
+feature_answer.png: A smartphone with a few rounded chat bubbles arriving from different directions, and a calm reply bubble going out in orange, a small crescent moon above to show it answers at any hour. No readable words. Plain #F4F2EF background, subject centred with space around. [style tail]
 ```
 ```
-niche_real_estate.png: An estate agent, a Latin American woman in smart casual clothes, handing a set of keys to a young couple in front of a modern terraced house. The keys and door are the orange accent. Plain #F4F2EF background, subject centred with space around. [style tail]
+feature_hot_leads.png: A row of small rounded message cards, most of them grey, with one lifted slightly above the rest and glowing orange, a soft warm halo around it, showing the one customer who is ready to buy. Plain #F4F2EF background, subject centred with space around. [style tail]
 ```
 ```
-niche_general.png: A shop owner, a white British man in an apron, behind the counter of a cosy independent shop, waving to a customer coming in. The shop's awning is the orange accent. Plain #F4F2EF background, subject centred with space around. [style tail]
+feature_booking.png: A simple calendar card with one time slot filled in orange and a small bell beside it, suggesting a booking and a reminder. No numbers or words. Plain #F4F2EF background, subject centred with space around. [style tail]
 ```
 ```
-niche_home_services.png: A borehole drilling crew at work in a sunny Nigerian residential compound, a compact drilling rig and two workers in hard hats, water just starting to flow from a new pipe. The rig is the orange accent. Plain #F4F2EF background, subject centred with space around. [style tail]
+feature_follow_up.png: A paper plane looping back towards a small open door, with a dotted path and a single orange star beside the door, suggesting a customer brought back. Plain #F4F2EF background, subject centred with space around. [style tail]
 ```
 
 ### How it works, three steps (1200 x 900 each, landscape 4:3)
@@ -55,7 +53,7 @@ A happy business owner, an East African man, shaking hands across a counter with
 ### auth_panel.png (900 x 1200, portrait 3:4)
 Beside "Every enquiry answered. Every lead followed up."
 ```
-A confident business owner, a South Asian woman in a workshop apron, standing in the doorway of her small business at closing time, glancing at her phone with a relaxed smile while a few orange chat bubbles float beside her. Warm late afternoon light. Plain #F4F2EF background with space at the top. [style tail]
+A confident business owner, a South Asian woman, standing in the doorway of her small business at closing time, glancing at her phone with a relaxed smile while a few orange chat bubbles float beside her. Warm late afternoon light. Plain #F4F2EF background with space at the top. [style tail]
 ```
 
 ## Inside the app: empty states (800 x 800 each, square)

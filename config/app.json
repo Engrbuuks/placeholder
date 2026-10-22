@@ -31,7 +31,7 @@
     {
       "id": "ads",
       "label": "Plan your first ad",
-      "detail": "Ad copy, audience and budget drafted from your niche pack, with leads flowing straight into your inbox."
+      "detail": "Ad copy, audience and budget drafted from your brand brain, with leads flowing straight into your inbox."
     }
   ],
   "landing": {
@@ -41,8 +41,8 @@
         "href": "#how"
       },
       {
-        "label": "Niches",
-        "href": "#niches"
+        "label": "What it does",
+        "href": "#features"
       },
       {
         "label": "Sample check",
@@ -79,16 +79,41 @@
     "heroFooterLeft": "{countries} countries / {languages} languages",
     "heroFooterRight": [
       "WhatsApp first",
-      "Naira and pounds",
+      "Every currency",
       "Owner approved"
     ],
-    "niches": {
-      "kicker": "Niche packs",
-      "heading": "Built for how your business wins customers.",
-      "intro": "Each pack sets the questions your assistant asks, the follow ups it sends and the result it works towards.",
-      "statPacks": "niche packs",
+    "features": {
+      "kicker": "What it does",
+      "heading": "Every enquiry answered, followed up and booked.",
+      "intro": "One assistant that learns your business from the details you confirm, then works every lead until it books or says no.",
+      "statCountries": "countries",
       "statChecks": "checks in every audit",
-      "goalPrefix": "Works towards"
+      "items": [
+        {
+          "icon": "chat",
+          "title": "Answers in seconds",
+          "body": "Replies on WhatsApp, SMS, email and your website, day and night, in your customer's language, using only the facts you confirmed.",
+          "tag": "Answer"
+        },
+        {
+          "icon": "gauge",
+          "title": "Spots your hot leads",
+          "body": "Reads every conversation for what the customer wants, how soon and their budget, and alerts you the moment someone is ready to buy.",
+          "tag": "Read"
+        },
+        {
+          "icon": "clock",
+          "title": "Books and reminds",
+          "body": "Customers pick a free time themselves, and reminders go out before every appointment, so fewer people forget.",
+          "tag": "Book"
+        },
+        {
+          "icon": "send",
+          "title": "Follows up and wins back",
+          "body": "Personal follow ups when someone goes quiet, review requests after a sale, and campaigns that bring past customers back.",
+          "tag": "Win back"
+        }
+      ]
     },
     "check": {
       "kicker": "Sample check",

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { appConfig, auditConfig, languageCodes, markets, packs, type MarketCode } from "@/lib/config";
+import { appConfig, auditConfig, languageCodes, markets } from "@/lib/config";
+import { Icon } from "@/components/Icon";
 import { scoreAudit } from "@/lib/audit/score";
 import { SiteNav } from "@/components/SiteNav";
 import { Arrow, Wordmark } from "@/components/Wordmark";
 import { LeakList, ScoreHeadline } from "@/components/AuditReport";
-import { DunesArt, HeroArt, NicheArt, SphereArt } from "@/components/art";
+import { DunesArt, HeroArt, SphereArt } from "@/components/art";
 
 // A typical small business site, used to show what the audit finds.
 const sample = scoreAudit(
@@ -71,10 +72,6 @@ function Connector({ ring }: { ring: "accent" | "ink" }) {
 export default async function Home() {
   if (await getSession()) redirect("/dashboard");
   const copy = appConfig.landing;
-  const marketNames = (Object.keys(markets) as MarketCode[]).reduce<Record<string, string>>(
-    (acc, code) => ({ ...acc, [code]: markets[code].name }),
-    {},
-  );
 
   return (
     <div className="overflow-x-clip">
@@ -120,46 +117,37 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Niche packs */}
-        <section id="niches" className="mx-auto max-w-[1200px] scroll-mt-24 border-t border-line px-4 py-16 sm:px-6 sm:py-20">
+        {/* What it does */}
+        <section id="features" className="mx-auto max-w-[1200px] scroll-mt-24 border-t border-line px-4 py-16 sm:px-6 sm:py-20">
           <div className="grid items-end gap-8 lg:grid-cols-[1.2fr_1fr_auto]">
             <div>
-              <p className="label">{copy.niches.kicker}</p>
-              <h2 className="mt-3 max-w-[14ch] text-[clamp(2.1rem,4.2vw,3.25rem)]">{copy.niches.heading}</h2>
+              <p className="label">{copy.features.kicker}</p>
+              <h2 className="mt-3 max-w-[16ch] text-[clamp(2.1rem,4.2vw,3.25rem)]">{copy.features.heading}</h2>
             </div>
-            <p className="max-w-[38ch] text-[0.9375rem] text-ink-soft lg:pb-2">{copy.niches.intro}</p>
+            <p className="max-w-[38ch] text-[0.9375rem] text-ink-soft lg:pb-2">{copy.features.intro}</p>
             <dl className="flex gap-0 lg:pb-1">
               <div className="border-l border-line pl-5 pr-7">
-                <dt className="sr-only">{copy.niches.statPacks}</dt>
-                <dd className="text-[2.6rem] font-semibold leading-none tracking-[-0.04em]">{packs.length}</dd>
-                <dd className="mt-1 max-w-[9ch] text-sm leading-tight text-ink-soft">{copy.niches.statPacks}</dd>
+                <dt className="sr-only">{copy.features.statCountries}</dt>
+                <dd className="text-[2.6rem] font-semibold leading-none tracking-[-0.04em]">{Object.keys(markets).length}</dd>
+                <dd className="mt-1 max-w-[9ch] text-sm leading-tight text-ink-soft">{copy.features.statCountries}</dd>
               </div>
               <div className="border-l border-line pl-5">
-                <dt className="sr-only">{copy.niches.statChecks}</dt>
+                <dt className="sr-only">{copy.features.statChecks}</dt>
                 <dd className="text-[2.6rem] font-semibold leading-none tracking-[-0.04em]">{auditConfig.checks.length}</dd>
-                <dd className="mt-1 max-w-[11ch] text-sm leading-tight text-ink-soft">{copy.niches.statChecks}</dd>
+                <dd className="mt-1 max-w-[11ch] text-sm leading-tight text-ink-soft">{copy.features.statChecks}</dd>
               </div>
             </dl>
           </div>
 
           <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {packs.map((p) => (
-              <li key={p.id} className="overflow-hidden rounded-2xl border border-line bg-surface">
-                <div className="bg-mist px-6 pb-2 pt-6">
-                  <NicheArt id={p.id} />
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-lg tracking-[-0.02em]">{p.shortName}</h3>
-                    <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />
-                  </div>
-                  <p className="font-mono text-xs text-ink-soft">{p.markets.includes("*") ? `All ${Object.keys(markets).length} countries` : p.markets.map((m) => marketNames[m] ?? m).join(", ")}</p>
-                  <p className="mt-5 text-sm text-ink-soft">{p.description}</p>
-                  <p className="label mt-5">
-                    <span className="block">{copy.niches.goalPrefix}</span>
-                    <span className="block text-ink">{p.conversionAction}</span>
-                  </p>
-                </div>
+            {copy.features.items.map((f) => (
+              <li key={f.title} className="flex flex-col rounded-2xl border border-line bg-surface p-6">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent-wash text-accent-deep">
+                  <Icon name={f.icon} />
+                </span>
+                <h3 className="mt-6 text-lg tracking-[-0.02em]">{f.title}</h3>
+                <p className="mt-3 text-sm text-ink-soft">{f.body}</p>
+                <p className="label mt-auto pt-6">{f.tag}</p>
               </li>
             ))}
           </ul>

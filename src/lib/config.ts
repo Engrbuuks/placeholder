@@ -58,13 +58,13 @@ const appSchema = z.object({
     heroSideList: z.array(z.string()),
     heroFooterLeft: z.string(),
     heroFooterRight: z.array(z.string()),
-    niches: z.object({
+    features: z.object({
       kicker: z.string(),
       heading: z.string(),
       intro: z.string(),
-      statPacks: z.string(),
+      statCountries: z.string(),
       statChecks: z.string(),
-      goalPrefix: z.string(),
+      items: z.array(z.object({ icon: z.string(), title: z.string(), body: z.string(), tag: z.string() })).min(1),
     }),
     check: z.object({ kicker: z.string(), heading: z.string(), intro: z.string(), caption: z.string() }),
     services: z.object({
