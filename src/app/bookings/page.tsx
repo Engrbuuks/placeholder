@@ -6,6 +6,7 @@ import { withTenant } from "@/lib/db";
 import { bookingSettings, bookingsFor } from "@/lib/booking";
 import { ensureWebchat } from "@/lib/webchat";
 import { bookingOutcomeAction, ownerCancelBookingAction } from "@/app/actions/booking";
+import { EmptyBookingsArt, EmptyState } from "@/components/illustrations";
 import { AppShell } from "@/components/AppShell";
 import { BookingSettingsForm } from "@/components/BookingSettingsForm";
 import { ChannelChip } from "@/components/inbox";
@@ -43,12 +44,12 @@ export default async function BookingsPage() {
         <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
           <h2 className="text-[1.0625rem] font-semibold tracking-[-0.02em]">Appointments</h2>
           {list.length === 0 ? (
-            <p className="mt-3 text-[0.9375rem] text-ink-soft">
+            <EmptyState art={EmptyBookingsArt}>
               No appointments yet.{" "}
               {settings.enabled
                 ? "Share your booking link, and the assistant offers it to customers who are ready."
                 : "Turn online booking on to let customers book themselves."}
-            </p>
+            </EmptyState>
           ) : (
             <div className="mt-4 space-y-5">
               {[...groups.entries()].map(([label, items]) => (

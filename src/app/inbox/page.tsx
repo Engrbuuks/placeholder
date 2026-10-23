@@ -3,7 +3,7 @@ import { loadAppPage } from "@/lib/shell";
 import { inboxCounts, listLeads } from "@/lib/inbox";
 import { AppShell } from "@/components/AppShell";
 import { InboxList, parseFilter } from "@/components/inbox";
-import { Icon } from "@/components/Icon";
+import { EmptyInboxArt } from "@/components/illustrations";
 import { Notice } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Inbox" };
@@ -26,9 +26,7 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
         <InboxList rows={rows} filter={filter} counts={counts} />
         <div className="hidden place-items-center rounded-2xl border border-dashed border-line lg:grid">
           <div className="max-w-xs text-center">
-            <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-mist">
-              <Icon name="inbox" />
-            </span>
+            <EmptyInboxArt className="mx-auto h-auto w-44" />
             <p className="mt-4 font-medium">Choose a conversation</p>
             <p className="mt-1 text-sm text-ink-soft">See the full thread, approve follow ups, reply, or mark a booking.</p>
           </div>

@@ -64,7 +64,7 @@ const appSchema = z.object({
       intro: z.string(),
       statCountries: z.string(),
       statChecks: z.string(),
-      items: z.array(z.object({ icon: z.string(), title: z.string(), body: z.string(), tag: z.string() })).min(1),
+      items: z.array(z.object({ art: z.enum(["answer", "hot", "booking", "followup"]), title: z.string(), body: z.string(), tag: z.string() })).min(1),
     }),
     check: z.object({ kicker: z.string(), heading: z.string(), intro: z.string(), caption: z.string() }),
     services: z.object({

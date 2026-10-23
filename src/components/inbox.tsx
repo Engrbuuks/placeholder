@@ -5,6 +5,7 @@ import { leadLabel } from "@/lib/pipeline/context";
 import { heatBand } from "@/lib/insight";
 import type { InboxFilter, InboxRow } from "@/lib/inbox";
 import { Icon } from "./Icon";
+import { EmptyHotArt, EmptyInboxArt, EmptyState } from "./illustrations";
 
 export const stageLabel = Object.fromEntries(automationConfig.stages.map((s) => [s.id, s.label])) as Record<string, string>;
 
@@ -82,7 +83,7 @@ export function InboxList({
         ))}
       </nav>
       {rows.length === 0 ? (
-        <div className="p-6 text-[0.9375rem] text-ink-soft">
+        <EmptyState art={filter === "hot" ? EmptyHotArt : EmptyInboxArt} size="sm">
           {filter === "needs_you"
             ? "Nothing needs you right now. The assistant is handling every conversation."
             : filter === "hot"
@@ -91,7 +92,7 @@ export function InboxList({
           <p className="mt-2">
             New conversations arrive from your <Link href="/channels" className="underline underline-offset-4">web chat and WhatsApp</Link>.
           </p>
-        </div>
+        </EmptyState>
       ) : (
         <ul className="divide-y divide-line overflow-y-auto">
           {rows.map((r) => (

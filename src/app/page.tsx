@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { appConfig, auditConfig, languageCodes, markets } from "@/lib/config";
-import { Icon } from "@/components/Icon";
+import { featureArt } from "@/components/illustrations";
 import { scoreAudit } from "@/lib/audit/score";
 import { SiteNav } from "@/components/SiteNav";
 import { Arrow, Wordmark } from "@/components/Wordmark";
@@ -141,13 +141,13 @@ export default async function Home() {
 
           <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {copy.features.items.map((f) => (
-              <li key={f.title} className="flex flex-col rounded-2xl border border-line bg-surface p-6">
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent-wash text-accent-deep">
-                  <Icon name={f.icon} />
-                </span>
-                <h3 className="mt-6 text-lg tracking-[-0.02em]">{f.title}</h3>
-                <p className="mt-3 text-sm text-ink-soft">{f.body}</p>
-                <p className="label mt-auto pt-6">{f.tag}</p>
+              <li key={f.title} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface">
+                <div className="bg-mist px-5 pb-2 pt-4">{(() => { const Art = featureArt[f.art]; return <Art />; })()}</div>
+                <div className="flex flex-1 flex-col p-5">
+                  <h3 className="text-lg tracking-[-0.02em]">{f.title}</h3>
+                  <p className="mt-3 text-sm text-ink-soft">{f.body}</p>
+                  <p className="label mt-auto pt-6">{f.tag}</p>
+                </div>
               </li>
             ))}
           </ul>

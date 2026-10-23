@@ -3,8 +3,8 @@ import Link from "next/link";
 import { loadAppPage } from "@/lib/shell";
 import { formatMoney } from "@/lib/config";
 import { change, formatDuration, resultsFor, type Results } from "@/lib/results";
+import { EmptyResultsArt } from "@/components/illustrations";
 import { AppShell } from "@/components/AppShell";
-import { Icon } from "@/components/Icon";
 
 export const metadata: Metadata = { title: "Results" };
 export const dynamic = "force-dynamic";
@@ -113,8 +113,8 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
         </nav>
 
         {empty && (
-          <p className="flex gap-3 rounded-2xl bg-accent-wash px-5 py-4 text-[0.9375rem]">
-            <Icon name="info" className="mt-0.5 h-[18px] w-[18px] shrink-0" />
+          <p className="flex flex-col items-center gap-4 rounded-2xl bg-accent-wash px-5 py-4 text-[0.9375rem] sm:flex-row">
+            <EmptyResultsArt className="h-auto w-36 shrink-0" />
             No leads in this period yet. Once enquiries arrive on your web chat, WhatsApp, texts, calls or lead form, this page shows where they came from and what they turned into. Mark sales as won with their value to see revenue.
           </p>
         )}

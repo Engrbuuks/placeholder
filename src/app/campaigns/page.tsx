@@ -3,6 +3,7 @@ import { loadAppPage } from "@/lib/shell";
 import { automationConfig, formatMoney, localeFor } from "@/lib/config";
 import { campaignSkips, campaignStats, segments } from "@/lib/pipeline/campaigns";
 import { stopCampaignAction } from "@/app/actions/campaigns";
+import { EmptyCampaignsArt, EmptyState } from "@/components/illustrations";
 import { AppShell } from "@/components/AppShell";
 import { CampaignForm } from "@/components/CampaignForm";
 import { SubmitButton } from "@/components/ui";
@@ -37,7 +38,7 @@ export default async function CampaignsPage() {
           <h2 className="text-[1.0625rem] font-semibold tracking-[-0.02em]">What your campaigns brought back</h2>
           <p className="mt-1 text-sm text-ink-soft">Bookings and sales count when they happen within {automationConfig.campaigns.attributionDays} days of the message.</p>
           {list.length === 0 ? (
-            <p className="mt-6 text-[0.9375rem] text-ink-soft">No campaigns yet. Start with the people who went quiet: they already asked about you once.</p>
+            <EmptyState art={EmptyCampaignsArt}>No campaigns yet. Start with the people who went quiet: they already asked about you once.</EmptyState>
           ) : (
             <ul className="mt-4 space-y-3">
               {list.map((c, i) => (
