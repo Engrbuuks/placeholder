@@ -5,6 +5,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: { default: appConfig.name, template: `%s | ${appConfig.name}` },
   description: appConfig.tagline,
+  metadataBase: new URL(process.env.APP_URL || "http://localhost:3000"),
+  // The picture shown when the site link is shared on WhatsApp, LinkedIn or X.
+  openGraph: { title: appConfig.name, description: appConfig.tagline, images: [{ url: "/illustrations/og.jpg", width: 1200, height: 630 }] },
+  twitter: { card: "summary_large_image", images: ["/illustrations/og.jpg"] },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

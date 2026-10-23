@@ -1,6 +1,6 @@
 import { appConfig } from "@/lib/config";
 import { Wordmark } from "./Wordmark";
-import { SphereArt } from "./art";
+import { Illustration } from "./Illustration";
 
 export function AuthShell({ title, intro, children }: { title: string; intro: string; children: React.ReactNode }) {
   const copy = appConfig.auth;
@@ -18,8 +18,8 @@ export function AuthShell({ title, intro, children }: { title: string; intro: st
         <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/25 blur-3xl" />
         <p className="label relative text-ink/75">{appConfig.name}</p>
         <h2 className="relative mt-4 max-w-[14ch] text-[2.6rem] text-ink">{copy.panelHeading}</h2>
-        <div className="relative mx-auto my-auto w-full max-w-[380px] py-8">
-          <SphereArt />
+        <div className="relative mx-auto my-auto w-full max-w-[340px] py-8">
+          <Illustration name="auth_panel" alt={copy.imageAlt} sizes="340px" className="h-auto w-full rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.18)]" />
         </div>
         <ul className="relative mt-8 space-y-2">
           {copy.panelList.map((item) => (

@@ -1,5 +1,7 @@
 "use client";
 
+import { Illustration } from "./Illustration";
+
 import { useState } from "react";
 
 type Day = { day: string; label: string; times: { start: string; label: string }[] };
@@ -61,6 +63,7 @@ export function BookingPicker({
   if (done) {
     return (
       <div role="status" className="mt-6 space-y-3 rounded-xl bg-mist p-5">
+        <Illustration name="booking_confirmed" alt="" sizes="(min-width: 640px) 400px, 90vw" className="mx-auto h-auto w-full max-w-[320px] rounded-xl" />
         <p className="text-lg font-semibold tracking-[-0.02em]">You are booked</p>
         <p className="text-[0.9375rem]">{done.when}</p>
         <div className="flex flex-wrap gap-3 text-sm">

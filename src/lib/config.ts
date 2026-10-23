@@ -43,6 +43,7 @@ const appSchema = z.object({
     loginIntro: z.string(),
     panelHeading: z.string(),
     panelList: z.array(z.string()),
+    imageAlt: z.string(),
   }),
   landing: z.object({
     nav: z.array(z.object({ label: z.string(), href: z.string() })),
@@ -53,9 +54,7 @@ const appSchema = z.object({
     intro: z.string(),
     cta: z.string(),
     secondaryCta: z.object({ label: z.string(), href: z.string() }),
-    heroArtTitle: z.string(),
-    heroLabels: z.tuple([z.string(), z.string(), z.string()]),
-    heroSideList: z.array(z.string()),
+    heroImageAlt: z.string(),
     heroFooterLeft: z.string(),
     heroFooterRight: z.array(z.string()),
     features: z.object({
@@ -80,6 +79,7 @@ const appSchema = z.object({
       cta: z.string(),
       note: z.string(),
       side: z.array(z.string()),
+      imageAlt: z.string(),
     }),
     footer: z.object({
       tagline: z.array(z.string()),

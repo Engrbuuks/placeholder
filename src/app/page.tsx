@@ -7,7 +7,8 @@ import { scoreAudit } from "@/lib/audit/score";
 import { SiteNav } from "@/components/SiteNav";
 import { Arrow, Wordmark } from "@/components/Wordmark";
 import { LeakList, ScoreHeadline } from "@/components/AuditReport";
-import { DunesArt, HeroArt, SphereArt } from "@/components/art";
+import { DunesArt } from "@/components/art";
+import { Illustration } from "@/components/Illustration";
 
 // A typical small business site, used to show what the audit finds.
 const sample = scoreAudit(
@@ -105,7 +106,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="lg:-mr-4">
-              <HeroArt labels={copy.heroLabels} sideList={copy.heroSideList} title={copy.heroArtTitle} />
+              <Illustration name="hero" alt={copy.heroImageAlt} sizes="(min-width: 1024px) 560px, 100vw" priority className="mx-auto h-auto w-full max-w-[560px] rounded-[28px]" />
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4 pb-14">
@@ -236,7 +237,7 @@ export default async function Home() {
                 </div>
               </div>
               <div className="mx-auto w-full max-w-sm">
-                <SphereArt />
+                <Illustration name="band_first_customer" alt={copy.band.imageAlt} sizes="(min-width: 1024px) 380px, 90vw" className="h-auto w-full rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.25)]" />
               </div>
               <div className="hidden lg:block">
                 <p className="label text-ink/75">

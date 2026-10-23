@@ -2,7 +2,7 @@
 
 The prompts for the real illustrations that replace the drawn art. Generate each image, name it as shown, and upload them to the chat; Claude places them, sizes them for phones and desktops, and adds alt text.
 
-**Status (23 Oct 2026).** The scenes without people are now drawn into the site as vector art (src/components/illustrations.tsx): the four What it does cards and the empty states for inbox, hot leads, bookings, campaigns and results. Their prompts below are kept only as a reference. Still to come from an image tool, because they show people: hero.png, band_first_customer.png, auth_panel.png, booking_confirmed.png and social_share.png. The How it works cards keep their small icons.
+**Status (23 Oct 2026).** All fourteen pictures are in the site. Nine are drawn as vector art (src/components/illustrations.tsx). The five with people were generated from the prompts below; their originals are in art/originals, and scripts/prepare_illustrations.py crops them, saves phone and desktop sizes to public/illustrations, and writes the link preview with the headline. To replace one, overwrite its original and run the script.
 
 **Style tail.** Every prompt ends with this so all the images match:
 

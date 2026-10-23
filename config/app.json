@@ -63,19 +63,7 @@
       "label": "See a sample check",
       "href": "#check"
     },
-    "heroArtTitle": "Scattered enquiries turning orange as they flow into a connected network of customers",
-    "heroLabels": [
-      "Found",
-      "Answered",
-      "Converted"
-    ],
-    "heroSideList": [
-      "Enquiries",
-      "Answers",
-      "Follow ups",
-      "Bookings",
-      "Revenue"
-    ],
+    "heroImageAlt": "A business owner relaxing at home in the evening while customer messages on her phone are answered",
     "heroFooterLeft": "{countries} countries / {languages} languages",
     "heroFooterRight": [
       "WhatsApp first",
@@ -153,7 +141,8 @@
         "Fewer missed",
         "More booked",
         "Clearer numbers"
-      ]
+      ],
+      "imageAlt": "A business owner shaking hands with a happy new customer"
     },
     "footer": {
       "tagline": [
@@ -192,7 +181,8 @@
       "Free check in about a minute",
       "Built for your kind of business",
       "Nothing goes live until you confirm it"
-    ]
+    ],
+    "imageAlt": "A shop owner at closing time, smiling at answered messages on her phone"
   },
   "dashboard": {
     "title": "Business health",
