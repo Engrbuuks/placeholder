@@ -1,6 +1,6 @@
 # Placeholder
 
-AI marketing platform for owner run businesses in Nigeria and the UK. Build round 2: the automation pipeline on top of the round 1 foundation.
+AI marketing platform for owner run businesses anywhere in the world: it answers every enquiry, reads every conversation, follows up and books, in 14 countries and 4 languages.
 
 ## What works in this round
 
