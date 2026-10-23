@@ -74,140 +74,117 @@ export default async function Home() {
   if (await getSession()) redirect("/dashboard");
   const copy = appConfig.landing;
 
+  const demo = copy.heroDemo;
+  const delay = (ms: number) => ({ "--d": `${ms}ms` }) as React.CSSProperties;
+
   return (
     <div className="overflow-x-clip">
       <SiteNav />
 
       <main>
-        {/* Hero */}
+        {/* Hero: the headline asks the question, and the conversation over the picture answers it. */}
         <section className="mx-auto max-w-[1200px] px-4 sm:px-6">
-          <div className="grid items-center gap-10 pb-10 pt-12 lg:grid-cols-[1fr_1.12fr] lg:gap-6 lg:pt-16">
+          <div className="grid items-center gap-10 pb-14 pt-10 lg:grid-cols-2 lg:gap-14 lg:pt-14">
             <div>
-              <p className="label">
-                {copy.eyebrow.map((line) => (
-                  <span key={line} className="block">
-                    {line}
-                  </span>
-                ))}
+              <h1 className="hero-in max-w-[12ch] text-[clamp(2.5rem,5.2vw,4.25rem)]" style={delay(0)}>
+                {copy.headline}
+              </h1>
+              <p className="hero-in mt-5 max-w-[44ch] text-[1.0625rem] leading-relaxed text-ink-soft" style={delay(120)}>
+                {copy.intro}
               </p>
-              <h1 className="mt-6 max-w-[11ch] text-[clamp(2.75rem,6.2vw,4.9rem)]">{copy.headline}</h1>
-              <p className="mt-6 max-w-[46ch] font-mono text-[0.875rem] leading-[1.75] text-ink-soft">{copy.intro}</p>
-              <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+              <div className="hero-in mt-7 flex flex-wrap items-center gap-x-6 gap-y-3" style={delay(220)}>
                 <Link
                   href="/signup"
-                  className="inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-3 font-medium text-white hover:bg-accent-deep"
+                  className="group inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-3 font-medium text-white transition-colors hover:bg-accent-deep"
                 >
                   {copy.cta}
-                  <Arrow />
+                  <span className="transition-transform group-hover:translate-x-0.5">
+                    <Arrow />
+                  </span>
                 </Link>
                 <a href={copy.secondaryCta.href} className="text-[0.9375rem] font-medium underline decoration-ink/30 underline-offset-[6px] hover:decoration-ink">
                   {copy.secondaryCta.label}
                 </a>
               </div>
+              <p className="hero-in mt-6 max-w-[48ch] text-sm text-ink-soft" style={delay(320)}>
+                {copy.heroProof.replace("{countries}", String(Object.keys(markets).length)).replace("{languages}", String(languageCodes.length))}
+              </p>
             </div>
-            <div className="lg:-mr-4">
-              <Illustration name="hero" alt={copy.heroImageAlt} sizes="(min-width: 1024px) 560px, 100vw" priority className="mx-auto h-auto w-full max-w-[560px] rounded-[28px]" />
+
+            <div className="relative mx-auto w-full max-w-[540px]">
+              <Illustration name="hero" alt={copy.heroImageAlt} sizes="(min-width: 1024px) 540px, 100vw" priority className="hero-art h-auto w-full rounded-[28px]" />
+              <div role="group" aria-label={demo.label} className="absolute inset-x-3 bottom-3 flex flex-col gap-2 sm:inset-x-auto sm:-left-8 sm:bottom-8 sm:w-[19rem]">
+                <div className="chip self-start rounded-2xl rounded-bl-md bg-surface px-3.5 py-2.5 text-sm shadow-[0_8px_24px_rgba(17,17,17,0.12)]" style={delay(900)}>
+                  {demo.customer}
+                  <span className="ml-2 font-mono text-[0.6875rem] text-ink-soft">{demo.customerTime}</span>
+                </div>
+                <div className="chip relative self-end rounded-2xl rounded-br-md bg-accent px-3.5 py-2.5 text-sm text-white shadow-[0_8px_24px_rgba(217,71,10,0.28)]" style={delay(1500)}>
+                  <span aria-hidden className="typing absolute inset-0 flex items-center gap-1 px-3.5">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  <span className="reply-text block">
+                    {demo.reply}
+                    <span className="mt-1 block font-mono text-[0.6875rem] text-white/80">
+                      {demo.replyNote} / {demo.replyTime}
+                    </span>
+                  </span>
+                </div>
+                <div className="chip inline-flex items-center gap-2 self-start rounded-full bg-ink px-3.5 py-2 text-sm font-medium text-white shadow-[0_8px_24px_rgba(17,17,17,0.2)]" style={delay(3000)}>
+                  <svg aria-hidden viewBox="0 0 16 16" className="h-4 w-4 text-accent" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3.5 8.5l3 3 6-7" />
+                  </svg>
+                  {demo.booked}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-14">
-            <div className="flex items-center gap-5">
-              <span className="label text-ink">{copy.heroFooterLeft.replace("{countries}", String(Object.keys(markets).length)).replace("{languages}", String(languageCodes.length))}</span>
-              <span aria-hidden className="hidden h-px w-40 bg-ink/25 sm:block" />
-            </div>
-            <p className="label">{copy.heroFooterRight.join("   /   ")}</p>
           </div>
         </section>
 
         {/* What it does */}
-        <section id="features" className="mx-auto max-w-[1200px] scroll-mt-24 border-t border-line px-4 py-16 sm:px-6 sm:py-20">
-          <div className="grid items-end gap-8 lg:grid-cols-[1.2fr_1fr_auto]">
-            <div>
-              <p className="label">{copy.features.kicker}</p>
-              <h2 className="mt-3 max-w-[16ch] text-[clamp(2.1rem,4.2vw,3.25rem)]">{copy.features.heading}</h2>
-            </div>
-            <p className="max-w-[38ch] text-[0.9375rem] text-ink-soft lg:pb-2">{copy.features.intro}</p>
-            <dl className="flex gap-0 lg:pb-1">
-              <div className="border-l border-line pl-5 pr-7">
-                <dt className="sr-only">{copy.features.statCountries}</dt>
-                <dd className="text-[2.6rem] font-semibold leading-none tracking-[-0.04em]">{Object.keys(markets).length}</dd>
-                <dd className="mt-1 max-w-[9ch] text-sm leading-tight text-ink-soft">{copy.features.statCountries}</dd>
-              </div>
-              <div className="border-l border-line pl-5">
-                <dt className="sr-only">{copy.features.statChecks}</dt>
-                <dd className="text-[2.6rem] font-semibold leading-none tracking-[-0.04em]">{auditConfig.checks.length}</dd>
-                <dd className="mt-1 max-w-[11ch] text-sm leading-tight text-ink-soft">{copy.features.statChecks}</dd>
-              </div>
-            </dl>
+        <section id="features" className="mx-auto max-w-[1200px] scroll-mt-24 border-t border-line px-4 py-14 sm:px-6">
+          <div className="grid items-end gap-4 lg:grid-cols-[1.1fr_1fr]">
+            <h2 className="max-w-[18ch] text-[clamp(1.9rem,3.4vw,2.6rem)]">{copy.features.heading}</h2>
+            <p className="max-w-[46ch] text-[0.9375rem] text-ink-soft lg:justify-self-end lg:pb-1">{copy.features.intro}</p>
           </div>
-
-          <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {copy.features.items.map((f) => (
-              <li key={f.title} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface">
-                <div className="bg-mist px-5 pb-2 pt-4">{(() => { const Art = featureArt[f.art]; return <Art />; })()}</div>
-                <div className="flex flex-1 flex-col p-5">
-                  <h3 className="text-lg tracking-[-0.02em]">{f.title}</h3>
-                  <p className="mt-3 text-sm text-ink-soft">{f.body}</p>
-                  <p className="label mt-auto pt-6">{f.tag}</p>
-                </div>
-              </li>
-            ))}
+          <ul className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {copy.features.items.map((f) => {
+              const Art = featureArt[f.art];
+              return (
+                <li key={f.title} className="grid grid-cols-[7.5rem_minmax(0,1fr)] overflow-hidden rounded-2xl border border-line bg-surface sm:block">
+                  <div className="feature-art grid place-items-center bg-mist px-2 sm:block sm:px-5 sm:pb-1 sm:pt-3">
+                    <Art />
+                  </div>
+                  <div className="p-4 sm:p-5">
+                    <h3 className="text-[1.0625rem] tracking-[-0.02em]">{f.title}</h3>
+                    <p className="mt-2 text-sm text-ink-soft">{f.body}</p>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
 
-        {/* Sample check */}
-        <section id="check" className="mx-auto max-w-[1200px] scroll-mt-24 border-t border-line px-4 py-16 sm:px-6 sm:py-20">
-          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-            <div>
-              <p className="label">{copy.check.kicker}</p>
-              <h2 className="mt-3 text-[clamp(2.1rem,4.2vw,3.25rem)]">{copy.check.heading}</h2>
-              <p className="mt-5 max-w-[40ch] text-[0.9375rem] text-ink-soft">{copy.check.intro}</p>
-              <Link
-                href="/signup"
-                className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-ink px-5 py-2.5 text-[0.9375rem] font-medium text-white hover:bg-ink/85"
-              >
-                {copy.cta}
-                <Arrow />
-              </Link>
-            </div>
-            <div className="rounded-3xl border border-line bg-surface p-6 sm:p-8">
-              <p className="label">{copy.check.caption}</p>
-              <div className="mt-6">
-                <ScoreHeadline score={sample.score} results={sample.results} />
-              </div>
-              <div className="mt-8">
-                <LeakList results={sample.results} limit={3} />
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* How it works */}
-        <section id="how" className="mx-auto max-w-[1200px] scroll-mt-24 border-t border-line px-4 py-16 sm:px-6 sm:py-20">
-          <div className="grid items-end gap-6 lg:grid-cols-[1.4fr_1fr]">
-            <div>
-              <p className="label">{copy.services.kicker}</p>
-              <h2 className="mt-3 max-w-[16ch] text-[clamp(2.1rem,4.2vw,3.25rem)]">{copy.services.heading}</h2>
-            </div>
-            <p className="max-w-[44ch] text-[0.9375rem] text-ink-soft lg:pb-2">{copy.services.intro}</p>
+        <section id="how" className="mx-auto max-w-[1200px] scroll-mt-24 border-t border-line px-4 py-14 sm:px-6">
+          <div className="grid items-end gap-4 lg:grid-cols-[1.1fr_1fr]">
+            <h2 className="max-w-[18ch] text-[clamp(1.9rem,3.4vw,2.6rem)]">{copy.services.heading}</h2>
+            <p className="max-w-[46ch] text-[0.9375rem] text-ink-soft lg:justify-self-end lg:pb-1">{copy.services.intro}</p>
           </div>
-          <ol className="mt-12 grid gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:gap-0">
+          <ol className="mt-9 grid gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:gap-0">
             {copy.services.items.map((item, n) => {
               const style = serviceStyles[n];
               return (
                 <li key={item.title} className="contents">
                   {n > 0 && <Connector ring={n === 1 ? "accent" : "ink"} />}
-                  <div className={`flex min-h-64 flex-col rounded-2xl p-6 ${style.card}`}>
+                  <div className={`flex flex-col rounded-2xl p-6 ${style.card}`}>
                     <div className="flex items-start justify-between">
                       <span className="font-mono text-sm">{String(n + 1).padStart(2, "0")}</span>
                       {serviceIcons[n]}
                     </div>
-                    <h3 className="mt-6 text-[1.6rem] tracking-[-0.03em]">{item.title}</h3>
-                    <p className={`mt-3 text-[0.9375rem] ${style.soft}`}>{item.body}</p>
-                    <div className="mt-auto pt-8">
-                      <span className={`inline-flex rounded-full px-3 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.06em] ${style.tag}`}>
-                        {item.tag}
-                      </span>
-                    </div>
+                    <h3 className="mt-5 text-[1.375rem] tracking-[-0.03em]">{item.title}</h3>
+                    <p className={`mt-2 text-[0.9375rem] ${style.soft}`}>{item.body}</p>
                   </div>
                 </li>
               );
@@ -215,39 +192,57 @@ export default async function Home() {
           </ol>
         </section>
 
+        {/* Sample check */}
+        <section id="check" className="mx-auto max-w-[1200px] scroll-mt-24 border-t border-line px-4 py-14 sm:px-6">
+          <div className="grid items-center gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12">
+            <div>
+              <h2 className="text-[clamp(1.9rem,3.4vw,2.6rem)]">{copy.check.heading}</h2>
+              <p className="mt-4 max-w-[40ch] text-[0.9375rem] text-ink-soft">{copy.check.intro}</p>
+              <Link
+                href="/signup"
+                className="group mt-6 inline-flex items-center gap-2.5 rounded-full bg-ink px-5 py-2.5 text-[0.9375rem] font-medium text-white transition-colors hover:bg-ink/85"
+              >
+                {copy.cta}
+                <span className="transition-transform group-hover:translate-x-0.5">
+                  <Arrow />
+                </span>
+              </Link>
+            </div>
+            <div className="rounded-3xl border border-line bg-surface p-6 sm:p-7">
+              <p className="text-sm text-ink-soft">{copy.check.caption}</p>
+              <div className="mt-4">
+                <ScoreHeadline score={sample.score} results={sample.results} />
+              </div>
+              <div className="mt-6">
+                <LeakList results={sample.results} limit={3} />
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Call to action band */}
         <section className="mx-auto max-w-[1240px] px-2 pb-6 sm:px-4">
-          <div className="relative overflow-hidden rounded-[28px] bg-accent px-6 py-12 sm:px-10 lg:py-14">
+          <div className="relative overflow-hidden rounded-[28px] bg-accent px-6 py-10 sm:px-10">
             <div aria-hidden className="pointer-events-none absolute -right-20 -top-24 h-96 w-96 rounded-full bg-white/20 blur-3xl" />
-            <div className="relative grid items-center gap-8 lg:grid-cols-[1.2fr_0.8fr_auto]">
+            <div className="relative grid items-center gap-8 lg:grid-cols-[1.3fr_0.7fr]">
               <div>
-                <p className="label text-ink/70">{copy.band.kicker}</p>
-                <h2 className="mt-3 max-w-[18ch] text-[clamp(2.1rem,4.4vw,3.4rem)] text-ink">{copy.band.heading}</h2>
+                <h2 className="max-w-[20ch] text-[clamp(1.9rem,3.6vw,2.8rem)] text-ink">{copy.band.heading}</h2>
                 <p className="mt-4 max-w-[46ch] text-[0.9375rem] text-ink/80">{copy.band.body}</p>
-                <div className="mt-8 flex flex-wrap items-center gap-5">
+                <div className="mt-7 flex flex-wrap items-center gap-5">
                   <Link
                     href="/signup"
-                    className="inline-flex items-center gap-2.5 rounded-full bg-ink px-6 py-3 font-medium text-white hover:bg-ink/85"
+                    className="group inline-flex items-center gap-2.5 rounded-full bg-ink px-6 py-3 font-medium text-white transition-colors hover:bg-ink/85"
                   >
                     {copy.band.cta}
-                    <Arrow />
+                    <span className="transition-transform group-hover:translate-x-0.5">
+                      <Arrow />
+                    </span>
                   </Link>
-                  <span aria-hidden className="h-6 w-px bg-ink/30" />
-                  <span className="font-mono text-xs text-ink/80">{copy.band.note}</span>
+                  <span className="text-sm text-ink/80">{copy.band.note}</span>
                 </div>
               </div>
-              <div className="mx-auto w-full max-w-sm">
-                <Illustration name="band_first_customer" alt={copy.band.imageAlt} sizes="(min-width: 1024px) 380px, 90vw" className="h-auto w-full rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.25)]" />
-              </div>
-              <div className="hidden lg:block">
-                <p className="label text-ink/75">
-                  {copy.band.side.map((line) => (
-                    <span key={line} className="block">
-                      {line}
-                    </span>
-                  ))}
-                </p>
-                <span aria-hidden className="mt-6 block h-px w-24 bg-ink/40" />
+              <div className="mx-auto w-full max-w-[340px]">
+                <Illustration name="band_first_customer" alt={copy.band.imageAlt} sizes="(min-width: 1024px) 340px, 90vw" className="h-auto w-full rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.25)]" />
               </div>
             </div>
           </div>
@@ -257,44 +252,20 @@ export default async function Home() {
       {/* Footer */}
       <footer className="relative mt-2">
         <div className="relative z-10 mx-auto max-w-[1200px] px-4 sm:px-6">
-          <div className="rounded-2xl border border-line bg-surface/85 px-6 py-6 backdrop-blur">
-            <div className="flex flex-wrap items-center justify-between gap-5">
-              <Wordmark />
-              <nav aria-label="Footer">
-                <ul className="flex flex-wrap gap-x-7 gap-y-2 text-sm">
-                  {copy.footer.links.map((l) => (
-                    <li key={l.label}>
-                      <a href={l.href} className="hover:underline hover:underline-offset-4">
-                        {l.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-              <p className="inline-flex items-center gap-2 text-sm">
-                <svg aria-hidden viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.2">
-                  <circle cx="8" cy="8" r="6.5" />
-                  <path d="M1.5 8h13M8 1.5c2 2 2 11 0 13M8 1.5c-2 2-2 11 0 13" />
-                </svg>
-                {copy.footer.location}
-              </p>
-            </div>
-            <div className="mt-6 flex justify-between gap-6">
-              <p className="label">
-                {copy.footer.tagline.map((line) => (
-                  <span key={line} className="block">
-                    {line}
-                  </span>
+          <div className="flex flex-wrap items-center justify-between gap-5 rounded-2xl border border-line bg-surface/85 px-6 py-5 backdrop-blur">
+            <Wordmark />
+            <nav aria-label="Footer">
+              <ul className="flex flex-wrap gap-x-7 gap-y-2 text-sm">
+                {copy.footer.links.map((l) => (
+                  <li key={l.label}>
+                    <a href={l.href} className="hover:underline hover:underline-offset-4">
+                      {l.label}
+                    </a>
+                  </li>
                 ))}
-              </p>
-              <p className="label text-right">
-                {copy.footer.side.map((line) => (
-                  <span key={line} className="block">
-                    {line}
-                  </span>
-                ))}
-              </p>
-            </div>
+              </ul>
+            </nav>
+            <p className="text-sm text-ink-soft">{copy.footer.location}</p>
           </div>
         </div>
         <div className="-mt-10">

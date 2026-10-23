@@ -51,11 +51,6 @@
     ],
     "navCta": "Check my business",
     "navCtaShort": "Free check",
-    "eyebrow": [
-      "Real enquiries.",
-      "Instant answers.",
-      "Revenue you can trace."
-    ],
     "headline": "A customer messaged you at 9pm. Who answered?",
     "intro": "Find out where your business is losing enquiries, then let an assistant that knows your business answer every message, follow up and book.",
     "cta": "Check my business",
@@ -64,53 +59,48 @@
       "href": "#check"
     },
     "heroImageAlt": "A business owner relaxing at home in the evening while customer messages on her phone are answered",
-    "heroFooterLeft": "{countries} countries / {languages} languages",
-    "heroFooterRight": [
-      "WhatsApp first",
-      "Every currency",
-      "Owner approved"
-    ],
+    "heroProof": "Works in {countries} countries and {languages} languages, on WhatsApp, SMS, email and your website.",
+    "heroDemo": {
+      "label": "A conversation the assistant handled after closing time",
+      "customer": "Hi, do you have any space tomorrow?",
+      "customerTime": "21:04",
+      "reply": "Yes, we have 10:00 or 14:30. Shall I book one for you?",
+      "replyTime": "21:04",
+      "replyNote": "Answered in 4 seconds",
+      "booked": "Booked for tomorrow at 10:00"
+    },
     "features": {
-      "kicker": "What it does",
       "heading": "Every enquiry answered, followed up and booked.",
       "intro": "One assistant that learns your business from the details you confirm, then works every lead until it books or says no.",
-      "statCountries": "countries",
-      "statChecks": "checks in every audit",
       "items": [
         {
           "title": "Answers in seconds",
           "body": "Replies on WhatsApp, SMS, email and your website, day and night, in your customer's language, using only the facts you confirmed.",
-          "tag": "Answer",
           "art": "answer"
         },
         {
           "title": "Spots your hot leads",
           "body": "Reads every conversation for what the customer wants, how soon and their budget, and alerts you the moment someone is ready to buy.",
-          "tag": "Read",
           "art": "hot"
         },
         {
           "title": "Books and reminds",
           "body": "Customers pick a free time themselves, and reminders go out before every appointment, so fewer people forget.",
-          "tag": "Book",
           "art": "booking"
         },
         {
           "title": "Follows up and wins back",
           "body": "Personal follow ups when someone goes quiet, review requests after a sale, and campaigns that bring past customers back.",
-          "tag": "Win back",
           "art": "followup"
         }
       ]
     },
     "check": {
-      "kicker": "Sample check",
       "heading": "See what is leaking.",
       "intro": "This is what the free check found for a typical small business website. Yours takes about a minute.",
       "caption": "A typical small business website"
     },
     "services": {
-      "kicker": "How it works",
       "heading": "From missed messages to measured revenue.",
       "intro": "Three steps, in order. Start with the free check today; the assistant and follow ups switch on as you connect your channels.",
       "items": [
@@ -132,23 +122,13 @@
       ]
     },
     "band": {
-      "kicker": "Start today",
       "heading": "Turn one missed message into your first booked customer.",
       "body": "Run the free check, confirm your details, and see exactly where enquiries slip away.",
       "cta": "Check my business",
       "note": "Takes about a minute",
-      "side": [
-        "Fewer missed",
-        "More booked",
-        "Clearer numbers"
-      ],
       "imageAlt": "A business owner shaking hands with a happy new customer"
     },
     "footer": {
-      "tagline": [
-        "Every enquiry",
-        "answered."
-      ],
       "links": [
         {
           "label": "Log in",
@@ -163,12 +143,7 @@
           "href": "mailto:support@example.com"
         }
       ],
-      "location": "Lagos / London",
-      "side": [
-        "Found",
-        "Answered",
-        "Converted"
-      ]
+      "location": "Lagos / London"
     }
   },
   "auth": {
